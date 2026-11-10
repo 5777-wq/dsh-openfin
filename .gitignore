@@ -1,0 +1,5 @@
+node_modules/
+client/src/generated-locales.js
+*.log
+.DS_Store
+coverage/

@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-11-10T01:12:47.000Z",
+  "generator": "scripts/sync-academy.mjs",
+  "upstream": [
+    {
+      "repo": "5777-wq/openfin-academy",
+      "url": "https://github.com/5777-wq/openfin-academy",
+      "commit": "96edc63793e0e782f2b2690784af60f416e3b72d",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/5777-wq/openfin-academy/blob/96edc63793e0e782f2b2690784af60f416e3b72d/LICENSE",
+      "copyright": "Copyright (c) 2026 5777-wq and OpenFin Academy contributors",
+      "source": "local-checkout"
+    },
+    {
+      "repo": "5777-wq/openfinlens",
+      "url": "https://github.com/5777-wq/openfinlens",
+      "commit": "d341653fe403533a3a21107af2068dfba780889b",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/5777-wq/openfinlens/blob/d341653fe403533a3a21107af2068dfba780889b/LICENSE",
+      "copyright": "Copyright (c) 2026 GLOBAL FIN contributors",
+      "source": "local-checkout"
+    }
+  ],
+  "counts": {
+    "articles": 25,
+    "sections": 6,
+    "articleBodyChars": 44205,
+    "relatedArticleRefs": 30,
+    "relatedTermRefs": 61,
+    "glossaryTerms": 293,
+    "glossaryCategories": 10
+  }
+}

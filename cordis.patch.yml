@@ -1,0 +1,6 @@
+# dsh-openfin bundle patch: inserts the Host half of the plugin.
+# The Client half (the OpenFin page) ships through `dsh.client` and is loaded
+# by the Web shell's module table.
+- insert:
+    - id: dsh-openfin
+      name: 'dsh-openfin'

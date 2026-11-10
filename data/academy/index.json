@@ -1,0 +1,500 @@
+{
+  "articles": [
+    {
+      "id": "1987",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "1987 黑色星期一：一天跌掉五分之一",
+      "dek": "没有预警，没有解释，事后所有人都在找理由。两年后，美联储主席说了那句名言。",
+      "tag": "危机复盘",
+      "tags": [
+        "1987",
+        "黑色星期一",
+        "组合保险",
+        "监管"
+      ],
+      "readMinutes": 8,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "1988-12-30"
+    },
+    {
+      "id": "1990",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "1990 日本泡沫：跌了三年才跌完",
+      "dek": "慢刀子割肉，才是最难受的那种。全球最著名的一次泡沫破裂，过程比想象中平静得多。",
+      "tag": "危机复盘",
+      "tags": [
+        "日本",
+        "泡沫",
+        "慢跌",
+        "央行"
+      ],
+      "readMinutes": 11,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "1993-06-30"
+    },
+    {
+      "id": "1994",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "1994 墨西哥比索危机：小国惹出的全球紧缩",
+      "dek": "这一年股市和黄金几乎没动，只有美债收益率飙升。这是一次债券危机。",
+      "tag": "危机复盘",
+      "tags": [
+        "1994",
+        "墨西哥",
+        "加息",
+        "美债"
+      ],
+      "readMinutes": 7,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "1995-12-29"
+    },
+    {
+      "id": "1998",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "1998 亚洲金融危机：恒指一天跌 13.7%",
+      "dek": "这一年，亚洲的钱在流血，美国的钱在上涨，黄金也在跌。三件事同时发生才最反直觉。",
+      "tag": "危机复盘",
+      "tags": [
+        "亚洲金融危机",
+        "香港",
+        "俄罗斯",
+        "LTCM",
+        "避险"
+      ],
+      "readMinutes": 12,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "1999-06-30"
+    },
+    {
+      "id": "2000-dotcom",
+      "section": "cycles",
+      "sectionLabel": "周期",
+      "title": "2000 年互联网泡沫：本轮 AI 周期像不像",
+      "dek": "不预测，只对照。六个维度逐项打分，相似的地方和不一样的地方都说清楚。",
+      "tag": "周期与镜鉴",
+      "tags": [
+        "2000",
+        "互联网泡沫",
+        "AI",
+        "周期",
+        "纳指"
+      ],
+      "readMinutes": 10,
+      "difficulty": 4,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "2008",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "2008 年那场金融危机，到底发生了什么",
+      "dek": "从房价见顶到雷曼倒闭，危机是怎么沿着资产负债表一路传导到每个家庭的。",
+      "tag": "危机复盘",
+      "tags": [
+        "2008",
+        "次贷",
+        "美债",
+        "危机"
+      ],
+      "readMinutes": 12,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2010-06-30"
+    },
+    {
+      "id": "2020",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "2020 疫情熔断：流动性先崩，政策后救",
+      "dek": "十个交易日四次熔断，原油期货跌成负数。同一段时间里，黄金先被卖、后来才创新高。",
+      "tag": "危机复盘",
+      "tags": [
+        "2020",
+        "疫情",
+        "熔断",
+        "流动性",
+        "原油",
+        "黄金"
+      ],
+      "readMinutes": 10,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-29",
+      "dataAsOfActual": "2021-03-31"
+    },
+    {
+      "id": "2022",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "2022 暴力加息：股票和债券为什么一起跌",
+      "dek": "一年加息 425 个基点。股票跌估值，债券跌价格——「股债搭配」第一次在很多人账户里同时失效。",
+      "tag": "危机复盘",
+      "tags": [
+        "2022",
+        "加息",
+        "通胀",
+        "美债",
+        "股债双杀"
+      ],
+      "readMinutes": 10,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-29",
+      "dataAsOfActual": "2023-06-30"
+    },
+    {
+      "id": "gold",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "黄金：它到底在防什么，又不防什么",
+      "dek": "不靠任何公司担保，只靠\"大家都认\"。但它不产生现金流，利率上行时它会先跌给你看。",
+      "tag": "标的百科",
+      "tags": [
+        "黄金",
+        "白银",
+        "避险",
+        "家庭资产"
+      ],
+      "readMinutes": 7,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "hk00700",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "腾讯：它同时是游戏公司、社交公司和投资公司",
+      "dek": "微信的社交、游戏的现金流、对外投资——三块加起来才是腾讯。",
+      "tag": "标的百科",
+      "tags": [
+        "腾讯",
+        "港股",
+        "互联网",
+        "游戏"
+      ],
+      "readMinutes": 6,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "hk09988",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "阿里巴巴：它的问题从来不是生意",
+      "dek": "电商、云计算、国际业务三块都在赚钱，股价却被\"叙事\"压着。",
+      "tag": "标的百科",
+      "tags": [
+        "阿里巴巴",
+        "港股",
+        "电商",
+        "云计算"
+      ],
+      "readMinutes": 5,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "inflation",
+      "section": "concepts",
+      "sectionLabel": "概念",
+      "title": "通胀：钱为什么放着放着就不值钱了",
+      "dek": "不是钱变少了，是尺子变短了。学会用实际利率算真实的到手收益。",
+      "tag": "货币与利率",
+      "tags": [
+        "通胀",
+        "实际利率",
+        "存款",
+        "家庭"
+      ],
+      "readMinutes": 6,
+      "difficulty": 1,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "money-jar",
+      "section": "family",
+      "sectionLabel": "家庭",
+      "title": "家里的钱怎么分：四只罐子",
+      "dek": "应急、稳健、进攻、长期。不谈买什么，只谈先分对桶。",
+      "tag": "家庭理财",
+      "tags": [
+        "家庭",
+        "配置",
+        "期限",
+        "入门"
+      ],
+      "readMinutes": 7,
+      "difficulty": 1,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "reading-reports",
+      "section": "reports",
+      "sectionLabel": "报告",
+      "title": "看懂财报：三张表和 PE、ROE 这些词到底在说什么",
+      "dek": "财报不是给会计看的，是给「想知道这家公司是不是真赚钱」的人看的。三张表各回答一个问题，PE、ROE 这些指标全是从三张表里算出来的。",
+      "tag": "读懂财报",
+      "tags": [
+        "财报",
+        "入门",
+        "PE",
+        "ROE",
+        "三张表"
+      ],
+      "readMinutes": 12,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-23",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "risk-free-rate",
+      "section": "concepts",
+      "sectionLabel": "概念",
+      "title": "为什么美债收益率是\"全球无风险利率\"",
+      "dek": "全球资产定价的那把尺子。它涨 1 个百分点，几乎所有东西的估值都要重算一遍。",
+      "tag": "货币与利率",
+      "tags": [
+        "利率",
+        "美债",
+        "定价",
+        "入门必读"
+      ],
+      "readMinutes": 8,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "sh600519",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "贵州茅台：A 股最贵的一门生意",
+      "dek": "它靠一个牌子赚走行业里大部分利润，股价对\"消费信心\"比对\"产量\"更敏感。",
+      "tag": "标的百科",
+      "tags": [
+        "贵州茅台",
+        "A股",
+        "白酒",
+        "消费"
+      ],
+      "readMinutes": 6,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "sz300750",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "宁德时代：它给电动车供应链装上了\"标准件\"",
+      "dek": "全球动力电池装机量第一。它的对手是车企自研电池的决心。",
+      "tag": "标的百科",
+      "tags": [
+        "宁德时代",
+        "A股",
+        "新能源车",
+        "电池"
+      ],
+      "readMinutes": 6,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usAAPL",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "苹果：它已经不只是卖手机的了",
+      "dek": "一家把利润藏在服务里的硬件公司，复权后涨了一百多倍，也真的跌过 57%。",
+      "tag": "标的百科",
+      "tags": [
+        "苹果",
+        "美股",
+        "消费电子",
+        "科技"
+      ],
+      "readMinutes": 6,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usAMZN",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "亚马逊：真正赚钱的是云和广告",
+      "dek": "一开始它靠\"网上卖书\"打败巴诺克；现在它的利润结构里，广告和 AWS 各占一块。",
+      "tag": "标的百科",
+      "tags": [
+        "亚马逊",
+        "美股",
+        "电商",
+        "云"
+      ],
+      "readMinutes": 5,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usGOOG",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "谷歌：搜索还在，但收钱的方式变了",
+      "dek": "广告还是它的命根子。AI 时代最大的悬念：搜索流量会不会被聊天机器人截走。",
+      "tag": "标的百科",
+      "tags": [
+        "谷歌",
+        "美股",
+        "互联网",
+        "AI",
+        "搜索"
+      ],
+      "readMinutes": 5,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usMETA",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "Meta：它曾经把互联网的时间都抢走了",
+      "dek": "靠\"免费让你用、你把注意力给它\"赚广告钱，代价是产品必须不停改。",
+      "tag": "标的百科",
+      "tags": [
+        "Meta",
+        "美股",
+        "社交",
+        "广告",
+        "AI"
+      ],
+      "readMinutes": 5,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usMSFT",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "微软：它同时是三条完全不同的生意",
+      "dek": "办公软件、云、AI 三条线周期完全不同，当成\"一家科技公司\"看最误判。",
+      "tag": "标的百科",
+      "tags": [
+        "微软",
+        "美股",
+        "软件",
+        "云",
+        "AI"
+      ],
+      "readMinutes": 5,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usNVDA",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "英伟达：涨过 100 倍，也从 0.23 美元起来过",
+      "dek": "AI 算力的卖铲人。复权月线从 0.23 美元涨到 228.38 美元，中途跌过 63%。",
+      "tag": "标的百科",
+      "tags": [
+        "英伟达",
+        "美股",
+        "芯片",
+        "AI"
+      ],
+      "readMinutes": 6,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usTSLA",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "特斯拉：它的估值从来不靠卖车",
+      "dek": "销量曾占全球汽车市场 1% 出头的公司，估值一度超过很多车企总和。它在为什么定价？",
+      "tag": "标的百科",
+      "tags": [
+        "特斯拉",
+        "美股",
+        "新能源车",
+        "汽车"
+      ],
+      "readMinutes": 6,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    },
+    {
+      "id": "usTSM",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "台积电：全世界最会做一件事的公司",
+      "dek": "几乎所有先进芯片都出自它的厂，护城河不是技术，是产能与良率。",
+      "tag": "标的百科",
+      "tags": [
+        "台积电",
+        "美股",
+        "芯片",
+        "半导体"
+      ],
+      "readMinutes": 5,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2026-11-09"
+    }
+  ],
+  "sections": [
+    {
+      "id": "all",
+      "label": "全部",
+      "count": 25
+    },
+    {
+      "id": "assets",
+      "label": "标的百科",
+      "count": 13
+    },
+    {
+      "id": "concepts",
+      "label": "概念",
+      "count": 2
+    },
+    {
+      "id": "crisis",
+      "label": "危机复盘",
+      "count": 7
+    },
+    {
+      "id": "cycles",
+      "label": "周期",
+      "count": 1
+    },
+    {
+      "id": "family",
+      "label": "家庭",
+      "count": 1
+    },
+    {
+      "id": "reports",
+      "label": "报告",
+      "count": 1
+    }
+  ]
+}

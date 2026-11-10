@@ -1,0 +1,60 @@
+{
+  "req_trace": "1",
+  "code": "1",
+  "message": "success",
+  "data": {
+    "page_index": 1,
+    "list": [
+      {
+        "summary": "【李强签署国务院令 公布修订后的《基金会管理条例》】国务院总理李强日前签署国务院令，公布修订后的《基金会管理条例》（以下简称《条例》），自2027年1月1日起施行。《条例》旨在加强基金会公信力建设，促进基金会健康有序发展。",
+        "image": "https://np-newspic.dfcfw.com/download/D25017815430251241617_w210h154.jpg",
+        "code": "202611103927362337",
+        "np_dst": "CMS",
+        "realSort": "1794319828062337",
+        "showTime": "2026-11-10 17:00:28",
+        "uniqueUrl": "http://finance.eastmoney.com/a/202611103927362337.html",
+        "title": "李强签署国务院令 公布修订后的《基金会管理条例》",
+        "mediaName": "新华社",
+        "url": "http://finance.eastmoney.com/news/1345,202611103927362337.html"
+      },
+      {
+        "summary": "【美国10月CPI环比增长0.4% 高于市场预期】美国10月消费者价格指数（CPI）环比增长0.4%，预估为0.3%，前值为0.6%。美国劳工统计局表示，受去年政府停摆影响，不会公布10月CPI同比数据。",
+        "image": "https://np-newspic.dfcfw.com/download/D24654200722391063567_w210h154.jpg",
+        "code": "202611103927569095",
+        "np_dst": "CMS",
+        "realSort": "1794319216069095",
+        "showTime": "2026-11-10 21:30:16",
+        "uniqueUrl": "http://finance.eastmoney.com/a/202611103927569095.html",
+        "title": "美国10月CPI环比增长0.4% 高于市场预期 12月加息概率仍维持在100%",
+        "mediaName": "财联社",
+        "url": "http://finance.eastmoney.com/news/1345,202611103927569095.html"
+      },
+      {
+        "summary": "【新一轮俄美乌三方会谈在阿布扎比开始举行】据俄罗斯方面消息，新一轮俄美乌三方会谈10日在阿联酋首都阿布扎比开始举行。",
+        "image": "https://np-newspic.dfcfw.com/download/D25388334802667153881_w210h154.jpg",
+        "code": "202611103927327465",
+        "np_dst": "CMS",
+        "realSort": "1794318308027465",
+        "showTime": "2026-11-10 16:15:08",
+        "uniqueUrl": "http://finance.eastmoney.com/a/202611103927327465.html",
+        "title": "新一轮俄美乌三方会谈在阿布扎比开始举行",
+        "mediaName": "央视新闻客户端",
+        "url": "http://finance.eastmoney.com/news/1345,202611103927327465.html"
+      },
+      {
+        "summary": "【美股三大指数震荡下跌 国际原油、金银价格同步下挫】美东时间周二，美股三大指数下跌，截至发稿，道琼斯指数跌0.65%，标普500指数跌0.67%，纳斯达克综合指数跌0.78%。",
+        "image": "https://np-newspic.dfcfw.com/download/D24650450240644422289_w210h154.jpg",
+        "code": "202611103927654526",
+        "np_dst": "CMS",
+        "realSort": "1794317414054526",
+        "showTime": "2026-11-11 00:13:28",
+        "uniqueUrl": "http://finance.eastmoney.com/a/202611103927654526.html",
+        "title": "美股三大指数震荡下跌 国际原油、金银价格同步下挫",
+        "mediaName": "东方财富Choice数据",
+        "url": "http://finance.eastmoney.com/news/1345,202611103927654526.html"
+      }
+    ],
+    "totle_hits": 5000,
+    "page_size": 8
+  }
+}

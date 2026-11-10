@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build the client artifact
+        run: npm run build
+      - name: The committed client artifact must match the sources
+        run: |
+          if ! git diff --exit-code -- client/client.js; then
+            echo "::error::client/client.js is stale — run 'npm run build' and commit the result."
+            exit 1
+          fi
+      - name: Repository self-check
+        run: npm run check
+      - name: Unit tests
+        run: node --test "tests/**/*.test.mjs"

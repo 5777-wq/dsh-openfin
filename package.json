@@ -1,0 +1,71 @@
+{
+  "name": "dsh-openfin",
+  "version": "0.1.0",
+  "description": "OpenFin — A-share and global market dashboard plus a plain-language finance academy, rendered as a native DeepSeek Harness page.",
+  "type": "module",
+  "license": "MIT",
+  "author": "5777-wq",
+  "icon": "icon.svg",
+  "homepage": "https://github.com/5777-wq/dsh-openfin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5777-wq/dsh-openfin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/5777-wq/dsh-openfin/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "finance",
+    "market",
+    "dashboard",
+    "a-share",
+    "education"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "client/client.js",
+    "data",
+    "locale/*.json",
+    "icon.svg",
+    "cordis.patch.yml",
+    "LICENSES",
+    "README.md"
+  ],
+  "engines": {
+    "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+  },
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "sync:academy": "node scripts/sync-academy.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test \"tests/**/*.test.mjs\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  }
+}

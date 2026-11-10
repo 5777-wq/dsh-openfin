@@ -1,0 +1,57 @@
+{
+  "articles": [
+    {
+      "id": "gold",
+      "section": "assets",
+      "sectionLabel": "标的百科",
+      "title": "黄金：它到底在防什么，又不防什么",
+      "dek": "不靠任何公司担保，只靠\"大家都认\"。但它不产生现金流，利率上行时它会先跌给你看。",
+      "tag": "标的百科",
+      "tags": [
+        "黄金",
+        "白银",
+        "避险",
+        "家庭资产"
+      ],
+      "readMinutes": 7,
+      "difficulty": 2,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": null
+    },
+    {
+      "id": "2008",
+      "section": "crisis",
+      "sectionLabel": "危机复盘",
+      "title": "2008 年那场金融危机，到底发生了什么",
+      "dek": "从房价见顶到雷曼倒闭，危机是怎么沿着资产负债表一路传导到每个家庭的。",
+      "tag": "危机复盘",
+      "tags": [
+        "2008",
+        "次贷",
+        "美债",
+        "危机"
+      ],
+      "readMinutes": 12,
+      "difficulty": 3,
+      "dataAsOf": "2026-10-21",
+      "dataAsOfActual": "2010-06-30"
+    }
+  ],
+  "sections": [
+    {
+      "id": "all",
+      "label": "全部",
+      "count": 2
+    },
+    {
+      "id": "assets",
+      "label": "标的百科",
+      "count": 1
+    },
+    {
+      "id": "crisis",
+      "label": "危机复盘",
+      "count": 1
+    }
+  ]
+}
