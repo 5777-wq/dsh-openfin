@@ -4,8 +4,8 @@ Native DeepSeek Harness plugin: one sidebar page that combines the **OpenFinLens
 market dashboard (A-share + global indices, sector heatmap, movers, news) with the
 **OpenFin Academy** plain-language finance library (25 articles, 293 glossary terms).
 
-This file is the single source of truth for interfaces while the v0.1.0 is built.
-Read `docs/DESIGN.md` for the product rationale once the repo is published.
+The contract this plugin was built against. It documents the wire formats, the
+module split and the invariants that keep the two halves compatible.
 
 ## Hard constraints
 
@@ -133,19 +133,19 @@ player 机构与人物, risk 风险与交易, tech 技术指标), in source disp
 
 ## Host module layout and ownership
 
-| File | Owner | Notes |
+| File | Part | Notes |
 |---|---|---|
-| `index.js` | host-data | `apply(ctx)`, `inject = ['webServer']`, registers the route prefix inside `ctx.effect` |
-| `lib/upstream.js` | host-data | `fetchJson(url, { timeoutMs, headers })`, retry once, UA string `dsh-openfin/0.1 (+https://github.com/5777-wq/dsh-openfin)` |
-| `lib/cache.js` | host-data | `memo(key, ttlMs, loader)` + in-flight dedupe + `peek(key)` for stale fallback |
-| `lib/quotes.js` | host-data | eastmoney `ulist.np/get` + `trends2/get`; binance/okx/coingecko fallback chain for crypto |
-| `lib/boards.js` | host-data | eastmoney `clist/get` (`fs=m:90+t:2`), sector constituents (`fs=b:<code>`) |
-| `lib/movers.js` | host-data | eastmoney `clist/get` for A-share gainers/losers/turnover |
-| `lib/news.js` | host-data | eastmoney `np-listapi` news columns (needs `req_trace`) |
-| `lib/academy.js` | host-data | reads `data/academy/*.json` lazily, search + article + glossary |
-| `lib/snapshot.js` | host-data | parallel assembly, `parts` status, stale flag |
-| `lib/routes.js` | host-data | route table + JSON helpers |
-| `tests/host/*.test.mjs` | host-data | `node:test`; normalize fixtures under `tests/fixtures/` recorded from real responses |
+| `index.js` | Host | `apply(ctx)`, `inject = ['webServer']`, registers the route prefix inside `ctx.effect` |
+| `lib/upstream.js` | Host | `fetchJson(url, { timeoutMs, headers })`, retry once, UA string `dsh-openfin/0.1 (+https://github.com/5777-wq/dsh-openfin)` |
+| `lib/cache.js` | Host | `memo(key, ttlMs, loader)` + in-flight dedupe + `peek(key)` for stale fallback |
+| `lib/quotes.js` | Host | eastmoney `ulist.np/get` + `trends2/get`; binance/okx/coingecko fallback chain for crypto |
+| `lib/boards.js` | Host | eastmoney `clist/get` (`fs=m:90+t:2`), sector constituents (`fs=b:<code>`) |
+| `lib/movers.js` | Host | eastmoney `clist/get` for A-share gainers/losers/turnover |
+| `lib/news.js` | Host | eastmoney `np-listapi` news columns (needs `req_trace`) |
+| `lib/academy.js` | Host | reads `data/academy/*.json` lazily, search + article + glossary |
+| `lib/snapshot.js` | Host | parallel assembly, `parts` status, stale flag |
+| `lib/routes.js` | Host | route table + JSON helpers |
+| `tests/host/*.test.mjs` | Host tests | `node:test`; normalize fixtures under `tests/fixtures/` recorded from real responses |
 
 Upstream endpoints that are verified working from the build machine:
 
@@ -186,7 +186,7 @@ sections counts match, glossary payload size bound).
 
 ## Client module layout
 
-`client/src/main.js` (lead) owns plugin registration and imports:
+`client/src/main.js` owns plugin registration and imports:
 
 ```js
 import { Dashboard } from './views/Dashboard.js'
@@ -195,11 +195,11 @@ import { Glossary } from './views/Glossary.js'
 import { en, zh } from './generated-locales.js'
 ```
 
-`client/src/theme.js` (lead) exports `export const CSS = String.raw\`…\`` with every
+`client/src/theme.js` exports `export const CSS = String.raw\`…\`` with every
 class the components use. The class prefix is `of-`. Component files must use
 classes from theme.js only; dynamic geometry may use inline `style`.
 
-Owned by **client-ui**:
+Client views and their components:
 
 | Module | Exports |
 |---|---|
@@ -216,14 +216,14 @@ Every component is a plain function component; no `React.` namespace access —
 import hooks explicitly: `import { createElement as h, useEffect, useMemo, useRef, useState } from 'react'`.
 Vite/esbuild JSX is **not** used: write `h(...)` calls (a local `el` helper per module is fine).
 
-Owned by **content**: `client/src/md.js` exports
+The content pipeline's `client/src/md.js` exports
 `renderMarkdown(body, { onTerm })` → array of React elements. Supports `##`/`###`
 headings, paragraphs, `-`/`1.` lists, `> ` blockquotes, tables (`| a | b |` with
 `---` separator row), `**bold**`, `` `code` ``, `[text](https://…)` links,
 and `[[termId|text]]` glossary references rendered as `<button class="of-term-ref" data-term="termId">text</button>`
 that calls `onTerm(termId)`. Unknown constructs fall back to plain text. No HTML injection.
 
-## Page composition (lead)
+## Page composition
 
 `main.js` renders a single `OpenFinPage` that owns:
 
@@ -238,7 +238,7 @@ that calls `onTerm(termId)`. Unknown constructs fall back to plain text. No HTML
 - Locale direction: `dir = dict.meta.direction` (`zh` → `'cn'`, `en` → `'intl'`);
   the page sets `data-direction` on the root so CSS flips up/down colors.
 
-## Locale dictionary keys (lead writes; components consume)
+## Locale dictionary keys
 
 `meta.title`, `meta.description`, `meta.direction`, `nav`, `title`, `subtitle`,
 `tab.market`, `tab.academy`, `tab.glossary`, `refresh`, `refreshedAt`, `loading`,
@@ -256,9 +256,9 @@ that calls `onTerm(termId)`. Unknown constructs fall back to plain text. No HTML
 Components may ask for keys not listed here; add them to **both** `locale/*.json`
 files and report the addition in the task log.
 
-## Definition of done for v0.1.0
+## Release checklist for v0.1.0
 
-1. `npm run build` succeeds; `node scripts/check.mjs` passes; `node --test tests/` passes.
+1. `npm run build` succeeds; `node scripts/check.mjs` passes; `node --test "tests/**/*.test.mjs"` passes.
 2. Installed in the running profile: sidebar row + full page, all three tabs work,
    sector drawer, article reader, glossary search.
 3. Playwright captures (1600×1000): market tab, academy tab, article, glossary;

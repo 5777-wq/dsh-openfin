@@ -578,6 +578,8 @@ var CSS = String.raw`
   font-family: var(--of-mono); font-size: 0.88em;
   padding: 1px 5px; border-radius: 5px; background: var(--of-surface-2);
 }
+.of-md-hr { border: 0; border-top: 0.5px solid var(--of-border); margin: 26px 0 14px; }
+.of-md-em { font-style: italic; color: var(--of-text-2); }
 .of-md-link { color: var(--of-brand); text-decoration: none; border-bottom: 1px dashed color-mix(in srgb, var(--of-brand) 45%, transparent); }
 .of-md-link:hover { border-bottom-style: solid; }
 .of-term-ref {
@@ -1853,6 +1855,7 @@ var UNORDERED_RE = /^([ \t]*)[-*+][ \t]+(.*)$/;
 var ORDERED_RE = /^([ \t]*)(\d{1,3})[.)][ \t]+(.*)$/;
 var QUOTE_RE = /^[ \t]*>[ \t]?(.*)$/;
 var TABLE_ROW_RE = /^[ \t]*\|/;
+var HR_RE = /^[ \t]*-(?:[ \t]*-){2,}[ \t]*$/;
 var SEPARATOR_CELL_RE = /^:?-{2,}:?$/;
 var SEPARATOR_CHARS_RE = /^[|\s:-]+$/;
 var EXTERNAL_HREF_RE = /^(https?:|mailto:)/i;
@@ -1867,30 +1870,40 @@ function parseInline(text, depth = 0) {
   const source = String(text == null ? "" : text);
   if (!source) return [];
   if (depth > 4) return [{ type: "text", value: source }];
-  const re = /!\[([^\]]*)\]\(([^)\s]*)\)|\*\*([\s\S]+?)\*\*|`([^`\n]+)`|\[\[([^\]|\n]+)\|([^\]\n]+)\]\]|\[([^\]\n]+)\]\(([^)\s]+)\)/g;
+  const re = /!\[(?<imageAlt>[^\]]*)\]\((?<imageSrc>[^)\s]*)\)|\*\*(?<strong>[\s\S]+?)\*\*|\*(?<em>[^\s*\n](?:[^*\n]*[^\s*])?)\*|`(?<code>[^`\n]+)`|\[\[(?<termId>[^\]|\n]+)\|(?<termText>[^\]\n]+)\]\]|\[(?<linkText>[^\]\n]+)\]\((?<href>[^)\s]+)\)/g;
   const nodes = [];
   let last = 0;
   let match;
   while (match = re.exec(source)) {
+    const groups = match.groups || {};
     if (match.index > last) pushText(nodes, source.slice(last, match.index));
     last = re.lastIndex;
-    if (match[1] !== void 0) {
-      pushText(nodes, match[1]);
-    } else if (match[3] !== void 0) {
-      const children = parseInline(match[3], depth + 1);
+    if (groups.imageAlt !== void 0) {
+      pushText(nodes, groups.imageAlt);
+    } else if (groups.strong !== void 0) {
+      const children = parseInline(groups.strong, depth + 1);
       if (children.length) nodes.push({ type: "strong", children });
       else pushText(nodes, match[0]);
-    } else if (match[4] !== void 0) {
-      nodes.push({ type: "code", value: match[4] });
-    } else if (match[5] !== void 0) {
-      nodes.push({ type: "term", id: match[5].trim(), text: match[6] });
-    } else if (match[7] !== void 0) {
-      const href = match[8];
+    } else if (groups.em !== void 0) {
+      const previous = match.index > 0 ? source[match.index - 1] : "";
+      if (/[0-9A-Za-z]/.test(previous)) {
+        pushText(nodes, match[0]);
+        continue;
+      }
+      const children = parseInline(groups.em, depth + 1);
+      if (children.length) nodes.push({ type: "em", children });
+      else pushText(nodes, match[0]);
+    } else if (groups.code !== void 0) {
+      nodes.push({ type: "code", value: groups.code });
+    } else if (groups.termId !== void 0) {
+      nodes.push({ type: "term", id: groups.termId.trim(), text: groups.termText });
+    } else if (groups.linkText !== void 0) {
+      const href = groups.href;
       if (EXTERNAL_HREF_RE.test(href)) {
-        const children = parseInline(match[7], depth + 1);
+        const children = parseInline(groups.linkText, depth + 1);
         if (children.length) nodes.push({ type: "link", href, children });
       } else {
-        pushText(nodes, match[7]);
+        pushText(nodes, groups.linkText);
       }
     }
   }
@@ -1956,6 +1969,7 @@ function startsBlock(lines, index) {
   if (HEADING_RE.test(trimmed)) return true;
   if (QUOTE_RE.test(line)) return true;
   if (UNORDERED_RE.test(line) || ORDERED_RE.test(line)) return true;
+  if (HR_RE.test(line)) return true;
   if (isTableStart(lines, index)) return true;
   return false;
 }
@@ -2071,6 +2085,11 @@ function parseMarkdown(body) {
       i = next;
       continue;
     }
+    if (HR_RE.test(line)) {
+      blocks.push({ type: "hr" });
+      i++;
+      continue;
+    }
     if (UNORDERED_RE.test(line) || ORDERED_RE.test(line)) {
       const { block, next } = parseList(lines, i);
       blocks.push(block);
@@ -2096,6 +2115,8 @@ function renderInline(nodes, onTerm, keyPrefix) {
     switch (node.type) {
       case "strong":
         return (0, import_react16.createElement)("strong", { key }, ...renderInline(node.children, onTerm, key));
+      case "em":
+        return (0, import_react16.createElement)("em", { key, className: "of-md-em" }, ...renderInline(node.children, onTerm, key));
       case "code":
         return (0, import_react16.createElement)("code", { key, className: "of-md-code" }, node.value);
       case "term":
@@ -2136,6 +2157,8 @@ function renderBlocks(blocks, { onTerm } = {}) {
       }
       case "paragraph":
         return (0, import_react16.createElement)("p", { key, className: "of-md-p" }, ...renderInline(block.children, onTerm, key));
+      case "hr":
+        return (0, import_react16.createElement)("hr", { key, className: "of-md-hr" });
       case "list": {
         const ordered = !!block.ordered;
         return (0, import_react16.createElement)(

@@ -43,7 +43,7 @@ const UNORDERED_RE = /^([ \t]*)[-*+][ \t]+(.*)$/
 const ORDERED_RE = /^([ \t]*)(\d{1,3})[.)][ \t]+(.*)$/
 const QUOTE_RE = /^[ \t]*>[ \t]?(.*)$/
 const TABLE_ROW_RE = /^[ \t]*\|/
-const HR_RE = /^[ \t]*-{3,}[ \t]*$/
+const HR_RE = /^[ \t]*-(?:[ \t]*-){2,}[ \t]*$/
 const SEPARATOR_CELL_RE = /^:?-{2,}:?$/
 const SEPARATOR_CHARS_RE = /^[|\s:-]+$/
 const EXTERNAL_HREF_RE = /^(https?:|mailto:)/i
@@ -69,34 +69,47 @@ function parseInline(text, depth = 0) {
   if (!source) return []
   if (depth > 4) return [{ type: 'text', value: source }]
 
-  // image (degrade to alt) | **strong** | `code` | [[term|text]] | [text](href)
-  const re = /!\[([^\]]*)\]\(([^)\s]*)\)|\*\*([\s\S]+?)\*\*|`([^`\n]+)`|\[\[([^\]|\n]+)\|([^\]\n]+)\]\]|\[([^\]\n]+)\]\(([^)\s]+)\)/g
+  // image (degrade to alt) | **strong** | *em* | `code` | [[term|text]] | [text](href)
+  // `**strong**` is listed before `*em*`: double asterisks always win over emphasis.
+  const re = /!\[(?<imageAlt>[^\]]*)\]\((?<imageSrc>[^)\s]*)\)|\*\*(?<strong>[\s\S]+?)\*\*|\*(?<em>[^\s*\n](?:[^*\n]*[^\s*])?)\*|`(?<code>[^`\n]+)`|\[\[(?<termId>[^\]|\n]+)\|(?<termText>[^\]\n]+)\]\]|\[(?<linkText>[^\]\n]+)\]\((?<href>[^)\s]+)\)/g
   const nodes = []
   let last = 0
   let match
   while ((match = re.exec(source))) {
+    const groups = match.groups || {}
     if (match.index > last) pushText(nodes, source.slice(last, match.index))
     last = re.lastIndex
 
-    if (match[1] !== undefined) {
-      pushText(nodes, match[1]) // image -> alt text
-    } else if (match[3] !== undefined) {
-      const children = parseInline(match[3], depth + 1)
+    if (groups.imageAlt !== undefined) {
+      pushText(nodes, groups.imageAlt) // image -> alt text
+    } else if (groups.strong !== undefined) {
+      const children = parseInline(groups.strong, depth + 1)
       if (children.length) nodes.push({ type: 'strong', children })
       else pushText(nodes, match[0])
-    } else if (match[4] !== undefined) {
-      nodes.push({ type: 'code', value: match[4] })
-    } else if (match[5] !== undefined) {
-      nodes.push({ type: 'term', id: match[5].trim(), text: match[6] })
-    } else if (match[7] !== undefined) {
-      const href = match[8]
+    } else if (groups.em !== undefined) {
+      // `2*3*4` style multiplication: a `*` opening right after a letter or
+      // digit is not emphasis. Otherwise recurse for terms/code inside the run.
+      const previous = match.index > 0 ? source[match.index - 1] : ''
+      if (/[0-9A-Za-z]/.test(previous)) {
+        pushText(nodes, match[0])
+        continue
+      }
+      const children = parseInline(groups.em, depth + 1)
+      if (children.length) nodes.push({ type: 'em', children })
+      else pushText(nodes, match[0])
+    } else if (groups.code !== undefined) {
+      nodes.push({ type: 'code', value: groups.code })
+    } else if (groups.termId !== undefined) {
+      nodes.push({ type: 'term', id: groups.termId.trim(), text: groups.termText })
+    } else if (groups.linkText !== undefined) {
+      const href = groups.href
       if (EXTERNAL_HREF_RE.test(href)) {
-        const children = parseInline(match[7], depth + 1)
+        const children = parseInline(groups.linkText, depth + 1)
         if (children.length) nodes.push({ type: 'link', href, children })
       } else {
         // Internal/relative targets (all `#/series/…` in the Academy corpus)
         // have no destination inside the plugin: degrade to the label text.
-        pushText(nodes, match[7])
+        pushText(nodes, groups.linkText)
       }
     }
   }
@@ -172,6 +185,7 @@ function startsBlock(lines, index) {
   if (HEADING_RE.test(trimmed)) return true
   if (QUOTE_RE.test(line)) return true
   if (UNORDERED_RE.test(line) || ORDERED_RE.test(line)) return true
+  if (HR_RE.test(line)) return true
   if (isTableStart(lines, index)) return true
   return false
 }
@@ -304,6 +318,12 @@ export function parseMarkdown(body) {
       continue
     }
 
+    if (HR_RE.test(line)) {
+      blocks.push({ type: 'hr' })
+      i++
+      continue
+    }
+
     if (UNORDERED_RE.test(line) || ORDERED_RE.test(line)) {
       const { block, next } = parseList(lines, i)
       blocks.push(block)
@@ -337,6 +357,8 @@ function renderInline(nodes, onTerm, keyPrefix) {
     switch (node.type) {
       case 'strong':
         return h('strong', { key }, ...renderInline(node.children, onTerm, key))
+      case 'em':
+        return h('em', { key, className: 'of-md-em' }, ...renderInline(node.children, onTerm, key))
       case 'code':
         return h('code', { key, className: 'of-md-code' }, node.value)
       case 'term':
@@ -382,6 +404,8 @@ export function renderBlocks(blocks, { onTerm } = {}) {
       }
       case 'paragraph':
         return h('p', { key, className: 'of-md-p' }, ...renderInline(block.children, onTerm, key))
+      case 'hr':
+        return h('hr', { key, className: 'of-md-hr' })
       case 'list': {
         const ordered = !!block.ordered
         return h(

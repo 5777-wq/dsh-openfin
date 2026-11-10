@@ -136,8 +136,8 @@ function normalizeElements(value) {
 test('parseMarkdown parses all 25 committed article bodies into supported blocks', () => {
   assert.equal(index.articles.length, 25)
   const totals = {}
-  const supportedBlocks = new Set(['heading', 'paragraph', 'list', 'blockquote', 'table'])
-  const supportedInlines = new Set(['text', 'strong', 'code', 'link', 'term'])
+  const supportedBlocks = new Set(['heading', 'paragraph', 'list', 'blockquote', 'table', 'hr'])
+  const supportedInlines = new Set(['text', 'strong', 'em', 'code', 'link', 'term'])
 
   for (const card of index.articles) {
     const article = articles.get(card.id)
@@ -183,14 +183,16 @@ test('parseMarkdown parses all 25 committed article bodies into supported blocks
   // change only when the committed Academy content is regenerated.
   assert.deepEqual(totals, {
     heading: 155, // 144 x h2 + 11 x h3
-    paragraph: 465,
+    paragraph: 452, // upstream paragraphs; 13 footer dividers were standalone, 12 hugged the disclaimer line
     list: 55,
     blockquote: 29,
     table: 13,
+    hr: 25, // one upstream source-footer divider per article
   })
   const inlines = inlineCounts(index.articles.flatMap((card) => parseMarkdown(articles.get(card.id).body)))
   assert.equal(inlines.term, 46, 'glossary refs detected')
   assert.equal(inlines.strong, 611, 'bold runs detected')
+  assert.equal(inlines.em, 25, 'one italic source-footer disclaimer per article')
   assert.equal(inlines.link || 0, 0, 'all corpus links are internal (#/series/…) and degrade to text')
   assert.equal(inlines.code || 0, 0)
 })
@@ -331,6 +333,50 @@ test('## and ### headings become headings; # and #### degrade to paragraphs', ()
   assert.deepEqual(paragraphsOf(blocks), ['# 一级', '#### 四级'])
 })
 
+test('--- lines become hr blocks (three or more dashes, optional spaces)', () => {
+  assert.deepEqual(parseMarkdown('---'), [{ type: 'hr' }])
+  assert.deepEqual(parseMarkdown('  ----  '), [{ type: 'hr' }])
+  assert.deepEqual(parseMarkdown('- - -'), [{ type: 'hr' }])
+  assert.deepEqual(parseMarkdown('--'), [{ type: 'paragraph', children: [{ type: 'text', value: '--' }] }])
+  assert.deepEqual(parseMarkdown('--- 后面还有字'), [
+    { type: 'paragraph', children: [{ type: 'text', value: '--- 后面还有字' }] },
+  ])
+  const blocks = parseMarkdown('前言\n\n---\n\n后记')
+  assert.deepEqual(
+    blocks.map((block) => block.type),
+    ['paragraph', 'hr', 'paragraph'],
+  )
+})
+
+test('*italic* becomes em; **bold** stays strong; math and unmatched stars stay literal', () => {
+  const block = parseMarkdown('正文 *斜体* 与 **粗体** 和 `代码`').find((item) => item.type === 'paragraph')
+  assert.deepEqual(block.children, [
+    { type: 'text', value: '正文 ' },
+    { type: 'em', children: [{ type: 'text', value: '斜体' }] },
+    { type: 'text', value: ' 与 ' },
+    { type: 'strong', children: [{ type: 'text', value: '粗体' }] },
+    { type: 'text', value: ' 和 ' },
+    { type: 'code', value: '代码' },
+  ])
+
+  // Emphasis can carry a glossary ref.
+  assert.deepEqual(parseMarkdown('*见 [[etf|ETF]] 一节*')[0].children, [
+    {
+      type: 'em',
+      children: [
+        { type: 'text', value: '见 ' },
+        { type: 'term', id: 'etf', text: 'ETF' },
+        { type: 'text', value: ' 一节' },
+      ],
+    },
+  ])
+
+  // `2*3`-style multiplication is not emphasis; unmatched asterisks stay literal.
+  for (const literal of ['2*3', '2*3*4', '*未闭合', '** 也不是粗体', '*空格结尾 *']) {
+    assert.equal(inlineText(parseMarkdown(literal)[0].children), literal, literal)
+  }
+})
+
 test('lists: unordered markers, ordered markers and continuation lines', () => {
   const blocks = parseMarkdown('- one\n- two\n\n1. first\n2. second\n\n3) third')
   assert.deepEqual(
@@ -381,14 +427,13 @@ test('inline bold, code, external links and term refs compose', () => {
 
 test('unknown constructs degrade to text instead of crashing or injecting HTML', () => {
   const cases = [
-    ['*斜体*', '*斜体*'],
-    ['---', '---'],
     ['![图](https://example.com/x.png)', '图'],
     ['<b>html</b>', '<b>html</b>'],
     ['**未闭合', '**未闭合'],
     ['[[only-id]]', '[[only-id]]'],
     ['[内部](#/series/usNVDA)', '内部'],
     ['![no alt]()', 'no alt'],
+    ['#### 四级', '#### 四级'],
   ]
   for (const [source, expected] of cases) {
     const blocks = parseMarkdown(source)
@@ -485,6 +530,20 @@ test('renderMarkdown returns React elements with the agreed class contract', () 
   assert.deepEqual(strong[0].children, ['粗体'])
 })
 
+test('renderMarkdown renders hr.of-md-hr and em.of-md-em for source footers', () => {
+  const elements = renderMarkdown('正文\n\n---\n\n*免责声明，不构成投资建议。*')
+  assert.deepEqual(
+    elements.map((element) => element.type),
+    ['p', 'hr', 'p'],
+  )
+  assert.equal(elements[1].props.className, 'of-md-hr')
+  const footer = elements[2]
+  assert.equal(footer.children.length, 1)
+  assert.equal(footer.children[0].type, 'em')
+  assert.equal(footer.children[0].props.className, 'of-md-em')
+  assert.deepEqual(footer.children[0].children, ['免责声明，不构成投资建议。'])
+})
+
 test('term refs render as button.of-term-ref with data-term and onTerm click', () => {
   const clicked = []
   const elements = renderMarkdown(RICH_BODY, { onTerm: (id) => clicked.push(id) })
@@ -546,4 +605,35 @@ test('real corpus renders one top-level element per block and keeps term buttons
     buttons += findAll(elements, byType('button')).length
   }
   assert.equal(buttons, 46, 'every glossary ref becomes a term button')
+})
+
+test('every article renders its upstream footer as one hr block + one em disclaimer', () => {
+  let hrCount = 0
+  let emCount = 0
+  for (const card of index.articles) {
+    const body = articles.get(card.id).body
+    const blocks = parseMarkdown(body)
+    assert.equal(blocks.filter((block) => block.type === 'hr').length, 1, `${card.id}: one hr`)
+    assert.equal(blocks[blocks.length - 2].type, 'hr', `${card.id}: hr sits right before the footer`)
+    assert.equal(blocks[blocks.length - 1].type, 'paragraph', `${card.id}: footer paragraph is last`)
+
+    const emNodes = []
+    walkInline(blocks[blocks.length - 1].children, (node) => {
+      if (node.type === 'em') emNodes.push(node)
+    })
+    assert.equal(emNodes.length, 1, `${card.id}: one em in the footer`)
+    assert.match(inlineText(emNodes), /不构成投资建议/, `${card.id}: disclaimer wording`)
+
+    const elements = renderMarkdown(body, { onTerm: () => {} })
+    const hrs = findAll(elements, byType('hr'))
+    const ems = findAll(elements, byType('em'))
+    assert.equal(hrs.length, 1, `${card.id}: renders one hr`)
+    assert.equal(ems.length, 1, `${card.id}: renders one em`)
+    for (const hr of hrs) assert.equal(hr.props.className, 'of-md-hr')
+    for (const em of ems) assert.equal(em.props.className, 'of-md-em')
+    hrCount += hrs.length
+    emCount += ems.length
+  }
+  assert.equal(hrCount, 25, 'hr per article')
+  assert.equal(emCount, 25, 'em per article')
 })
