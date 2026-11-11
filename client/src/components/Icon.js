@@ -25,6 +25,13 @@ const GLYPHS = {
       h('path', { d: 'M18.5 5.5 10.8 13.2', strokeWidth }),
       h('path', { d: 'M18.5 13v4.4a1.6 1.6 0 0 1-1.6 1.6H6.6A1.6 1.6 0 0 1 5 17.4V7.1a1.6 1.6 0 0 1 1.6-1.6h4.2', strokeWidth }),
     ),
+  float: (strokeWidth) =>
+    h(
+      'g',
+      null,
+      h('rect', { x: 3.5, y: 4.5, width: 17, height: 14, rx: 2.6, strokeWidth }),
+      h('rect', { x: 11, y: 10.5, width: 7, height: 5.4, rx: 1.2, fill: 'currentColor', stroke: 'none', opacity: 0.9 }),
+    ),
   chevron: (strokeWidth) => h('path', { d: 'm8.5 5.5 6.5 6.5-6.5 6.5', strokeWidth }),
   info: (strokeWidth) =>
     h(

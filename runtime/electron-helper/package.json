@@ -1,0 +1,8 @@
+{
+  "name": "dsh-openfin-electron-helper",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Always-on-top transparent window for the dsh-openfin floating HUD. Started by the plugin's Host half; not a user-facing app.",
+  "main": "main.js",
+  "license": "MIT"
+}

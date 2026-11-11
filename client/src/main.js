@@ -1,8 +1,12 @@
 import { createElement as h, useCallback, useEffect, useState } from 'react'
-import { getSnapshot } from './api.js'
+import { getSnapshot, getHud } from './api.js'
 import { CSS } from './theme.js'
 import { en, zh } from './generated-locales.js'
-import { Mark } from './components/Icon.js'
+import { Mark, Icon } from './components/Icon.js'
+import { HUD_CSS } from './theme-hud.js'
+import { loadHudConfig, saveHudConfig, subscribeHudConfig, syncHudConfig, pushDesktop, openHudSettings, onOpenHudSettings } from './hud-config.js'
+import { FloatingHud } from './components/FloatingHud.js'
+import { HudSettings } from './components/HudSettings.js'
 import { Tabs, RefreshButton } from './components/Tabs.js'
 import { Dashboard } from './views/Dashboard.js'
 import { Academy } from './views/Academy.js'
@@ -85,6 +89,69 @@ function useSnapshotFeed() {
   return { ...state, refresh }
 }
 
+/**
+ * Floating "摸鱼" HUD layer: the in-page widget plus its settings sheet.
+ *
+ * Registered once in `shell.overlay` at root scope, so it stays alive across
+ * panel and tab switches. The config is the shared HudConfig: the page header
+ * opens the settings sheet, the sheet edits the config, and every change is
+ * mirrored to the Host for the desktop helper.
+ */
+function HudLayer({ t, onOpenDashboard }) {
+  const [config, setConfig] = useState(loadHudConfig)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [status, setStatus] = useState(null)
+
+  useEffect(() => subscribeHudConfig(setConfig), [])
+  useEffect(() => onOpenHudSettings(() => setSettingsOpen(true)), [])
+
+  const update = useCallback((partial) => {
+    const next = saveHudConfig(partial)
+    setConfig(next)
+    if (partial && partial.desktop !== undefined) pushDesktop(partial.desktop)
+    else syncHudConfig(next)
+  }, [])
+
+  const refreshStatus = useCallback(() => {
+    getHud().then(setStatus, () => setStatus(null))
+  }, [])
+
+  useEffect(() => {
+    if (!config.desktop && !settingsOpen) return undefined
+    refreshStatus()
+    const timer = setInterval(() => {
+      if (config.desktop) refreshStatus()
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [config.desktop, settingsOpen, refreshStatus])
+
+  if (!config.inline && !settingsOpen) return null
+
+  return h(
+    'div',
+    { className: 'of-hud-layer' },
+    config.inline
+      ? h(FloatingHud, {
+          t,
+          config,
+          onChange: update,
+          onConfigure: () => setSettingsOpen(true),
+          onOpenDashboard,
+        })
+      : null,
+    settingsOpen
+      ? h(HudSettings, {
+          t,
+          config,
+          status,
+          onChange: update,
+          onRefreshStatus: refreshStatus,
+          onClose: () => setSettingsOpen(false),
+        })
+      : null,
+  )
+}
+
 function OpenFinPage({ t }) {
   const [tab, setTab] = useState(readTab)
   const [articleId, setArticleId] = useState(null)
@@ -133,6 +200,17 @@ function OpenFinPage({ t }) {
             onChange: changeTab,
             ariaLabel: t('title'),
           }),
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'of-icon-btn',
+              title: t('hud.settings'),
+              'aria-label': t('hud.settings'),
+              onClick: () => openHudSettings(),
+            },
+            h(Icon, { name: 'float', size: 15 }),
+          ),
           tab === 'market'
             ? h(RefreshButton, {
                 label: t('refresh'),
@@ -214,7 +292,7 @@ export function apply(ctx) {
   ctx.effect(() => {
     const tag = document.createElement('style')
     tag.setAttribute('data-dsh-openfin', '')
-    tag.textContent = CSS
+    tag.textContent = CSS + HUD_CSS
     document.head.appendChild(tag)
     return () => {
       tag.remove()
@@ -244,6 +322,29 @@ export function apply(ctx) {
         inject: () => ({ t }),
       },
       (ownerProps) => h(OpenFinPage, { t: (ownerProps && ownerProps.t) || t }),
+    ),
+  )
+
+  // The floating HUD lives in the frame-wide overlay, not in the page, so it
+  // survives panel switches and can stay visible while the user chats.
+  const layout = ctx.get ? ctx.get('layout') : undefined
+  ctx.slots.inject('shell.overlay', () =>
+    ctx.slots.register(
+      {
+        name: 'shell.overlay',
+        id: 'dsh-openfin-hud',
+        order: 60,
+        label: () => t('hud.title'),
+        locale: NS,
+        inject: () => ({ t }),
+      },
+      (ownerProps) =>
+        h(HudLayer, {
+          t: (ownerProps && ownerProps.t) || t,
+          onOpenDashboard: () => {
+            if (layout && typeof layout.selectPanel === 'function') layout.selectPanel(PANEL_ID)
+          },
+        }),
     ),
   )
 }

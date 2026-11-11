@@ -1,7 +1,7 @@
 {
   "name": "dsh-openfin",
-  "version": "0.1.0",
-  "description": "OpenFin — A-share and global market dashboard plus a plain-language finance academy, rendered as a native DeepSeek Harness page.",
+  "version": "0.2.0",
+  "description": "OpenFin — A-share and global market dashboard, a plain-language finance academy, and a floating always-on-top market HUD, as native DeepSeek Harness surfaces.",
   "type": "module",
   "license": "MIT",
   "author": "5777-wq",
@@ -43,7 +43,8 @@
     "README.md",
     "NOTICE.md",
     "CHANGELOG.md",
-    "README.en.md"
+    "README.en.md",
+    "runtime"
   ],
   "engines": {
     "dsh": ">=0.2.2-rc.1 <0.3.0-0"

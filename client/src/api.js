@@ -52,6 +52,38 @@ export const getArticle = (id, signal) =>
 export const getGlossary = (signal) => getJson('/glossary', { signal, cache: 'default' })
 
 /**
+ * POST one JSON body to a HUD endpoint.
+ * @param {string} path
+ * @param {object} body
+ * @param {{ signal?: AbortSignal }} [options]
+ */
+export async function postJson(path, body, options = {}) {
+  const response = await fetch(API_BASE + path, {
+    method: 'POST',
+    signal: options.signal,
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify(body),
+  })
+  let payload
+  try {
+    payload = await response.json()
+  } catch {
+    payload = undefined
+  }
+  if (!response.ok) {
+    const message = payload && typeof payload.error === 'string' ? payload.error : `HTTP ${response.status}`
+    throw new Error(message)
+  }
+  return payload
+}
+
+/** Floating-HUD status: Electron availability, helper state and shared config. */
+export const getHud = (signal) => getJson('/hud', { signal })
+
+/** Change the HUD: `{ desktop }`, `{ config }` or `{ action: 'recenter' }`. */
+export const postHud = (body, signal) => postJson('/hud', body, { signal })
+
+/**
  * One-shot resource fetch with loading/error state and a manual reload.
  *
  * @param {(signal: AbortSignal) => Promise<any>} loader

@@ -16,6 +16,7 @@ OpenFin 把两块东西放进同一个 DSH 页面：
 
 - **行情**：11 个全球标的（上证、深证、创业板、恒生、纳指、标普、道指、COMEX 黄金、美元指数、BTC、ETH）+ A股 96 个行业板块的市值热力图 + 涨跌幅/成交额异动榜 + 东方财富财经快讯。点任意板块，在热力图下方展开成分股。
 - **学院**：`opencode` 式的白话金融读物——7 场危机复盘、13 个标的百科、概念与周期文章，共 25 篇，正文带术语链接；再加一个 293 条的金融词典（含「今日一词」）。
+- **悬浮窗（摸鱼模式）**：一张可拖动的小卡片，页面内或**桌面置顶**都有——只显示你勾选的品种，透明度、闲置淡出、卡片标题、尺寸都能调；收起时变成一颗会显示涨跌的吉祥物小球。
 
 页面是 DSH 侧边栏里的一行，点开就是整页，跟随宿主主题（浅色/深色/第三方皮肤）、语言（中/英）与窗口宽度；动效只动 `transform`/`opacity`，并遵守 `prefers-reduced-motion`。
 
@@ -26,6 +27,24 @@ OpenFin 把两块东西放进同一个 DSH 页面：
 | 板块成分股 | 文章阅读 |
 |---|---|
 | ![板块](docs/screenshots/sector.jpg) | ![文章](docs/screenshots/article.jpg) |
+
+## 悬浮窗（摸鱼模式）
+
+打开 **OpenFin → 右上角「悬浮行情设置」**：
+
+- **页面内悬浮卡**：在 DSH 窗口里浮一张可拖动的小卡，默认右下角，收起后是 44px 的吉祥物小球，点一下展开。调节帕吉透明度（20–100%）、闲置 N 秒后自动淡到「闲置不透明度」、鼠标悬停恢复清晰。
+- **桌面悬浮窗**：在应用之外开一个**透明置顶小窗**，DSH 被别的窗口盖住也看得见；原生窗口透明度、拖动记忆位置、关闭按钮即退出。需要本机有一份 Electron 运行时（其他 DSH 桌面插件通常已经放在 `$DSH_HOME/electron`；也可用 `DSH_OPENFIN_ELECTRON` 指定，或用 `PATH` 里的 `electron`）。
+- **显示品种**：11 个标的里选 1–6 个，卡片按选择顺序显示；可选迷你走势线、自定义卡片标题（比如改成「监控」）、一键回默认位置。
+
+| 页面内悬浮卡 | 桌面置顶小窗 |
+|---|---|
+| ![悬浮卡](docs/screenshots/hud-inline.jpg) | ![桌面悬浮窗](docs/screenshots/hud-desktop.png) |
+
+| 悬浮设置 |
+|---|
+| ![悬浮设置](docs/screenshots/hud-settings.jpg) |
+
+设置会记住（页面内配置与桌面窗共用一份），行情每 30 秒刷新一次；页面隐藏时暂停。
 
 ## 安装
 
@@ -54,6 +73,7 @@ dsh plugin --profile web add https://github.com/5777-wq/dsh-openfin/releases/lat
 - DeepSeek Harness **0.2.2-rc.1** 或更新的 0.2.x（`engines.dsh` 已声明）。
 - 能访问公开行情接口的网络（东方财富 / Binance / OKX / CoinGecko 任一可达）。
 - 不需要 API key，不需要登录，不需要 Python 或本地编译。
+- **桌面置顶悬浮窗**额外需要一份 Electron 运行时（自动探测 `$DSH_HOME/electron`、`DSH_OPENFIN_ELECTRON` 或 `PATH`；缺失时页面内悬浮卡仍照常可用）。
 
 ## 数据与隐私
 
@@ -91,7 +111,8 @@ node scripts/sync-academy.mjs --academy ../openfin-academy --openfinlens ../open
 
 ```text
 index.js                  Host 半场入口（注册 /dsh-openfin 路由）
-lib/                      行情抓取、缓存、快照组装、学院数据、HTTP 路由
+lib/                      行情抓取、缓存、快照组装、学院数据、HUD 管理、HTTP 路由
+runtime/electron-helper/  桌面置顶悬浮窗（独立 Electron 进程，无依赖）
 client/src/               页面源码（React，打包成单文件）
 client/client.js          提交的构建产物（安装时不需要构建）
 data/                     文章索引、25 篇正文、293 条词典（由 sync 脚本生成）
@@ -102,6 +123,8 @@ docs/SPEC.md              接口与模块契约
 ## 已知边界
 
 - 行情是公开接口的聚合，可能延迟或缺失；页面会标注，不构成投资建议。
+- 桌面置顶窗在找不到 Electron 运行时的机器上不可用（会显示原因）；页面内悬浮卡不受影响。
+- 桌面置顶窗按“置顶、不抢焦点”实现，不拦截其他应用的鼠标；如需完全隐形，把透明度调低或直接关闭。
 - 学院正文是中文原文；英文界面只翻译界面文案。
 - 仅测试了 DSH 0.2.2-rc.1 桌面端与 `dsh web`。
 

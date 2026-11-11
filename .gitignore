@@ -3,3 +3,9 @@ client/src/generated-locales.js
 *.log
 .DS_Store
 coverage/
+
+# local pack output
+*.tgz
+
+# helper scratch
+runtime/**/*.tmp

@@ -15,6 +15,7 @@ OpenFin puts two things on one DSH page:
 
 - **Markets** — 11 global instruments (Shanghai, Shenzhen, ChiNext, Hang Seng, Nasdaq, S&P 500, Dow, COMEX gold, dollar index, BTC, ETH), a market-cap treemap of 96 A-share industry sectors, gainers/losers/turnover lists, and an Eastmoney news feed. Click any sector to expand its constituents underneath the heatmap.
 - **Academy** — 25 plain-language finance articles (7 crisis replays, 13 asset explainers, concepts and cycles) with glossary cross-links, plus a 293-term finance glossary with a term of the day.
+- **Floating HUD ("slacking mode")** — a small draggable quote card, inside the page or **always-on-top on the desktop**: pick up to six instruments, set opacity, idle fade, card title and size. Collapsed, it is a mascot chip showing the first instrument's change.
 
 The page is one row in the DSH sidebar that opens a full page. It follows the host theme (light, dark, or a community skin), locale (zh/en), and window width; motion only touches `transform`/`opacity` and respects `prefers-reduced-motion`.
 
@@ -25,6 +26,24 @@ The page is one row in the DSH sidebar that opens a full page. It follows the ho
 | Sector constituents | Article reader |
 |---|---|
 | ![Sector](docs/screenshots/sector.jpg) | ![Article](docs/screenshots/article.jpg) |
+
+## Floating HUD ("slacking mode")
+
+Open **OpenFin → the floating-window button (top right)**:
+
+- **In-page card** — a draggable card over the DSH window, bottom-right by default; collapsed it becomes a 44 px mascot chip that expands on click. Opacity 20–100%, fade to an "idle opacity" after N seconds, full opacity on hover.
+- **Desktop window** — a transparent **always-on-top** window outside the app, still visible when DSH is behind other windows; native window opacity, remembered position, close button to quit. It needs an Electron runtime on the machine (other DSH desktop plugins usually leave one in `$DSH_HOME/electron`; alternatively point `DSH_OPENFIN_ELECTRON` at one, or have `electron` on `PATH`).
+- **Instruments** — choose 1–6 of the eleven quotes; order follows your selection. Optional sparklines, a custom card title, and a one-click position reset.
+
+| In-page card | Desktop always-on-top |
+|---|---|
+| ![HUD](docs/screenshots/hud-inline.jpg) | ![Desktop HUD](docs/screenshots/hud-desktop.png) |
+
+| HUD settings |
+|---|
+| ![HUD settings](docs/screenshots/hud-settings.jpg) |
+
+Settings are remembered and shared between both surfaces; quotes refresh every 30 s and pause while the page is hidden.
 
 ## Install
 
@@ -53,6 +72,7 @@ After installing, click **OpenFin** in the sidebar. Refresh the page; if the row
 - DeepSeek Harness **0.2.2-rc.1** or a later 0.2.x (`engines.dsh` is declared).
 - Network access to public quote endpoints (Eastmoney / Binance / OKX / CoinGecko — any one reachable).
 - No API key, no login, no Python, no local build.
+- The **desktop always-on-top window** additionally needs an Electron runtime (auto-detected from `$DSH_HOME/electron`, `DSH_OPENFIN_ELECTRON`, or `PATH`; the in-page card works without it).
 
 ## Data and privacy
 
@@ -90,7 +110,8 @@ Layout:
 
 ```text
 index.js                  Host half entry (registers /dsh-openfin routes)
-lib/                      quote fetching, caching, snapshot assembly, academy data, HTTP routes
+lib/                      quote fetching, caching, snapshot assembly, academy data, HUD manager, HTTP routes
+runtime/electron-helper/  the desktop always-on-top window (standalone Electron process, no dependencies)
 client/src/               page sources (React, bundled into one file)
 client/client.js          committed build artifact (no build needed at install time)
 data/                     article index, 25 article bodies, 293 glossary terms (generated)
@@ -101,6 +122,8 @@ docs/SPEC.md              interface and module contracts
 ## Known limits
 
 - Quotes are an aggregation of public endpoints and may be late or missing; the page says so, and nothing here is investment advice.
+- The desktop window is unavailable without an Electron runtime (the reason is shown in settings); the in-page card is unaffected.
+- The desktop window is always-on-top and does not steal focus or block other apps' clicks; lower the opacity or close it if you want it out of the way.
 - Article bodies are Chinese originals; the English UI translates interface copy only.
 - Tested on DSH 0.2.2-rc.1 desktop and `dsh web` only.
 

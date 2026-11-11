@@ -266,3 +266,162 @@ files and report the addition in the task log.
 4. `GET /dsh-openfin/api/snapshot` returns the documented shape, and a killed
    upstream yields `parts[].ok = false` instead of a 500.
 5. README (zh + en), LICENSE, third-party notice, screenshots, marketplace entry ready.
+
+---
+
+# Floating HUD (v0.2)
+
+A "摸鱼" surface: a small always-available quote widget with a pet-like mascot,
+configurable instruments, opacity and idle fade. Two renderings of the same
+config:
+
+1. **In-page HUD** — a React component in the `shell.overlay` slot: draggable
+   inside the DSH window, works in `dsh web` and Desktop, CSS opacity, idle fade.
+2. **Desktop HUD** — an optional always-on-top transparent window created by a
+   bundled Electron helper process (`runtime/electron-helper/`). Desktop only;
+   native window opacity, still on top when DSH is behind other windows. The
+   helper is a plain display surface: settings live in the DSH page, the helper
+   receives config + snapshots from its own main process.
+
+## Shared config (`HudConfig`)
+
+Persisted by the Host at `$DSH_HOME/dsh-openfin/hud.json` (atomic tmp+rename).
+The in-page HUD mirrors it to `localStorage` for instant boot, then reconciles
+with the Host copy on mount.
+
+```jsonc
+{
+  "version": 1,
+  "inline": false,         // show the in-page HUD (opt-in)
+  "desktop": false,        // desired state of the desktop helper
+  "collapsed": false,      // in-page HUD collapsed to the mascot
+  "symbols": ["sh000001", "sz399001", "hkHSI", "usIXIC", "btc"], // 1..6 known quote ids
+  "opacity": 85,           // 20..100 (CSS + native window opacity)
+  "idleOpacity": 35,       // 20..100; used only when idleAfterMs > 0
+  "idleAfterMs": 30000,    // 0 | 5000..600000
+  "hoverFull": true,       // pointer over the HUD restores `opacity`
+  "size": "m",             // s | m | l
+  "title": "OpenFin",      // 1..18 chars, user-editable label
+  "showSpark": true,       // mini sparklines
+  "position": { "x": 0, "y": 0 } // in-page HUD, viewport px (0,0 = default bottom-right)
+}
+```
+
+Validation clamps or rejects invalid values; unknown keys are dropped. Quote ids
+are the `quotes[].id` values from `/api/snapshot`: `sh000001`, `sz399001`, `sz399006`, `hkHSI`, `usIXIC`, `usSPX`, `usDJIA`, `hfGC`, `fxUDI`, `btc`, `eth`.
+
+## Host routes
+
+Both live under the existing `/dsh-openfin` prefix; the exact route for the HUD
+is registered separately:
+
+```
+GET  /dsh-openfin/api/hud   -> 200 HudStatus
+POST /dsh-openfin/api/hud   body: { desktop?: boolean, config?: Partial<HudConfig>, action?: 'recenter' }
+                            -> 200 HudStatus
+```
+
+```jsonc
+// HudStatus
+{
+  "available": true,              // an Electron binary was found
+  "running": false,               // helper process alive
+  "electron": { "path": "C:/.../electron.exe" },   // path null when unavailable
+  "reason": "…",                  // human text when !available or spawn failed
+  "config": { /* HudConfig */ },
+  "window": { "x": 1, "y": 1, "width": 340, "height": 210 }   // null when closed
+}
+```
+
+Behavior:
+
+- `config` is merged into the persisted config, validated, written, and returned.
+- `desktop: true` spawns the helper when not running; `false` stops it.
+- `action: 'recenter'` asks a running helper to move to the default corner.
+- Errors answer `{ error }` with 400 (invalid body), 409 (helper unavailable),
+  500 (spawn/stop failure); the status routes never throw.
+
+## Electron discovery and lifecycle (`lib/hud.js`)
+
+Discovery order (first existing file wins, `available:false` + `reason` otherwise):
+
+1. `process.env.DSH_OPENFIN_ELECTRON`
+2. `$DSH_HOME/electron/electron.exe` (Windows), `$DSH_HOME/electron/electron`
+   (Linux), `$DSH_HOME/electron/Electron.app/Contents/MacOS/Electron` (macOS) —
+   the runtime other DSH desktop plugins already keep there
+3. `electron` / `electron.exe` found on `PATH`
+
+`$DSH_HOME` is `process.env.DSH_HOME` or `~/.dsh`. Spawning:
+
+- args, one token each: `--openfin-host=<origin> --openfin-config=<hud.json>
+  --openfin-window=<hud-window.json> --openfin-parent-pid=<pid>
+  --openfin-size=<s|m|l>`. The `--key=value` form is required: with a
+  URL-looking value followed by another flag, Electron 43 mis-resolves the app
+  and exits before loading it (verified; see lib/hud.js)`
+- env: inherited **minus `ELECTRON_RUN_AS_NODE`** (this variable is set inside a
+  DSH host and would start Electron in Node mode, breaking the helper)
+- a 6 s spawn deadline, one instance only, killed on plugin dispose and on
+  `process` exit; `running` tracks the real child, `reason` records the last error
+
+`$DSH_HOME/dsh-openfin/hud-window.json` is written by the helper only:
+`{ "bounds": { "x": 1, "y": 1, "width": 340, "height": 210 } }`.
+
+## Electron helper (`runtime/electron-helper/`)
+
+CommonJS, no build, no dependencies. Files: `package.json`, `main.js`,
+`preload.js`, `hud.html`, `hud.css`, `hud.js`.
+
+- One frameless transparent `BrowserWindow`: `alwaysOnTop` level
+  `screen-saver`, `skipTaskbar`, `hasShadow:false`, `resizable:false`,
+  `showInactive()`, `backgroundColor:'#00000000'`, sandboxed webPreferences with
+  a preload.
+- Loads `hud.html` from disk; the main process fetches the snapshot every 15 s
+  (and once immediately) from `<host>/dsh-openfin/api/snapshot` with Node fetch,
+  watches the config file every 2 s, and pushes `{ snapshot, config }` to the
+  renderer over `webContents.send`.
+- Window size by config: s 300×150, m 340×210, l 384×270 (header + rows + footer);
+  position from `hud-window.json` clamped into the display work area; default is
+  the primary display's bottom-right corner with a 16 px margin.
+- Native opacity = `config.opacity/100`; when idle (`idleAfterMs > 0`) and the
+  pointer is away, fade to `config.idleOpacity/100`; pointer entry restores.
+- Renderer reports pointer enter/leave; header is a drag region
+  (`-webkit-app-region: drag`), buttons are `no-drag`.
+- Close button closes the window and quits the app. The helper exits by itself
+  when the parent PID disappears (checked every 3 s) and when the window closes.
+- `--capture <path>` (test aid): after first paint, `capturePage()` to a PNG,
+  quit. Never passed in production.
+- The helper must never open an unauthenticated page over HTTP; the only network
+  call is its own main-process fetch of the snapshot.
+
+## In-page HUD (client)
+
+- Registered in `shell.overlay` (frame-wide, root scope) — independent of the
+  selected panel, so it survives page/tab switches.
+- Collapsed: 44 px mascot chip + a change pill for the first selected symbol.
+  Expanded: card with header (mascot, title, expand/collapse, settings, close),
+  one row per selected symbol (name, value, change, optional spark), footer
+  (updated time, disclaimer).
+- Pointer drag moves it; position clamps to the viewport and persists in
+  `HudConfig.position`; `action:'recenter'` resets it.
+- Opacity applies to the widget only (not a backdrop); `hoverFull` raises it to
+  `opacity` while the pointer is over the widget; idle fade applies after
+  `idleAfterMs` with no pointer.
+- Reduced motion: no idle pulse/spark animations.
+- The settings sheet is opened from the card's gear or the page header button
+  (`plugin header`), rendered in the same overlay, and edits the shared config:
+  inline on/off, desktop on/off + status, symbol checkboxes (eleven),
+  opacity/idle sliders, size, title, spark toggle, reset position.
+- Every config change saves locally, then debounces a `POST /api/hud` (400 ms);
+  a changed `desktop` flag is sent immediately.
+
+## Acceptance
+
+- `GET/POST /api/hud` answer the documented shapes; invalid bodies are 400.
+- In-page HUD: shows configured symbols, drags, persists across reload, opacity
+  and idle fade work, settings edit everything, desktop toggle reports status.
+- Desktop helper on a machine with an Electron binary: opens a transparent
+  always-on-top window, shows the same symbols, drags by its header, stays on
+  top, restores position, closes from its button, and disappears when DSH quits.
+- `node --test "tests/**/*.test.mjs"` covers config validation, discovery order,
+  status shape, spawn/kill with a fake child process, and (when a real Electron
+  binary is present) a documented manual capture check via `--capture`.

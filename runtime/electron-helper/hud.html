@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenFin</title>
+    <link rel="stylesheet" href="hud.css" />
+  </head>
+  <body>
+    <main class="card" id="card" data-size="m" data-direction="cn">
+      <header class="head">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="22" height="22">
+            <circle cx="32" cy="33" r="18.5" fill="none" stroke="currentColor" stroke-width="3.4" opacity="0.9" />
+            <path d="M14.5 39.5 24 29.5l7 6.8 9.5-11.2 8 8.4" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="48.5" cy="33" r="3.2" fill="#c79a3a" />
+          </svg>
+        </span>
+        <span class="title" id="title">OpenFin</span>
+        <span class="spacer"></span>
+        <button class="close" id="close" type="button" title="关闭悬浮窗" aria-label="关闭悬浮窗">×</button>
+      </header>
+      <section class="rows" id="rows" aria-live="polite">
+        <div class="empty" id="empty">等待行情…</div>
+      </section>
+      <footer class="foot">
+        <span class="status" id="status">—</span>
+        <span class="spacer"></span>
+        <span class="note">仅供参考</span>
+      </footer>
+    </main>
+    <script src="hud.js"></script>
+  </body>
+</html>

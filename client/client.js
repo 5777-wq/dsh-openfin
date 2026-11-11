@@ -1,4 +1,4 @@
-/* dsh-openfin 0.1.0 — built by scripts/build-client.mjs. Do not edit. */
+/* dsh-openfin 0.2.0 — built by scripts/build-client.mjs. Do not edit. */
 window.__ModuleLoader__.load({
   id: "dsh-openfin",
   factory(require) {
@@ -30,7 +30,7 @@ __export(main_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(main_exports);
-var import_react21 = require("react");
+var import_react23 = require("react");
 
 // client/src/api.js
 var import_react = require("react");
@@ -59,6 +59,27 @@ var getSector = (code, signal) => getJson("/sector?code=" + encodeURIComponent(c
 var getAcademy = (signal) => getJson("/academy", { signal, cache: "default" });
 var getArticle = (id, signal) => getJson("/academy/article?id=" + encodeURIComponent(id), { signal, cache: "default" });
 var getGlossary = (signal) => getJson("/glossary", { signal, cache: "default" });
+async function postJson(path, body, options = {}) {
+  const response = await fetch(API_BASE + path, {
+    method: "POST",
+    signal: options.signal,
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify(body)
+  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = void 0;
+  }
+  if (!response.ok) {
+    const message = payload && typeof payload.error === "string" ? payload.error : `HTTP ${response.status}`;
+    throw new Error(message);
+  }
+  return payload;
+}
+var getHud = (signal) => getJson("/hud", { signal });
+var postHud = (body, signal) => postJson("/hud", body, { signal });
 function useResource(loader, deps = []) {
   const [state, setState] = (0, import_react.useState)({ loading: true, data: null, error: null });
   const [nonce, setNonce] = (0, import_react.useState)(0);
@@ -697,7 +718,7 @@ var CSS = String.raw`
 // client/src/generated-locales.js
 var en = {
   "meta.title": "OpenFin market and academy",
-  "meta.description": "A-share and global quotes, an industry heatmap, market news, and a plain-language finance academy as one native DeepSeek Harness page.",
+  "meta.description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent always-on-top market HUD as native DeepSeek Harness surfaces.",
   "meta.direction": "intl",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -757,11 +778,46 @@ var en = {
   "glossary.expand": "Expand",
   "glossary.collapse": "Collapse",
   "a11y.loading": "Loading",
-  "a11y.refresh": "Refresh"
+  "a11y.refresh": "Refresh",
+  "hud.title": "Floating quotes",
+  "hud.inline": "Show the in-page HUD",
+  "hud.inlineHint": "A small draggable quote card that floats inside DeepSeek Harness.",
+  "hud.desktop": "Desktop HUD",
+  "hud.desktopHint": "An always-on-top window outside the app. Needs an Electron runtime on this machine.",
+  "hud.desktopOn": "Running",
+  "hud.desktopOff": "Stopped",
+  "hud.desktopUnavailable": "Electron runtime not found",
+  "hud.recenter": "Recenter",
+  "hud.symbols": "Instruments",
+  "hud.symbolsHint": "Choose 1\u20136 instruments for the card.",
+  "hud.opacity": "Opacity",
+  "hud.idleOpacity": "Idle opacity",
+  "hud.idleAfter": "Fade out after",
+  "hud.idleOff": "Never",
+  "hud.hoverFull": "Full opacity on hover",
+  "hud.size": "Size",
+  "hud.sizeS": "S",
+  "hud.sizeM": "M",
+  "hud.sizeL": "L",
+  "hud.spark": "Mini sparklines",
+  "hud.titleLabel": "Card title",
+  "hud.resetPosition": "Reset position",
+  "hud.positionHint": "Drag the card to move it; the default is the bottom-right corner.",
+  "hud.collapsedHint": "Expand the quote card",
+  "hud.expand": "Expand",
+  "hud.collapse": "Collapse",
+  "hud.settings": "Floating HUD settings",
+  "hud.close": "Close",
+  "hud.openDashboard": "Open the OpenFin page",
+  "hud.updated": "Updated",
+  "hud.disclaimer": "Informational only",
+  "hud.waiting": "Waiting for quotes",
+  "hud.error": "Quote feed unavailable",
+  "hud.saved": "Changes save automatically"
 };
 var zh = {
   "meta.title": "OpenFin \u91D1\u878D\u770B\u677F",
-  "meta.description": "A\u80A1\u4E0E\u5168\u7403\u884C\u60C5\u3001\u884C\u4E1A\u70ED\u529B\u56FE\u3001\u8D22\u7ECF\u5FEB\u8BAF\uFF0C\u52A0\u4E0A\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\uFF0C\u4F5C\u4E3A DeepSeek Harness \u91CC\u7684\u539F\u751F\u9875\u9762\u3002",
+  "meta.description": "A\u80A1\u4E0E\u5168\u7403\u884C\u60C5\u3001\u884C\u4E1A\u70ED\u529B\u56FE\u3001\u8D22\u7ECF\u5FEB\u8BAF\u3001\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\uFF0C\u5916\u52A0\u53EF\u62D6\u52A8\u3001\u53EF\u8C03\u900F\u660E\u5EA6\u7684\u60AC\u6D6E\u884C\u60C5\u7A97\uFF0C\u4F5C\u4E3A DeepSeek Harness \u7684\u539F\u751F\u9875\u9762\u4E0E\u684C\u9762\u5C0F\u7EC4\u4EF6\u3002",
   "meta.direction": "cn",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -821,7 +877,42 @@ var zh = {
   "glossary.expand": "\u5C55\u5F00",
   "glossary.collapse": "\u6536\u8D77",
   "a11y.loading": "\u6B63\u5728\u52A0\u8F7D",
-  "a11y.refresh": "\u5237\u65B0"
+  "a11y.refresh": "\u5237\u65B0",
+  "hud.title": "\u60AC\u6D6E\u884C\u60C5",
+  "hud.inline": "\u9875\u9762\u5185\u60AC\u6D6E\u5361",
+  "hud.inlineHint": "\u5728 DeepSeek Harness \u7A97\u53E3\u4E0A\u5C42\u663E\u793A\u4E00\u5F20\u53EF\u62D6\u52A8\u7684\u884C\u60C5\u5C0F\u5361\u3002",
+  "hud.desktop": "\u684C\u9762\u60AC\u6D6E\u7A97",
+  "hud.desktopHint": "\u5728\u5E94\u7528\u4E4B\u5916\u7F6E\u9876\u663E\u793A\uFF0C\u9700\u8981\u672C\u673A\u6709 Electron \u8FD0\u884C\u65F6\u3002",
+  "hud.desktopOn": "\u8FD0\u884C\u4E2D",
+  "hud.desktopOff": "\u672A\u8FD0\u884C",
+  "hud.desktopUnavailable": "\u672A\u627E\u5230 Electron \u8FD0\u884C\u65F6",
+  "hud.recenter": "\u56DE\u5230\u9ED8\u8BA4\u4F4D\u7F6E",
+  "hud.symbols": "\u663E\u793A\u7684\u54C1\u79CD",
+  "hud.symbolsHint": "\u9009 1\u20136 \u4E2A\u54C1\u79CD\u653E\u8FDB\u5C0F\u5361\u91CC\u3002",
+  "hud.opacity": "\u4E0D\u900F\u660E\u5EA6",
+  "hud.idleOpacity": "\u95F2\u7F6E\u4E0D\u900F\u660E\u5EA6",
+  "hud.idleAfter": "\u95F2\u7F6E\u6DE1\u51FA",
+  "hud.idleOff": "\u4E0D\u6DE1\u51FA",
+  "hud.hoverFull": "\u60AC\u505C\u65F6\u6062\u590D\u5168\u4E0D\u900F\u660E",
+  "hud.size": "\u5C3A\u5BF8",
+  "hud.sizeS": "\u5C0F",
+  "hud.sizeM": "\u4E2D",
+  "hud.sizeL": "\u5927",
+  "hud.spark": "\u8FF7\u4F60\u8D70\u52BF\u7EBF",
+  "hud.titleLabel": "\u5361\u7247\u6807\u9898",
+  "hud.resetPosition": "\u91CD\u7F6E\u4F4D\u7F6E",
+  "hud.positionHint": "\u62D6\u52A8\u5361\u7247\u5373\u53EF\u6446\u653E\uFF0C\u9ED8\u8BA4\u5728\u53F3\u4E0B\u89D2\u3002",
+  "hud.collapsedHint": "\u5C55\u5F00\u884C\u60C5\u5C0F\u5361",
+  "hud.expand": "\u5C55\u5F00",
+  "hud.collapse": "\u6536\u8D77",
+  "hud.settings": "\u60AC\u6D6E\u884C\u60C5\u8BBE\u7F6E",
+  "hud.close": "\u5173\u95ED",
+  "hud.openDashboard": "\u6253\u5F00 OpenFin \u9875\u9762",
+  "hud.updated": "\u66F4\u65B0\u4E8E",
+  "hud.disclaimer": "\u4EC5\u4F9B\u53C2\u8003",
+  "hud.waiting": "\u7B49\u5F85\u884C\u60C5\u6570\u636E",
+  "hud.error": "\u884C\u60C5\u6682\u65F6\u53D6\u4E0D\u5230",
+  "hud.saved": "\u8BBE\u7F6E\u4F1A\u81EA\u52A8\u4FDD\u5B58"
 };
 
 // client/src/components/Icon.js
@@ -847,6 +938,12 @@ var GLYPHS = {
     (0, import_react2.createElement)("path", { d: "M13.5 5.5h5v5", strokeWidth }),
     (0, import_react2.createElement)("path", { d: "M18.5 5.5 10.8 13.2", strokeWidth }),
     (0, import_react2.createElement)("path", { d: "M18.5 13v4.4a1.6 1.6 0 0 1-1.6 1.6H6.6A1.6 1.6 0 0 1 5 17.4V7.1a1.6 1.6 0 0 1 1.6-1.6h4.2", strokeWidth })
+  ),
+  float: (strokeWidth) => (0, import_react2.createElement)(
+    "g",
+    null,
+    (0, import_react2.createElement)("rect", { x: 3.5, y: 4.5, width: 17, height: 14, rx: 2.6, strokeWidth }),
+    (0, import_react2.createElement)("rect", { x: 11, y: 10.5, width: 7, height: 5.4, rx: 1.2, fill: "currentColor", stroke: "none", opacity: 0.9 })
   ),
   chevron: (strokeWidth) => (0, import_react2.createElement)("path", { d: "m8.5 5.5 6.5 6.5-6.5 6.5", strokeWidth }),
   info: (strokeWidth) => (0, import_react2.createElement)(
@@ -903,46 +1000,980 @@ function Mark({ size = 22, radius = 6 }) {
   );
 }
 
-// client/src/components/Tabs.js
-var import_react3 = require("react");
-function Tabs({ items, value, onChange, ariaLabel }) {
-  return (0, import_react3.createElement)(
-    "div",
-    { className: "of-tabs", role: "tablist", "aria-label": ariaLabel },
-    items.map(
-      (item) => (0, import_react3.createElement)(
-        "button",
-        {
-          key: item.id,
-          type: "button",
-          role: "tab",
-          className: "of-tab",
-          "aria-selected": item.id === value,
-          "aria-controls": "of-panel-" + item.id,
-          onClick: () => onChange(item.id)
-        },
-        item.label
-      )
-    )
-  );
+// client/src/theme-hud.js
+var HUD_CSS = String.raw`
+/* ------------------------------------------------------------- layer */
+.of-hud-layer {
+  --of-brand: #0f8c93;
+  --of-brand-deep: #0a5c64;
+  --of-gold: #c79a3a;
+  --of-ease: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --of-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --of-up: var(--dsw-alias-state-error-primary, #d93a3a);
+  --of-down: var(--dsw-alias-state-success-primary, #1f9d63);
+  --of-flat: var(--dsw-alias-label-secondary, #6b7280);
+  --of-border: var(--dsw-alias-border-l1, rgba(0, 0, 0, 0.09));
+  --of-border-strong: var(--dsw-alias-border-l2, rgba(0, 0, 0, 0.16));
+  --of-surface: var(--dsw-alias-bg-layer-1, #ffffff);
+  --of-surface-2: var(--dsw-alias-bg-layer-2, #f5f5f4);
+  --of-text: var(--dsw-alias-label-primary, #1b1b1b);
+  --of-text-2: var(--dsw-alias-label-secondary, #6b7280);
+  --of-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
 }
-function RefreshButton({ label, busy, onClick }) {
-  return (0, import_react3.createElement)(
-    "button",
-    {
-      type: "button",
-      className: "of-icon-btn",
-      "data-busy": busy ? "true" : "false",
-      title: label,
-      "aria-label": label,
-      onClick
-    },
-    (0, import_react3.createElement)(Icon, { name: "refresh", size: 15 })
-  );
+.of-hud-layer *,
+.of-hud-layer *::before,
+.of-hud-layer *::after { box-sizing: border-box; }
+.of-hud-layer ::selection { background: color-mix(in srgb, var(--of-brand) 26%, transparent); }
+.of-hud-layer :focus-visible {
+  outline: 2px solid var(--of-brand);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-// client/src/views/Dashboard.js
-var import_react10 = require("react");
+/* -------------------------------------------------------------- widget */
+.of-hud {
+  --of-hud-w: 330px;
+  --of-hud-up: #ff8f86;
+  --of-hud-down: #5cd6a3;
+  --of-hud-flat: #9fb0b3;
+  --of-hud-ink: #f2f7f6;
+  --of-hud-ink-2: rgba(230, 241, 239, 0.52);
+  --of-hud-card: #0e161b;
+  --of-hud-line: rgba(255, 255, 255, 0.075);
+  --of-hud-soft: rgba(255, 255, 255, 0.06);
+  position: fixed;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  color: var(--of-hud-ink);
+  opacity: 1;
+  transition: opacity 180ms var(--of-ease);
+  will-change: opacity;
+}
+.of-hud[data-direction="intl"] {
+  --of-hud-up: #5cd6a3;
+  --of-hud-down: #ff8f86;
+}
+.of-hud[data-dragging="true"] { cursor: grabbing; }
+
+/* collapsed: [pct pill][mascot chip] */
+.of-hud-chip-row {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  cursor: grab;
+  animation: of-hud-fade 180ms var(--of-ease) both;
+}
+.of-hud[data-dragging="true"] .of-hud-chip-row { cursor: grabbing; }
+.of-hud-pill {
+  width: 62px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 620;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--of-hud-ink-2);
+  background: color-mix(in srgb, var(--of-hud-card) 82%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 10px 22px -16px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.of-hud-pill[data-tone="up"] { color: var(--of-hud-up); }
+.of-hud-pill[data-tone="down"] { color: var(--of-hud-down); }
+.of-hud-pill[data-tone="flat"] { color: var(--of-hud-ink-2); }
+
+/* the mascot: a 44 px round chip carrying the OpenFin lens */
+.of-hud-mascot {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #f4f9f8;
+  background:
+    radial-gradient(120% 120% at 32% 22%, rgba(56, 190, 190, 0.5) 0%, transparent 62%),
+    linear-gradient(152deg, #14989f 0%, #0c6f77 56%, #094b53 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 14px 30px -18px rgba(3, 18, 22, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -8px 16px -12px rgba(0, 0, 0, 0.6);
+}
+.of-hud-mascot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--of-gold) 52%, transparent);
+  opacity: 0;
+  animation: of-hud-breathe 3.4s var(--of-ease) infinite;
+  pointer-events: none;
+}
+.of-hud-mascot::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--of-gold);
+  opacity: 0.85;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--of-gold) 60%, transparent);
+}
+.of-hud[data-idle="true"] .of-hud-mascot::after,
+.of-hud[data-reduced="true"] .of-hud-mascot::after { animation: none; opacity: 0; }
+@keyframes of-hud-breathe {
+  0% { opacity: 0; transform: scale(0.88); }
+  32% { opacity: 0.6; }
+  100% { opacity: 0; transform: scale(1.18); }
+}
+
+/* expanded card */
+.of-hud-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  color: var(--of-hud-ink);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(20, 152, 159, 0.16) 0%, transparent 58%),
+    linear-gradient(168deg, rgba(22, 35, 41, 0.94) 0%, var(--of-hud-card) 52%, rgba(11, 18, 22, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 30px 64px -34px rgba(0, 0, 0, 0.82),
+    0 4px 14px -8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  overflow: hidden;
+  transform-origin: 100% 100%;
+  animation: of-hud-pop 220ms var(--of-ease-out) both;
+}
+.of-hud[data-reduced="true"] .of-hud-card { animation: of-hud-fade 160ms linear both; }
+@keyframes of-hud-pop {
+  from { opacity: 0; transform: translateY(6px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes of-hud-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.of-hud-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 8px 0 10px;
+  border-bottom: 1px solid var(--of-hud-line);
+  cursor: grab;
+}
+.of-hud[data-dragging="true"] .of-hud-head { cursor: grabbing; }
+.of-hud-face {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: #f4f9f8;
+  background: linear-gradient(152deg, #14989f 0%, #0a5c64 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.of-hud-title {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 5px;
+  margin-left: -5px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 620;
+  letter-spacing: 0.008em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+  transition: background-color 140ms var(--of-ease);
+}
+.of-hud-title:hover { background: var(--of-hud-soft); }
+.of-hud-title-input {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--of-brand) 55%, transparent);
+  background: rgba(6, 12, 15, 0.6);
+  color: var(--of-hud-ink);
+  font: inherit;
+  font-size: 12.5px;
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--of-brand) 16%, transparent);
+}
+.of-hud-actions { display: flex; align-items: center; gap: 1px; flex: none; }
+.of-hud-ibtn {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(233, 245, 243, 0.58);
+  cursor: pointer;
+  transition: color 140ms var(--of-ease), background-color 140ms var(--of-ease), transform 120ms var(--of-ease);
+}
+.of-hud-ibtn:hover { color: var(--of-hud-ink); background: var(--of-hud-soft); }
+.of-hud-ibtn:active { transform: scale(0.92); }
+.of-hud-ibtn[data-danger="true"]:hover {
+  color: #ffb6ae;
+  background: rgba(255, 107, 107, 0.14);
+}
+
+/* instrument rows */
+.of-hud-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px 6px;
+}
+.of-hud-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 60px 46px;
+  align-items: center;
+  gap: 8px;
+  height: 31px;
+  padding: 0 6px;
+  border-radius: 8px;
+  cursor: grab;
+  transition: background-color 150ms var(--of-ease);
+}
+.of-hud[data-spark="false"] .of-hud-row { grid-template-columns: minmax(0, 1fr) auto 60px; }
+.of-hud-row:hover { background: var(--of-hud-soft); }
+.of-hud-row-name {
+  font-size: 11.5px;
+  font-weight: 520;
+  color: rgba(238, 246, 244, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.of-hud-row-price {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(238, 246, 244, 0.66);
+  text-align: right;
+}
+.of-hud-row-pct {
+  justify-self: end;
+  min-width: 56px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  color: var(--of-hud-flat);
+}
+.of-hud-row-pct[data-tone="up"] {
+  color: var(--of-hud-up);
+  background: color-mix(in srgb, var(--of-hud-up) 13%, transparent);
+}
+.of-hud-row-pct[data-tone="down"] {
+  color: var(--of-hud-down);
+  background: color-mix(in srgb, var(--of-hud-down) 13%, transparent);
+}
+.of-hud-row-pct[data-tone="flat"] { background: rgba(255, 255, 255, 0.05); }
+.of-hud-spark {
+  position: relative;
+  width: 46px;
+  height: 18px;
+  opacity: 0.9;
+}
+.of-hud-spark .of-quote-spark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: auto;
+  height: 18px;
+}
+.of-hud-spark[data-tone="up"] .of-quote-spark path:first-child { fill: var(--of-hud-up); }
+.of-hud-spark[data-tone="up"] .of-quote-spark path:last-child { stroke: var(--of-hud-up); }
+.of-hud-spark[data-tone="down"] .of-quote-spark path:first-child { fill: var(--of-hud-down); }
+.of-hud-spark[data-tone="down"] .of-quote-spark path:last-child { stroke: var(--of-hud-down); }
+.of-hud-spark[data-tone="flat"] .of-quote-spark path:first-child { fill: var(--of-hud-flat); }
+.of-hud-spark[data-tone="flat"] .of-quote-spark path:last-child { stroke: var(--of-hud-flat); }
+
+/* footer */
+.of-hud-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px 0 11px;
+  border-top: 1px solid var(--of-hud-line);
+  font-size: 9.5px;
+  color: rgba(226, 238, 236, 0.42);
+  letter-spacing: 0.01em;
+}
+.of-hud-foot-time {
+  flex: none;
+  font-family: var(--of-mono);
+  font-variant-numeric: tabular-nums;
+  color: rgba(226, 238, 236, 0.52);
+}
+.of-hud-foot-sep { opacity: 0.5; }
+.of-hud-foot-note {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 9.5px;
+  color: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+button.of-hud-foot-note { cursor: pointer; }
+button.of-hud-foot-note:hover { color: rgba(255, 210, 205, 0.9); }
+.of-hud-foot-note[data-error="true"] { color: #ffb6ae; }
+.of-hud-foot-btn { width: 22px; height: 22px; color: rgba(226, 238, 236, 0.5); }
+.of-hud-foot-btn:hover { color: var(--of-hud-ink); }
+
+/* ---------------------------------------------------- settings sheet */
+.of-hset-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  pointer-events: auto;
+  background: color-mix(in srgb, #0e161b 40%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: of-hset-scrim 160ms linear both;
+}
+@keyframes of-hset-scrim { from { opacity: 0; } to { opacity: 1; } }
+.of-hset {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: min(86vh, 780px);
+  overflow: hidden;
+  border-radius: 16px;
+  border: 0.5px solid var(--of-border-strong);
+  background: var(--of-surface);
+  color: var(--of-text);
+  box-shadow:
+    0 40px 100px -48px rgba(0, 0, 0, 0.65),
+    0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: of-hset-rise 200ms var(--of-ease-out) both;
+}
+@keyframes of-hset-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.of-hset[data-reduced="true"] { animation: of-hset-scrim 160ms linear both; }
+.of-hset-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 13px 12px 12px 16px;
+  border-bottom: 0.5px solid var(--of-border);
+  background:
+    radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--of-brand) 8%, transparent) 0%, transparent 60%),
+    var(--of-surface);
+}
+.of-hset-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 9px;
+  color: var(--of-brand);
+  background: color-mix(in srgb, var(--of-brand) 10%, transparent);
+}
+.of-hset-titles { flex: 1; min-width: 0; }
+.of-hset-title {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.006em;
+}
+.of-hset-sub { margin-top: 2px; font-size: 10.5px; color: var(--of-text-2); }
+.of-hset-close { flex: none; }
+.of-hset-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2px 16px 16px;
+  scrollbar-width: thin;
+}
+.of-hset-section {
+  padding: 14px 0;
+  border-bottom: 0.5px solid var(--of-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.of-hset-section:last-child { border-bottom: 0; padding-bottom: 4px; }
+.of-hset-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.of-hset-section-label {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--of-text-2);
+}
+.of-hset-section-meta {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--of-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.of-hset-field { display: flex; flex-direction: column; gap: 6px; }
+.of-hset-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 28px;
+}
+.of-hset-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.of-hset-value {
+  flex: none;
+  min-width: 42px;
+  text-align: right;
+  font-size: 11.5px;
+  color: var(--of-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.of-hset-hint {
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--of-text-2);
+}
+.of-hset-error { font-size: 10.5px; line-height: 1.55; color: var(--of-up); }
+
+/* switch */
+.of-hset-switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--of-text-2) 26%, transparent);
+  cursor: pointer;
+  transition: background-color 180ms var(--of-ease);
+}
+.of-hset-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--of-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: transform 180ms var(--of-ease);
+}
+.of-hset-switch[aria-checked="true"] { background: var(--of-brand); }
+.of-hset-switch[aria-checked="true"]::after { transform: translateX(14px); }
+.of-hset-switch:disabled { opacity: 0.42; cursor: default; }
+
+/* desktop status line */
+.of-hset-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 16px;
+  font-size: 10.8px;
+  color: var(--of-text-2);
+  line-height: 1.45;
+}
+.of-hset-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--of-text-2);
+}
+.of-hset-status[data-tone="ok"] .of-hset-dot { background: var(--dsw-alias-state-success-primary, #1f9d63); }
+.of-hset-status[data-tone="warn"] .of-hset-dot { background: var(--of-gold); }
+.of-hset-status-text { flex: none; font-weight: 500; }
+.of-hset-status-reason {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--of-text-2);
+  opacity: 0.85;
+}
+
+/* symbols grid */
+.of-hset-symbols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 6px;
+}
+.of-hset-symbol {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--of-text);
+  font: inherit;
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--of-ease),
+    border-color 150ms var(--of-ease),
+    color 150ms var(--of-ease);
+}
+.of-hset-symbol:hover { background: var(--of-surface-2); }
+.of-hset-symbol[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--of-brand) 42%, transparent);
+  background: color-mix(in srgb, var(--of-brand) 8%, transparent);
+}
+.of-hset-check {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 1px solid var(--of-border-strong);
+  border-radius: 4px;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--of-surface);
+}
+.of-hset-symbol[aria-pressed="true"] .of-hset-check {
+  background: var(--of-brand);
+  border-color: var(--of-brand);
+  color: #fff;
+}
+.of-hset-symbol-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* slider / select / input / segmented */
+.of-hset-range {
+  flex: 1;
+  min-width: 100px;
+  height: 20px;
+  accent-color: var(--of-brand);
+  cursor: pointer;
+}
+.of-hset-range:disabled { opacity: 0.45; cursor: default; }
+.of-hset-select {
+  flex: none;
+  max-width: 160px;
+  padding: 6px 8px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 8px;
+  background: var(--of-surface);
+  color: var(--of-text);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.of-hset-select:focus-visible { outline: 2px solid var(--of-brand); outline-offset: 1px; }
+.of-hset-input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 8px;
+  background: var(--of-surface);
+  color: var(--of-text);
+  font: inherit;
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 150ms var(--of-ease), box-shadow 150ms var(--of-ease);
+}
+.of-hset-input::placeholder { color: var(--of-text-2); }
+.of-hset-input:focus {
+  border-color: color-mix(in srgb, var(--of-brand) 55%, var(--of-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--of-brand) 12%, transparent);
+}
+.of-hset-count {
+  flex: none;
+  min-width: 44px;
+  text-align: right;
+  font-size: 10.5px;
+  color: var(--of-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.of-hset-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 9px;
+  background: var(--of-surface-2);
+}
+.of-hset-seg-btn {
+  appearance: none;
+  min-width: 34px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--of-text-2);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 150ms var(--of-ease), background-color 150ms var(--of-ease);
+}
+.of-hset-seg-btn:hover { color: var(--of-text); }
+.of-hset-seg-btn[aria-pressed="true"] {
+  background: var(--of-surface);
+  color: var(--of-text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 0.5px var(--of-border);
+}
+
+.of-hset-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.of-hset-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  padding-top: 10px;
+  font-size: 10.5px;
+  color: var(--of-text-2);
+}
+
+/* -------------------------------------------------------- responsive */
+@media (max-width: 560px) {
+  .of-hset-backdrop { padding: 10px; align-items: flex-end; }
+  .of-hset { max-height: 92vh; width: 100%; }
+  .of-hset-body { padding: 2px 12px 12px; }
+  .of-hud-title { font-size: 12px; }
+}
+
+/* ---------------------------------------------------- reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .of-hud,
+  .of-hud *,
+  .of-hset,
+  .of-hset * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .of-hud-mascot::after { animation: none !important; opacity: 0 !important; }
+}
+`;
+
+// client/src/hud-config.js
+var STORAGE_KEY = "dsh-openfin:hud";
+var SETTINGS_EVENT = "dsh-openfin:hud-settings";
+var SYNC_DELAY_MS = 400;
+var MAX_SYMBOLS = 6;
+var MIN_OPACITY = 20;
+var MAX_OPACITY = 100;
+var MIN_IDLE_MS = 5e3;
+var MAX_IDLE_MS = 6e5;
+var TITLE_MAX = 18;
+var SIZES = /* @__PURE__ */ new Set(["s", "m", "l"]);
+var SYMBOLS = Object.freeze(
+  [
+    { id: "sh000001", name: "\u4E0A\u8BC1\u6307\u6570", kind: "index" },
+    { id: "sz399001", name: "\u6DF1\u8BC1\u6210\u6307", kind: "index" },
+    { id: "sz399006", name: "\u521B\u4E1A\u677F\u6307", kind: "index" },
+    { id: "hkHSI", name: "\u6052\u751F\u6307\u6570", kind: "index" },
+    { id: "usIXIC", name: "\u7EB3\u65AF\u8FBE\u514B", kind: "index" },
+    { id: "usSPX", name: "\u6807\u666E500", kind: "index" },
+    { id: "usDJIA", name: "\u9053\u743C\u65AF", kind: "index" },
+    { id: "hfGC", name: "COMEX\u9EC4\u91D1", kind: "commodity" },
+    { id: "fxUDI", name: "\u7F8E\u5143\u6307\u6570", kind: "fx" },
+    { id: "btc", name: "BTC", kind: "crypto" },
+    { id: "eth", name: "ETH", kind: "crypto" }
+  ].map((symbol) => Object.freeze(symbol))
+);
+var SYMBOL_IDS = new Set(SYMBOLS.map((symbol) => symbol.id));
+var DEFAULT_HUD = Object.freeze({
+  version: 1,
+  inline: false,
+  desktop: false,
+  collapsed: false,
+  symbols: Object.freeze(["sh000001", "sz399001", "hkHSI", "usIXIC", "btc"]),
+  opacity: 85,
+  idleOpacity: 35,
+  idleAfterMs: 3e4,
+  hoverFull: true,
+  size: "m",
+  title: "OpenFin",
+  showSpark: true,
+  position: Object.freeze({ x: 0, y: 0 })
+});
+var cache = null;
+var listeners = /* @__PURE__ */ new Set();
+var revision = 0;
+var reconcileStarted = false;
+var storageBound = false;
+var syncTimer = 0;
+var pendingPatch = null;
+function readStored() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+function writeStored(config) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch {
+  }
+}
+function bool(value, fallback) {
+  return typeof value === "boolean" ? value : fallback;
+}
+function clampNumber(value, min, max, fallback) {
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(number)));
+}
+function normalizeTitle(value, fallback) {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.replace(/\s+/g, " ").trim().slice(0, TITLE_MAX);
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+function normalizeSymbols(value, fallback) {
+  if (!Array.isArray(value)) return fallback.slice();
+  const seen = /* @__PURE__ */ new Set();
+  const picked = [];
+  for (const id of value) {
+    if (typeof id !== "string" || !SYMBOL_IDS.has(id) || seen.has(id)) continue;
+    seen.add(id);
+    picked.push(id);
+    if (picked.length >= MAX_SYMBOLS) break;
+  }
+  return picked.length > 0 ? picked : fallback.slice();
+}
+function normalizePosition(value, fallback) {
+  if (value === null || typeof value !== "object") return { x: fallback.x, y: fallback.y };
+  const x = Number(value.x);
+  const y = Number(value.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return { x: fallback.x, y: fallback.y };
+  return { x: Math.round(x), y: Math.round(y) };
+}
+function normalizeConfig(base, patch) {
+  const source = patch !== null && typeof patch === "object" ? patch : {};
+  return {
+    version: 1,
+    inline: bool(source.inline, base.inline),
+    desktop: bool(source.desktop, base.desktop),
+    collapsed: bool(source.collapsed, base.collapsed),
+    symbols: source.symbols === void 0 ? base.symbols.slice() : normalizeSymbols(source.symbols, base.symbols),
+    opacity: source.opacity === void 0 ? base.opacity : clampNumber(source.opacity, MIN_OPACITY, MAX_OPACITY, base.opacity),
+    idleOpacity: source.idleOpacity === void 0 ? base.idleOpacity : clampNumber(source.idleOpacity, MIN_OPACITY, MAX_OPACITY, base.idleOpacity),
+    idleAfterMs: source.idleAfterMs === void 0 ? base.idleAfterMs : source.idleAfterMs === 0 ? 0 : clampNumber(source.idleAfterMs, MIN_IDLE_MS, MAX_IDLE_MS, base.idleAfterMs),
+    hoverFull: bool(source.hoverFull, base.hoverFull),
+    size: typeof source.size === "string" && SIZES.has(source.size) ? source.size : base.size,
+    title: source.title === void 0 ? base.title : normalizeTitle(source.title, base.title),
+    showSpark: bool(source.showSpark, base.showSpark),
+    position: source.position === void 0 ? { x: base.position.x, y: base.position.y } : normalizePosition(source.position, base.position)
+  };
+}
+function cloneConfig(config) {
+  return { ...config, symbols: config.symbols.slice(), position: { x: config.position.x, y: config.position.y } };
+}
+function sameConfig(left, right) {
+  return JSON.stringify(cloneConfig(left)) === JSON.stringify(cloneConfig(right));
+}
+function loadHudConfig() {
+  if (cache === null) cache = normalizeConfig(DEFAULT_HUD, readStored() || {});
+  return cloneConfig(cache);
+}
+function notify() {
+  const current = loadHudConfig();
+  for (const listener of Array.from(listeners)) {
+    try {
+      listener(current);
+    } catch {
+    }
+  }
+}
+function saveHudConfig(partial) {
+  if (cache === null) cache = normalizeConfig(DEFAULT_HUD, readStored() || {});
+  cache = normalizeConfig(cache, partial && typeof partial === "object" ? partial : {});
+  revision += 1;
+  writeStored(cache);
+  notify();
+  return cloneConfig(cache);
+}
+function subscribeHudConfig(listener) {
+  if (typeof listener !== "function") return () => {
+  };
+  listeners.add(listener);
+  if (!storageBound) {
+    storageBound = true;
+    bindStorage();
+  }
+  if (!reconcileStarted) {
+    reconcileStarted = true;
+    scheduleReconcile();
+  }
+  return () => {
+    listeners.delete(listener);
+  };
+}
+function syncHudConfig(config) {
+  const source = config && typeof config === "object" ? config : loadHudConfig();
+  const { desktop: _desktop, ...patch } = source;
+  pendingPatch = patch;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(flushSync, SYNC_DELAY_MS);
+}
+function flushSync() {
+  if (syncTimer) {
+    clearTimeout(syncTimer);
+    syncTimer = 0;
+  }
+  const patch = pendingPatch;
+  pendingPatch = null;
+  if (!patch) return;
+  postHud({ config: patch }).catch(() => {
+  });
+}
+function pushDesktop(enabled) {
+  const on = enabled === true;
+  if (syncTimer) {
+    clearTimeout(syncTimer);
+    syncTimer = 0;
+  }
+  const patch = pendingPatch;
+  pendingPatch = null;
+  const body = patch ? { config: patch, desktop: on } : { desktop: on };
+  return postHud(body).then(
+    (status) => status,
+    () => null
+  );
+}
+function openHudSettings() {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(new CustomEvent(SETTINGS_EVENT));
+  } catch {
+  }
+}
+function onOpenHudSettings(listener) {
+  if (typeof window === "undefined" || typeof listener !== "function") return () => {
+  };
+  const handler = () => listener();
+  window.addEventListener(SETTINGS_EVENT, handler);
+  return () => {
+    window.removeEventListener(SETTINGS_EVENT, handler);
+  };
+}
+function bindStorage() {
+  if (typeof window === "undefined") return;
+  window.addEventListener("storage", (event) => {
+    if (!event || event.key !== STORAGE_KEY || typeof event.newValue !== "string") return;
+    let parsed;
+    try {
+      parsed = JSON.parse(event.newValue);
+    } catch {
+      return;
+    }
+    const next = normalizeConfig(DEFAULT_HUD, parsed !== null && typeof parsed === "object" ? parsed : {});
+    if (cache !== null && sameConfig(cache, next)) return;
+    cache = next;
+    revision += 1;
+    notify();
+  });
+  window.addEventListener("pagehide", flushSync);
+}
+function scheduleReconcile() {
+  if (typeof window === "undefined") return;
+  const run = () => {
+    const startedAt = revision;
+    getHud().then(
+      (status) => {
+        const hostConfig = status && status.config;
+        if (!hostConfig || typeof hostConfig !== "object") return;
+        if (revision !== startedAt) return;
+        const next = normalizeConfig(DEFAULT_HUD, hostConfig);
+        const local = loadHudConfig();
+        if (sameConfig(local, next)) return;
+        cache = next;
+        writeStored(cache);
+        notify();
+      },
+      () => {
+      }
+    );
+  };
+  if (typeof queueMicrotask === "function") queueMicrotask(run);
+  else setTimeout(run, 0);
+}
+
+// client/src/components/FloatingHud.js
+var import_react5 = require("react");
 
 // client/src/format.js
 var PLACEHOLDER = "\u2014";
@@ -976,63 +2007,23 @@ function trim(value) {
   const digits = abs >= 100 ? 0 : abs >= 10 ? 1 : 2;
   return value.toFixed(digits);
 }
+function fmtClock(ms) {
+  if (typeof ms !== "number" || !Number.isFinite(ms)) return PLACEHOLDER;
+  const date = new Date(ms);
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
 function signClass(value) {
   if (typeof value !== "number" || !Number.isFinite(value) || Math.abs(value) < 1e-9) return "flat";
   return value > 0 ? "up" : "down";
 }
 
-// client/src/components/Feedback.js
-var import_react4 = require("react");
-function Skeleton({ height = 12, width = "100%", radius, style, className }) {
-  return (0, import_react4.createElement)("div", {
-    className: className ? "of-skeleton " + className : "of-skeleton",
-    style: { height, width, borderRadius: radius, ...style },
-    "aria-hidden": true
-  });
-}
-function SkeletonLines({ lines = 3, gap = 8 }) {
-  return (0, import_react4.createElement)(
-    "div",
-    { style: { display: "flex", flexDirection: "column", gap }, "aria-hidden": true },
-    Array.from(
-      { length: lines },
-      (_, index) => (0, import_react4.createElement)(Skeleton, {
-        key: index,
-        height: 10,
-        width: index === lines - 1 ? "62%" : "100%",
-        radius: 5
-      })
-    )
-  );
-}
-function EmptyState({ title, body, icon }) {
-  return (0, import_react4.createElement)(
-    "div",
-    { className: "of-empty" },
-    icon ? (0, import_react4.createElement)("div", { className: "of-empty-icon" }, icon) : null,
-    title ? (0, import_react4.createElement)("div", { className: "of-error-title" }, title) : null,
-    body ? (0, import_react4.createElement)("div", null, body) : null
-  );
-}
-function ErrorState({ title, body, retryLabel, onRetry }) {
-  return (0, import_react4.createElement)(
-    "div",
-    { className: "of-error", role: "alert" },
-    (0, import_react4.createElement)("div", { className: "of-error-title" }, title),
-    body ? (0, import_react4.createElement)("div", null, body) : null,
-    onRetry && retryLabel ? (0, import_react4.createElement)("button", { type: "button", className: "of-btn", onClick: onRetry, style: { marginTop: 4 } }, retryLabel) : null
-  );
-}
-
-// client/src/components/QuoteCard.js
-var import_react7 = require("react");
-
 // client/src/hooks.js
-var import_react5 = require("react");
+var import_react3 = require("react");
 function useCountUp(value, duration = 420) {
-  const [display, setDisplay] = (0, import_react5.useState)(value);
-  const current = (0, import_react5.useRef)(value);
-  (0, import_react5.useEffect)(() => {
+  const [display, setDisplay] = (0, import_react3.useState)(value);
+  const current = (0, import_react3.useRef)(value);
+  (0, import_react3.useEffect)(() => {
     if (typeof value !== "number" || !Number.isFinite(value)) {
       current.current = value;
       setDisplay(value);
@@ -1065,9 +2056,23 @@ function useCountUp(value, duration = 420) {
   }, [value, duration]);
   return display;
 }
+function useMediaQuery(query) {
+  const [matches, setMatches] = (0, import_react3.useState)(
+    () => typeof window !== "undefined" && window.matchMedia ? window.matchMedia(query).matches : false
+  );
+  (0, import_react3.useEffect)(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return void 0;
+    const list = window.matchMedia(query);
+    const onChange = () => setMatches(list.matches);
+    setMatches(list.matches);
+    list.addEventListener("change", onChange);
+    return () => list.removeEventListener("change", onChange);
+  }, [query]);
+  return matches;
+}
 
 // client/src/components/Sparkline.js
-var import_react6 = require("react");
+var import_react4 = require("react");
 function Sparkline({ values, up }) {
   if (!Array.isArray(values) || values.length < 3) return null;
   let min = Infinity;
@@ -1085,7 +2090,7 @@ function Sparkline({ values, up }) {
   const line = points.map(([x, y], index) => (index === 0 ? "M" : "L") + x.toFixed(2) + " " + y.toFixed(2)).join(" ");
   const area = line + " L100 100 L0 100 Z";
   const color = up ? "var(--of-up)" : "var(--of-down)";
-  return (0, import_react6.createElement)(
+  return (0, import_react4.createElement)(
     "svg",
     {
       className: "of-quote-spark",
@@ -1094,8 +2099,8 @@ function Sparkline({ values, up }) {
       "aria-hidden": true,
       focusable: false
     },
-    (0, import_react6.createElement)("path", { d: area, fill: color, opacity: 0.1 }),
-    (0, import_react6.createElement)("path", {
+    (0, import_react4.createElement)("path", { d: area, fill: color, opacity: 0.1 }),
+    (0, import_react4.createElement)("path", {
       d: line,
       fill: "none",
       stroke: color,
@@ -1107,36 +2112,1209 @@ function Sparkline({ values, up }) {
   );
 }
 
+// client/src/components/FloatingHud.js
+var POLL_MS = 3e4;
+var CHIP = 44;
+var PILL_W = 62;
+var CHIP_GAP = 6;
+var COLLAPSED_W = PILL_W + CHIP_GAP + CHIP;
+var COLLAPSED_H = CHIP;
+var EDGE = 8;
+var DEFAULT_MARGIN = 24;
+var DRAG_START_SQ = 16;
+var TITLE_MAX2 = 18;
+var CARD_W = Object.freeze({ s: 300, m: 330, l: 368 });
+var QUOTE_ALIASES = Object.freeze({
+  hkHSI: "100.HSI",
+  usIXIC: "100.NDX",
+  usSPX: "100.SPX",
+  usDJIA: "100.DJIA",
+  hfGC: "101.GC00Y",
+  fxUDI: "100.UDI",
+  btc: "BTC",
+  eth: "ETH"
+});
+function estimateCardHeight(rowCount) {
+  return 84 + Math.max(1, rowCount) * 31;
+}
+function readViewport() {
+  if (typeof window === "undefined") return { w: 1280, h: 800 };
+  return { w: window.innerWidth || 1280, h: window.innerHeight || 800 };
+}
+function useViewport() {
+  const [viewport, setViewport] = (0, import_react5.useState)(readViewport);
+  (0, import_react5.useEffect)(() => {
+    const onChange = () => setViewport(readViewport());
+    window.addEventListener("resize", onChange);
+    return () => window.removeEventListener("resize", onChange);
+  }, []);
+  return viewport;
+}
+function clampValue(value, min, max) {
+  if (min > max) return min;
+  return Math.min(max, Math.max(min, value));
+}
+function isDefaultPosition(position) {
+  if (!position || typeof position !== "object") return true;
+  return Math.round(Number(position.x) || 0) === 0 && Math.round(Number(position.y) || 0) === 0;
+}
+function resolveAnchor(position, viewport, collapsed, cardW, cardH) {
+  const base = isDefaultPosition(position) ? { x: viewport.w - COLLAPSED_W - DEFAULT_MARGIN, y: viewport.h - COLLAPSED_H - DEFAULT_MARGIN } : { x: Number(position.x) || 0, y: Number(position.y) || 0 };
+  let x = clampValue(base.x, EDGE, viewport.w - COLLAPSED_W - EDGE);
+  let y = clampValue(base.y, EDGE, viewport.h - COLLAPSED_H - EDGE);
+  if (!collapsed) {
+    const left = clampValue(x + COLLAPSED_W - cardW, EDGE, viewport.w - cardW - EDGE);
+    const top = clampValue(y + COLLAPSED_H - cardH, EDGE, viewport.h - cardH - EDGE);
+    x = left + cardW - COLLAPSED_W;
+    y = top + cardH - COLLAPSED_H;
+  }
+  return { x: Math.round(x), y: Math.round(y) };
+}
+var HUD_GLYPHS = {
+  gear: (strokeWidth) => (0, import_react5.createElement)(
+    "g",
+    null,
+    (0, import_react5.createElement)("circle", { cx: 12, cy: 12, r: 3.3, strokeWidth }),
+    (0, import_react5.createElement)("path", {
+      d: "M12 3.4v2.3M12 18.3v2.3M3.4 12h2.3M18.3 12h2.3M5.9 5.9l1.6 1.6M16.5 16.5l1.6 1.6M5.9 18.1l1.6-1.6M16.5 7.5l1.6-1.6",
+      strokeWidth
+    })
+  ),
+  collapse: (strokeWidth) => (0, import_react5.createElement)("path", { d: "M6.5 12h11", strokeWidth })
+};
+function HudGlyph({ name: name2, size = 13, strokeWidth = 1.6 }) {
+  const draw = HUD_GLYPHS[name2];
+  if (!draw) return null;
+  return (0, import_react5.createElement)(
+    "svg",
+    {
+      viewBox: "0 0 24 24",
+      width: size,
+      height: size,
+      fill: "none",
+      stroke: "currentColor",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      "aria-hidden": true,
+      focusable: false,
+      style: { display: "block", flex: "none" }
+    },
+    draw(strokeWidth)
+  );
+}
+function HudRow({ symbol, quote, showSpark, onOpen }) {
+  const animated = useCountUp(quote && typeof quote.price === "number" ? quote.price : null, 420);
+  const pct = quote && typeof quote.pct === "number" ? quote.pct : null;
+  const tone = quote ? signClass(pct) : "flat";
+  const name2 = quote && quote.name || symbol.name;
+  const digits = quote && typeof quote.digits === "number" ? quote.digits : 2;
+  const priceText = quote ? fmtPrice(animated, digits) : "\u2014";
+  const pctText = quote ? fmtPct(pct) : "\u2014";
+  return (0, import_react5.createElement)(
+    "div",
+    {
+      className: "of-hud-row",
+      role: "button",
+      tabIndex: 0,
+      "data-hud-action": "open",
+      "aria-label": name2 + " " + priceText + " " + pctText,
+      title: name2,
+      onKeyDown: (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen?.();
+        }
+      }
+    },
+    (0, import_react5.createElement)("span", { className: "of-hud-row-name" }, name2),
+    (0, import_react5.createElement)("span", { className: "of-hud-row-price" }, priceText),
+    (0, import_react5.createElement)("span", { className: "of-hud-row-pct", "data-tone": tone }, pctText),
+    showSpark ? (0, import_react5.createElement)(
+      "span",
+      { className: "of-hud-spark", "data-tone": tone, "aria-hidden": true },
+      quote && Array.isArray(quote.spark) ? (0, import_react5.createElement)(Sparkline, { values: quote.spark, up: pct >= 0 }) : null
+    ) : null
+  );
+}
+function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden }) {
+  const viewport = useViewport();
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const [snapshot, setSnapshot] = (0, import_react5.useState)(null);
+  const [loading, setLoading] = (0, import_react5.useState)(true);
+  const [error, setError] = (0, import_react5.useState)(null);
+  const [hover, setHover] = (0, import_react5.useState)(false);
+  const [idle, setIdle] = (0, import_react5.useState)(false);
+  const [dragging, setDragging] = (0, import_react5.useState)(false);
+  const [dragPos, setDragPos] = (0, import_react5.useState)(null);
+  const [editingTitle, setEditingTitle] = (0, import_react5.useState)(false);
+  const [draftTitle, setDraftTitle] = (0, import_react5.useState)(config.title || "OpenFin");
+  const [measuredHeight, setMeasuredHeight] = (0, import_react5.useState)(0);
+  const rootRef = (0, import_react5.useRef)(null);
+  const cardRef = (0, import_react5.useRef)(null);
+  const titleInputRef = (0, import_react5.useRef)(null);
+  const dragRef = (0, import_react5.useRef)(null);
+  const dragPosRef = (0, import_react5.useRef)(null);
+  const frameRef = (0, import_react5.useRef)(0);
+  const idleTimerRef = (0, import_react5.useRef)(0);
+  const idleRef = (0, import_react5.useRef)(false);
+  const reloadRef = (0, import_react5.useRef)(null);
+  const direction = t("meta.direction") === "intl" ? "intl" : "cn";
+  const collapsed = config.collapsed === true;
+  const size = CARD_W[config.size] ? config.size : "m";
+  const cardW = CARD_W[size];
+  const rows = (0, import_react5.useMemo)(() => {
+    const ids = Array.isArray(config.symbols) ? config.symbols : [];
+    return ids.map((id) => SYMBOLS.find((symbol) => symbol.id === id)).filter(Boolean);
+  }, [config.symbols]);
+  const quoteMap = (0, import_react5.useMemo)(() => {
+    const map = /* @__PURE__ */ new Map();
+    const quotes = snapshot && Array.isArray(snapshot.quotes) ? snapshot.quotes : [];
+    for (const quote of quotes) {
+      if (quote && typeof quote.id === "string") map.set(quote.id, quote);
+    }
+    for (const hudId of Object.keys(QUOTE_ALIASES)) {
+      const quote = map.get(QUOTE_ALIASES[hudId]);
+      if (quote && !map.has(hudId)) map.set(hudId, quote);
+    }
+    return map;
+  }, [snapshot]);
+  const cardH = collapsed ? COLLAPSED_H : measuredHeight || estimateCardHeight(rows.length);
+  const resolved = resolveAnchor(config.position, viewport, collapsed, cardW, cardH);
+  const anchor = dragPos || resolved;
+  const left = collapsed ? anchor.x : anchor.x + COLLAPSED_W - cardW;
+  const top = collapsed ? anchor.y : anchor.y + COLLAPSED_H - cardH;
+  (0, import_react5.useEffect)(() => {
+    let alive = true;
+    const controller = new AbortController();
+    let timer = 0;
+    const load = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      try {
+        const data = await getSnapshot(controller.signal);
+        if (!alive) return;
+        setSnapshot(data);
+        setError(null);
+      } catch (reason) {
+        if (!alive || reason && reason.name === "AbortError") return;
+        setError(reason && reason.message || String(reason));
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+    reloadRef.current = load;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        await load();
+        if (alive) schedule();
+      }, POLL_MS);
+    };
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.hidden) {
+        clearTimeout(timer);
+        timer = 0;
+        return;
+      }
+      void load();
+      schedule();
+    };
+    void load();
+    schedule();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      alive = false;
+      controller.abort();
+      clearTimeout(timer);
+      reloadRef.current = null;
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    if (!editingTitle) setDraftTitle(config.title || "");
+  }, [config.title, editingTitle]);
+  (0, import_react5.useEffect)(() => {
+    if (!editingTitle) return;
+    const node = titleInputRef.current;
+    if (node) {
+      try {
+        node.focus();
+        node.select();
+      } catch {
+      }
+    }
+  }, [editingTitle]);
+  const symbolKey = rows.map((row) => row.id).join("|");
+  (0, import_react5.useLayoutEffect)(() => {
+    if (collapsed) {
+      setMeasuredHeight(0);
+      return void 0;
+    }
+    const node = cardRef.current;
+    if (!node) return void 0;
+    const update = () => {
+      const height = node.offsetHeight;
+      if (height > 0) setMeasuredHeight(height);
+    };
+    update();
+    let observer = null;
+    if (typeof ResizeObserver === "function") {
+      observer = new ResizeObserver(update);
+      observer.observe(node);
+    }
+    return () => {
+      if (observer) observer.disconnect();
+    };
+  }, [collapsed, size, symbolKey, config.showSpark]);
+  (0, import_react5.useEffect)(() => {
+    const timeout = Number(config.idleAfterMs) || 0;
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = 0;
+    idleRef.current = false;
+    setIdle(false);
+    if (timeout <= 0) return void 0;
+    idleTimerRef.current = setTimeout(() => {
+      idleRef.current = true;
+      setIdle(true);
+    }, timeout);
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = 0;
+      }
+    };
+  }, [config.idleAfterMs]);
+  const bump = (0, import_react5.useCallback)(() => {
+    const timeout = Number(config.idleAfterMs) || 0;
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = 0;
+    }
+    if (idleRef.current) {
+      idleRef.current = false;
+      setIdle(false);
+    }
+    if (timeout > 0) {
+      idleTimerRef.current = setTimeout(() => {
+        idleRef.current = true;
+        setIdle(true);
+      }, timeout);
+    }
+  }, [config.idleAfterMs]);
+  const opacityBase = clampValue(Number(config.opacity) || 100, 20, 100) / 100;
+  const opacityIdle = clampValue(Number(config.idleOpacity) || 20, 20, 100) / 100;
+  const active = hover || dragging;
+  const opacity = active && config.hoverFull !== false ? 1 : idle ? opacityIdle : opacityBase;
+  const beginTitleEdit = () => {
+    setDraftTitle(config.title || "");
+    setEditingTitle(true);
+  };
+  const commitTitle = () => {
+    setEditingTitle(false);
+    const next = draftTitle.replace(/\s+/g, " ").trim().slice(0, TITLE_MAX2);
+    if (next && next !== config.title) onChange?.({ title: next });
+  };
+  const cancelTitle = () => {
+    setEditingTitle(false);
+    setDraftTitle(config.title || "");
+  };
+  const startDrag = (event) => {
+    if (event.button !== 0) return;
+    if (event.isPrimary === false) return;
+    const target = event.target;
+    if (target && typeof target.closest === "function" && target.closest('[data-hud-no-drag="true"]')) return;
+    if (dragRef.current) return;
+    dragRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      origin: anchor,
+      moved: false,
+      // Pointer capture retargets later events to the root, so remember what
+      // the user actually pressed to decide between expand/title/open.
+      target: event.target
+    };
+    try {
+      if (rootRef.current) rootRef.current.setPointerCapture(event.pointerId);
+    } catch {
+    }
+    bump();
+  };
+  const moveDrag = (event) => {
+    bump();
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.moved) {
+      if (dx * dx + dy * dy < DRAG_START_SQ) return;
+      drag.moved = true;
+      setDragging(true);
+    }
+    const next = resolveAnchor(
+      { x: drag.origin.x + dx, y: drag.origin.y + dy },
+      viewport,
+      collapsed,
+      cardW,
+      cardH
+    );
+    dragPosRef.current = next;
+    if (frameRef.current) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0;
+      if (dragPosRef.current) setDragPos(dragPosRef.current);
+    });
+  };
+  const cancelDrag = () => {
+    dragRef.current = null;
+    dragPosRef.current = null;
+    setDragPos(null);
+    setDragging(false);
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    }
+  };
+  const endDrag = (event) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (event && drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    setDragging(false);
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    }
+    const finalPosition = drag.moved ? dragPosRef.current || drag.origin : null;
+    dragPosRef.current = null;
+    setDragPos(null);
+    try {
+      if (rootRef.current && rootRef.current.hasPointerCapture && rootRef.current.hasPointerCapture(drag.pointerId)) {
+        rootRef.current.releasePointerCapture(drag.pointerId);
+      }
+    } catch {
+    }
+    if (drag.moved) {
+      if (finalPosition) onChange?.({ position: { x: finalPosition.x, y: finalPosition.y } });
+      return;
+    }
+    const target = drag.target;
+    const action = target && typeof target.closest === "function" ? target.closest("[data-hud-action]") : null;
+    const kind = action ? action.getAttribute("data-hud-action") : "";
+    if (kind === "expand") onChange?.({ collapsed: false });
+    else if (kind === "title") beginTitleEdit();
+    else if (kind === "open") onOpenDashboard?.();
+  };
+  if (hidden) return null;
+  const firstSymbol = rows.length > 0 ? rows[0] : null;
+  const firstQuote = firstSymbol ? quoteMap.get(firstSymbol.id) || null : null;
+  const firstPct = firstQuote && typeof firstQuote.pct === "number" ? firstQuote.pct : null;
+  const pillTone = firstQuote ? signClass(firstPct) : "flat";
+  const pillText = firstQuote ? fmtPct(firstPct) : loading && !error ? "\u2026" : "\u2014";
+  const updatedText = snapshot && typeof snapshot.updatedAt === "number" ? fmtClock(snapshot.updatedAt) : loading ? t("hud.waiting") : "\u2014";
+  const chip = collapsed ? (0, import_react5.createElement)(
+    "div",
+    {
+      key: "chip",
+      className: "of-hud-chip-row",
+      role: "button",
+      tabIndex: 0,
+      "data-hud-action": "expand",
+      "aria-label": t("hud.collapsedHint"),
+      title: t("hud.expand"),
+      onKeyDown: (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onChange?.({ collapsed: false });
+        }
+      }
+    },
+    (0, import_react5.createElement)(
+      "span",
+      {
+        className: "of-hud-pill",
+        "data-tone": pillTone,
+        title: firstSymbol ? firstSymbol.name + " " + pillText : t("hud.waiting")
+      },
+      pillText
+    ),
+    (0, import_react5.createElement)("span", { className: "of-hud-mascot" }, (0, import_react5.createElement)(Mark, { size: 22 }))
+  ) : null;
+  const titleNode = editingTitle ? (0, import_react5.createElement)("input", {
+    key: "title-input",
+    className: "of-hud-title-input",
+    ref: titleInputRef,
+    value: draftTitle,
+    maxLength: TITLE_MAX2,
+    "data-hud-no-drag": "true",
+    "aria-label": t("hud.titleLabel"),
+    onChange: (event) => setDraftTitle(event.target.value),
+    onBlur: commitTitle,
+    onKeyDown: (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitTitle();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        cancelTitle();
+      }
+    }
+  }) : (0, import_react5.createElement)(
+    "div",
+    {
+      key: "title",
+      className: "of-hud-title",
+      "data-hud-action": "title",
+      role: "button",
+      tabIndex: 0,
+      title: t("hud.titleLabel"),
+      onKeyDown: (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          beginTitleEdit();
+        }
+      }
+    },
+    config.title || t("hud.title")
+  );
+  const head = (0, import_react5.createElement)(
+    "div",
+    { className: "of-hud-head" },
+    (0, import_react5.createElement)("span", { className: "of-hud-face" }, (0, import_react5.createElement)(Mark, { size: 15 })),
+    titleNode,
+    (0, import_react5.createElement)(
+      "div",
+      { className: "of-hud-actions" },
+      (0, import_react5.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-hud-ibtn",
+          "data-hud-no-drag": "true",
+          title: t("hud.collapse"),
+          "aria-label": t("hud.collapse"),
+          onClick: () => onChange?.({ collapsed: true })
+        },
+        (0, import_react5.createElement)(HudGlyph, { name: "collapse" })
+      ),
+      (0, import_react5.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-hud-ibtn",
+          "data-hud-no-drag": "true",
+          title: t("hud.settings"),
+          "aria-label": t("hud.settings"),
+          onClick: () => onConfigure?.()
+        },
+        (0, import_react5.createElement)(HudGlyph, { name: "gear" })
+      ),
+      (0, import_react5.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-hud-ibtn",
+          "data-hud-no-drag": "true",
+          "data-danger": "true",
+          title: t("hud.close"),
+          "aria-label": t("hud.close"),
+          onClick: () => onChange?.({ inline: false })
+        },
+        (0, import_react5.createElement)(Icon, { name: "close", size: 13 })
+      )
+    )
+  );
+  const rowsNode = (0, import_react5.createElement)(
+    "div",
+    { className: "of-hud-rows" },
+    rows.length === 0 ? (0, import_react5.createElement)("div", { className: "of-hud-row", style: { cursor: "default" } }, (0, import_react5.createElement)("span", { className: "of-hud-row-name" }, t("empty"))) : rows.map(
+      (symbol) => (0, import_react5.createElement)(HudRow, {
+        key: symbol.id,
+        symbol,
+        quote: quoteMap.get(symbol.id) || null,
+        showSpark: config.showSpark !== false,
+        onOpen: onOpenDashboard
+      })
+    )
+  );
+  const footNote = error ? (0, import_react5.createElement)(
+    "button",
+    {
+      type: "button",
+      className: "of-hud-foot-note",
+      "data-error": "true",
+      "data-hud-no-drag": "true",
+      title: error,
+      onClick: () => {
+        if (reloadRef.current) reloadRef.current();
+      }
+    },
+    t("hud.error")
+  ) : (0, import_react5.createElement)("span", { className: "of-hud-foot-note", title: t("hud.disclaimer") }, t("hud.disclaimer"));
+  const foot = (0, import_react5.createElement)(
+    "div",
+    { className: "of-hud-foot" },
+    (0, import_react5.createElement)("span", { className: "of-hud-foot-time", title: t("hud.updated") }, updatedText),
+    (0, import_react5.createElement)("span", { className: "of-hud-foot-sep", "aria-hidden": true }, "\xB7"),
+    footNote,
+    (0, import_react5.createElement)(
+      "button",
+      {
+        type: "button",
+        className: "of-hud-ibtn of-hud-foot-btn",
+        "data-hud-no-drag": "true",
+        title: t("hud.openDashboard"),
+        "aria-label": t("hud.openDashboard"),
+        onClick: () => onOpenDashboard?.()
+      },
+      (0, import_react5.createElement)(Icon, { name: "external", size: 12 })
+    )
+  );
+  const card = collapsed ? null : (0, import_react5.createElement)(
+    "div",
+    {
+      key: "card",
+      className: "of-hud-card",
+      ref: cardRef,
+      role: "region",
+      "aria-label": config.title || t("hud.title")
+    },
+    head,
+    rowsNode,
+    foot
+  );
+  return (0, import_react5.createElement)(
+    "div",
+    {
+      ref: rootRef,
+      className: "of-hud",
+      role: "group",
+      "aria-label": collapsed ? t("hud.collapsedHint") : config.title || t("hud.title"),
+      "data-collapsed": collapsed ? "true" : "false",
+      "data-direction": direction,
+      "data-reduced": reduceMotion ? "true" : "false",
+      "data-idle": idle ? "true" : "false",
+      "data-dragging": dragging ? "true" : "false",
+      "data-size": size,
+      "data-spark": config.showSpark !== false ? "true" : "false",
+      style: {
+        left: left + "px",
+        top: top + "px",
+        width: (collapsed ? COLLAPSED_W : cardW) + "px",
+        height: (collapsed ? COLLAPSED_H : cardH) + "px",
+        opacity,
+        "--of-hud-w": cardW + "px"
+      },
+      onPointerDown: startDrag,
+      onPointerMove: moveDrag,
+      onPointerUp: endDrag,
+      onPointerCancel: cancelDrag,
+      onLostPointerCapture: cancelDrag,
+      onPointerEnter: () => {
+        setHover(true);
+        bump();
+      },
+      onPointerLeave: () => setHover(false)
+    },
+    chip,
+    card
+  );
+}
+
+// client/src/components/HudSettings.js
+var import_react6 = require("react");
+var TITLE_MAX3 = 18;
+var IDLE_OPTIONS = [0, 1e4, 3e4, 6e4];
+var SIZE_OPTIONS = [
+  ["s", "hud.sizeS"],
+  ["m", "hud.sizeM"],
+  ["l", "hud.sizeL"]
+];
+function SettingSwitch({ checked, label, disabled, onChange, autoFocus }) {
+  return (0, import_react6.createElement)("button", {
+    type: "button",
+    className: "of-hset-switch",
+    role: "switch",
+    "aria-checked": checked ? "true" : "false",
+    "aria-label": label,
+    title: label,
+    disabled: Boolean(disabled),
+    "data-autofocus": autoFocus ? "true" : void 0,
+    onClick: () => onChange(!checked)
+  });
+}
+function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) {
+  const [localStatus, setLocalStatus] = (0, import_react6.useState)(null);
+  const [recentering, setRecentering] = (0, import_react6.useState)(false);
+  const [desktopPending, setDesktopPending] = (0, import_react6.useState)(false);
+  const [titleDraft, setTitleDraft] = (0, import_react6.useState)(config.title || "");
+  const sheetRef = (0, import_react6.useRef)(null);
+  const titleFocusedRef = (0, import_react6.useRef)(false);
+  const cancelTitleRef = (0, import_react6.useRef)(false);
+  const direction = t("meta.direction") === "intl" ? "intl" : "cn";
+  const refreshStatus = (0, import_react6.useCallback)(() => {
+    getHud().then(
+      (next) => setLocalStatus(next !== null && typeof next === "object" ? next : null),
+      () => setLocalStatus(null)
+    );
+    if (typeof onRefreshStatus === "function") onRefreshStatus();
+  }, [onRefreshStatus]);
+  (0, import_react6.useEffect)(() => {
+    refreshStatus();
+  }, [refreshStatus]);
+  (0, import_react6.useEffect)(() => {
+    if (!desktopPending) return void 0;
+    const first = setTimeout(refreshStatus, 700);
+    const second = setTimeout(refreshStatus, 2200);
+    const settle = setTimeout(() => setDesktopPending(false), 2600);
+    return () => {
+      clearTimeout(first);
+      clearTimeout(second);
+      clearTimeout(settle);
+    };
+  }, [desktopPending, refreshStatus]);
+  (0, import_react6.useEffect)(() => {
+    if (!titleFocusedRef.current) setTitleDraft(typeof config.title === "string" ? config.title : "");
+  }, [config.title]);
+  (0, import_react6.useEffect)(() => {
+    const sheet = sheetRef.current;
+    const opener = typeof document !== "undefined" ? document.activeElement : null;
+    const focusables = () => {
+      if (!sheet) return [];
+      return Array.from(
+        sheet.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]'
+        )
+      ).filter((node) => node.offsetParent !== null);
+    };
+    const initial = sheet ? sheet.querySelector('[data-autofocus="true"]') || focusables()[0] : null;
+    if (initial && typeof initial.focus === "function") {
+      try {
+        initial.focus();
+      } catch {
+      }
+    }
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        const target = event.target;
+        const typing = target && target.tagName === "INPUT" && target.type === "text";
+        if (typing) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onClose?.();
+        return;
+      }
+      if (event.key !== "Tab" || !sheet) return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const firstItem = items[0];
+      const lastItem = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === firstItem) {
+        event.preventDefault();
+        lastItem.focus();
+      } else if (!event.shiftKey && document.activeElement === lastItem) {
+        event.preventDefault();
+        firstItem.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      if (opener && typeof opener.focus === "function") {
+        try {
+          opener.focus();
+        } catch {
+        }
+      }
+    };
+  }, [onClose]);
+  const onTitleBlur = () => {
+    titleFocusedRef.current = false;
+    if (cancelTitleRef.current) {
+      cancelTitleRef.current = false;
+      setTitleDraft(config.title || "");
+      return;
+    }
+    const next = titleDraft.replace(/\s+/g, " ").trim().slice(0, TITLE_MAX3);
+    if (next && next !== config.title) onChange?.({ title: next });
+    else setTitleDraft(config.title || "");
+  };
+  const onTitleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.currentTarget.blur();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      cancelTitleRef.current = true;
+      event.currentTarget.blur();
+    }
+  };
+  const toggleDesktop = (next) => {
+    onChange?.({ desktop: next });
+    setDesktopPending(true);
+  };
+  const recenter = () => {
+    if (recentering) return;
+    setRecentering(true);
+    postHud({ action: "recenter" }).then(
+      () => {
+        setRecentering(false);
+        refreshStatus();
+      },
+      () => setRecentering(false)
+    );
+  };
+  const symbols = Array.isArray(config.symbols) ? config.symbols : [];
+  const toggleSymbol = (id) => {
+    if (symbols.includes(id)) {
+      if (symbols.length <= 1) return;
+      onChange?.({ symbols: symbols.filter((entry) => entry !== id) });
+      return;
+    }
+    if (symbols.length >= 6) return;
+    onChange?.({ symbols: [...symbols, id] });
+  };
+  const hud = status !== null && status !== void 0 ? status : localStatus;
+  const available = hud ? hud.available !== false : null;
+  const running = hud ? hud.running === true : false;
+  const reason = hud && hud.reason ? String(hud.reason) : "";
+  let statusText = t("hud.waiting");
+  let statusTone = "muted";
+  if (hud) {
+    if (hud.available === false) {
+      statusText = t("hud.desktopUnavailable");
+      statusTone = "warn";
+    } else if (hud.running === true) {
+      statusText = t("hud.desktopOn");
+      statusTone = "ok";
+    } else {
+      statusText = t("hud.desktopOff");
+    }
+  }
+  const idleAfter = typeof config.idleAfterMs === "number" ? config.idleAfterMs : 0;
+  const idleChoices = IDLE_OPTIONS.includes(idleAfter) ? IDLE_OPTIONS.slice() : [...IDLE_OPTIONS, idleAfter];
+  idleChoices.sort((left, right) => left - right);
+  const opacity = typeof config.opacity === "number" ? config.opacity : 85;
+  const idleOpacity = typeof config.idleOpacity === "number" ? config.idleOpacity : 35;
+  const size = config.size === "s" || config.size === "l" ? config.size : "m";
+  const spark = config.showSpark !== false;
+  return (0, import_react6.createElement)(
+    "div",
+    {
+      className: "of-hset-backdrop",
+      "data-direction": direction,
+      onPointerDown: (event) => {
+        if (event.target === event.currentTarget) onClose?.();
+      }
+    },
+    (0, import_react6.createElement)(
+      "section",
+      {
+        className: "of-hset",
+        ref: sheetRef,
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-labelledby": "of-hset-title",
+        tabIndex: -1
+      },
+      (0, import_react6.createElement)(
+        "header",
+        { className: "of-hset-head" },
+        (0, import_react6.createElement)("span", { className: "of-hset-mark" }, (0, import_react6.createElement)(Mark, { size: 18 })),
+        (0, import_react6.createElement)(
+          "div",
+          { className: "of-hset-titles" },
+          (0, import_react6.createElement)("h2", { className: "of-hset-title", id: "of-hset-title" }, t("hud.title")),
+          (0, import_react6.createElement)("div", { className: "of-hset-sub" }, t("hud.saved"))
+        ),
+        (0, import_react6.createElement)(
+          "button",
+          {
+            type: "button",
+            className: "of-icon-btn of-hset-close",
+            title: t("hud.close"),
+            "aria-label": t("hud.close"),
+            onClick: () => onClose?.()
+          },
+          (0, import_react6.createElement)(Icon, { name: "close", size: 14 })
+        )
+      ),
+      (0, import_react6.createElement)(
+        "div",
+        { className: "of-hset-body" },
+        // ------------------------------------------------------ visibility
+        (0, import_react6.createElement)(
+          "section",
+          { className: "of-hset-section" },
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.inline")),
+              (0, import_react6.createElement)(SettingSwitch, {
+                checked: config.inline === true,
+                label: t("hud.inline"),
+                autoFocus: true,
+                onChange: (next) => onChange?.({ inline: next })
+              })
+            ),
+            (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.inlineHint"))
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.desktop")),
+              (0, import_react6.createElement)(SettingSwitch, {
+                checked: config.desktop === true,
+                label: t("hud.desktop"),
+                disabled: available === false,
+                onChange: toggleDesktop
+              })
+            ),
+            (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.desktopHint")),
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-status", "data-tone": statusTone },
+              (0, import_react6.createElement)("span", { className: "of-hset-dot", "aria-hidden": true }),
+              (0, import_react6.createElement)("span", { className: "of-hset-status-text" }, statusText),
+              reason && !running ? (0, import_react6.createElement)("span", { className: "of-hset-status-reason", title: reason }, reason) : null,
+              (0, import_react6.createElement)(
+                "button",
+                {
+                  type: "button",
+                  className: "of-btn",
+                  style: { flex: "none", marginLeft: "auto", padding: "4px 9px", fontSize: 10.5 },
+                  title: t("hud.recenter"),
+                  disabled: !running || recentering,
+                  onClick: recenter
+                },
+                t("hud.recenter")
+              )
+            )
+          )
+        ),
+        // ------------------------------------------------------ instruments
+        (0, import_react6.createElement)(
+          "section",
+          { className: "of-hset-section" },
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-section-head" },
+            (0, import_react6.createElement)("span", { className: "of-hset-section-label" }, t("hud.symbols")),
+            (0, import_react6.createElement)("span", { className: "of-hset-section-meta" }, symbols.length + "/6")
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-symbols", role: "group", "aria-label": t("hud.symbols") },
+            SYMBOLS.map((symbol) => {
+              const selected = symbols.includes(symbol.id);
+              return (0, import_react6.createElement)(
+                "button",
+                {
+                  key: symbol.id,
+                  type: "button",
+                  className: "of-hset-symbol",
+                  "aria-pressed": selected ? "true" : "false",
+                  title: symbol.name,
+                  onClick: () => toggleSymbol(symbol.id)
+                },
+                (0, import_react6.createElement)("span", { className: "of-hset-check", "aria-hidden": true }, selected ? "\u2713" : ""),
+                (0, import_react6.createElement)("span", { className: "of-hset-symbol-name" }, symbol.name)
+              );
+            })
+          ),
+          (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.symbolsHint"))
+        ),
+        // -------------------------------------------------------- appearance
+        (0, import_react6.createElement)(
+          "section",
+          { className: "of-hset-section" },
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.titleLabel")),
+              (0, import_react6.createElement)("span", { className: "of-hset-count" }, titleDraft.length + "/" + TITLE_MAX3)
+            ),
+            (0, import_react6.createElement)("input", {
+              type: "text",
+              className: "of-hset-input",
+              value: titleDraft,
+              maxLength: TITLE_MAX3,
+              placeholder: t("hud.titleLabel"),
+              "aria-label": t("hud.titleLabel"),
+              onFocus: () => {
+                titleFocusedRef.current = true;
+              },
+              onBlur: onTitleBlur,
+              onChange: (event) => setTitleDraft(event.target.value),
+              onKeyDown: onTitleKeyDown
+            })
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.opacity")),
+              (0, import_react6.createElement)("input", {
+                type: "range",
+                className: "of-hset-range",
+                min: 20,
+                max: 100,
+                step: 1,
+                value: opacity,
+                "aria-label": t("hud.opacity"),
+                onChange: (event) => onChange?.({ opacity: Number(event.target.value) })
+              }),
+              (0, import_react6.createElement)("span", { className: "of-hset-value" }, opacity + "%")
+            )
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.idleOpacity")),
+              (0, import_react6.createElement)("input", {
+                type: "range",
+                className: "of-hset-range",
+                min: 20,
+                max: 100,
+                step: 1,
+                value: idleOpacity,
+                disabled: idleAfter === 0,
+                "aria-label": t("hud.idleOpacity"),
+                onChange: (event) => onChange?.({ idleOpacity: Number(event.target.value) })
+              }),
+              (0, import_react6.createElement)("span", { className: "of-hset-value" }, idleOpacity + "%")
+            )
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.idleAfter")),
+              (0, import_react6.createElement)(
+                "select",
+                {
+                  className: "of-hset-select",
+                  value: String(idleAfter),
+                  "aria-label": t("hud.idleAfter"),
+                  onChange: (event) => onChange?.({ idleAfterMs: Number(event.target.value) })
+                },
+                idleChoices.map(
+                  (value) => (0, import_react6.createElement)("option", { key: value, value: String(value) }, value === 0 ? t("hud.idleOff") : Math.round(value / 1e3) + "s")
+                )
+              )
+            )
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.hoverFull")),
+              (0, import_react6.createElement)(SettingSwitch, {
+                checked: config.hoverFull !== false,
+                label: t("hud.hoverFull"),
+                onChange: (next) => onChange?.({ hoverFull: next })
+              })
+            )
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.size")),
+              (0, import_react6.createElement)(
+                "div",
+                { className: "of-hset-seg", role: "group", "aria-label": t("hud.size") },
+                SIZE_OPTIONS.map(
+                  ([value, key]) => (0, import_react6.createElement)(
+                    "button",
+                    {
+                      key: value,
+                      type: "button",
+                      className: "of-hset-seg-btn",
+                      "aria-pressed": size === value ? "true" : "false",
+                      onClick: () => onChange?.({ size: value })
+                    },
+                    t(key)
+                  )
+                )
+              )
+            )
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.spark")),
+              (0, import_react6.createElement)(SettingSwitch, {
+                checked: spark,
+                label: t("hud.spark"),
+                onChange: (next) => onChange?.({ showSpark: next })
+              })
+            )
+          )
+        ),
+        // ---------------------------------------------------------- position
+        (0, import_react6.createElement)(
+          "section",
+          { className: "of-hset-section" },
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-actions" },
+            (0, import_react6.createElement)(
+              "button",
+              {
+                type: "button",
+                className: "of-btn",
+                onClick: () => onChange?.({ position: { x: 0, y: 0 } })
+              },
+              t("hud.resetPosition")
+            ),
+            (0, import_react6.createElement)("span", { className: "of-hset-hint" }, t("hud.positionHint"))
+          )
+        )
+      )
+    )
+  );
+}
+
+// client/src/components/Tabs.js
+var import_react7 = require("react");
+function Tabs({ items, value, onChange, ariaLabel }) {
+  return (0, import_react7.createElement)(
+    "div",
+    { className: "of-tabs", role: "tablist", "aria-label": ariaLabel },
+    items.map(
+      (item) => (0, import_react7.createElement)(
+        "button",
+        {
+          key: item.id,
+          type: "button",
+          role: "tab",
+          className: "of-tab",
+          "aria-selected": item.id === value,
+          "aria-controls": "of-panel-" + item.id,
+          onClick: () => onChange(item.id)
+        },
+        item.label
+      )
+    )
+  );
+}
+function RefreshButton({ label, busy, onClick }) {
+  return (0, import_react7.createElement)(
+    "button",
+    {
+      type: "button",
+      className: "of-icon-btn",
+      "data-busy": busy ? "true" : "false",
+      title: label,
+      "aria-label": label,
+      onClick
+    },
+    (0, import_react7.createElement)(Icon, { name: "refresh", size: 15 })
+  );
+}
+
+// client/src/views/Dashboard.js
+var import_react12 = require("react");
+
+// client/src/components/Feedback.js
+var import_react8 = require("react");
+function Skeleton({ height = 12, width = "100%", radius, style, className }) {
+  return (0, import_react8.createElement)("div", {
+    className: className ? "of-skeleton " + className : "of-skeleton",
+    style: { height, width, borderRadius: radius, ...style },
+    "aria-hidden": true
+  });
+}
+function SkeletonLines({ lines = 3, gap = 8 }) {
+  return (0, import_react8.createElement)(
+    "div",
+    { style: { display: "flex", flexDirection: "column", gap }, "aria-hidden": true },
+    Array.from(
+      { length: lines },
+      (_, index) => (0, import_react8.createElement)(Skeleton, {
+        key: index,
+        height: 10,
+        width: index === lines - 1 ? "62%" : "100%",
+        radius: 5
+      })
+    )
+  );
+}
+function EmptyState({ title, body, icon }) {
+  return (0, import_react8.createElement)(
+    "div",
+    { className: "of-empty" },
+    icon ? (0, import_react8.createElement)("div", { className: "of-empty-icon" }, icon) : null,
+    title ? (0, import_react8.createElement)("div", { className: "of-error-title" }, title) : null,
+    body ? (0, import_react8.createElement)("div", null, body) : null
+  );
+}
+function ErrorState({ title, body, retryLabel, onRetry }) {
+  return (0, import_react8.createElement)(
+    "div",
+    { className: "of-error", role: "alert" },
+    (0, import_react8.createElement)("div", { className: "of-error-title" }, title),
+    body ? (0, import_react8.createElement)("div", null, body) : null,
+    onRetry && retryLabel ? (0, import_react8.createElement)("button", { type: "button", className: "of-btn", onClick: onRetry, style: { marginTop: 4 } }, retryLabel) : null
+  );
+}
+
 // client/src/components/QuoteCard.js
+var import_react9 = require("react");
 function QuoteCard({ quote, index = 0 }) {
   const direction = signClass(quote.pct);
   const shown = useCountUp(quote.price, 460);
   const digits = Number.isFinite(quote.digits) ? quote.digits : 2;
-  return (0, import_react7.createElement)(
+  return (0, import_react9.createElement)(
     "div",
     { className: "of-quote of-stagger", style: { "--i": index } },
-    (0, import_react7.createElement)(
+    (0, import_react9.createElement)(
       "div",
       { className: "of-quote-name" },
-      (0, import_react7.createElement)("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, quote.name),
-      (0, import_react7.createElement)("span", {
+      (0, import_react9.createElement)("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, quote.name),
+      (0, import_react9.createElement)("span", {
         className: "of-quote-dot " + (direction === "up" ? "of-up" : direction === "down" ? "of-down" : "of-flat"),
         style: { background: "currentColor" }
       })
     ),
-    (0, import_react7.createElement)("div", { className: "of-quote-price" }, fmtPrice(shown, digits)),
-    (0, import_react7.createElement)(
+    (0, import_react9.createElement)("div", { className: "of-quote-price" }, fmtPrice(shown, digits)),
+    (0, import_react9.createElement)(
       "div",
       { className: "of-quote-change of-" + direction },
-      (0, import_react7.createElement)("span", null, fmtPct(quote.pct)),
-      Number.isFinite(quote.change) ? (0, import_react7.createElement)("span", { style: { opacity: 0.62 } }, fmtChange(quote.change, digits)) : null
+      (0, import_react9.createElement)("span", null, fmtPct(quote.pct)),
+      Number.isFinite(quote.change) ? (0, import_react9.createElement)("span", { style: { opacity: 0.62 } }, fmtChange(quote.change, digits)) : null
     ),
-    (0, import_react7.createElement)(Sparkline, { values: quote.spark, up: direction === "up" })
+    (0, import_react9.createElement)(Sparkline, { values: quote.spark, up: direction === "up" })
   );
 }
 
 // client/src/components/Heatmap.js
-var import_react8 = require("react");
+var import_react10 = require("react");
 
 // client/src/layout.js
 function squarify(items, box) {
@@ -1153,10 +3331,10 @@ function squarify(items, box) {
   let x = box.x;
   let y = box.y;
   let w = width;
-  let h21 = height;
+  let h23 = height;
   let index = 0;
   while (index < entries.length) {
-    const side = Math.min(w, h21);
+    const side = Math.min(w, h23);
     if (side <= 0) break;
     const row = [];
     let previousRatio = Infinity;
@@ -1171,10 +3349,10 @@ function squarify(items, box) {
     if (row.length === 0) break;
     const rowArea = row.reduce((sum, entry) => sum + entry.area, 0);
     const thickness = side > 0 ? rowArea / side : 0;
-    if (w >= h21) {
+    if (w >= h23) {
       let cursor = y;
       for (const entry of row) {
-        const cellHeight = rowArea > 0 ? entry.area / rowArea * h21 : 0;
+        const cellHeight = rowArea > 0 ? entry.area / rowArea * h23 : 0;
         rects.push({ item: entry.item, x, y: cursor, w: thickness, h: cellHeight });
         cursor += cellHeight;
       }
@@ -1188,7 +3366,7 @@ function squarify(items, box) {
         cursor += cellWidth;
       }
       y += thickness;
-      h21 -= thickness;
+      h23 -= thickness;
     }
   }
   return rects;
@@ -1227,10 +3405,10 @@ function cellBackground(pct) {
   return `color-mix(in srgb, ${token} ${strength}%, var(--of-surface-2))`;
 }
 function Heatmap({ boards, activeCode, onSelect, t }) {
-  const hostRef = (0, import_react8.useRef)(null);
-  const [size, setSize] = (0, import_react8.useState)({ width: 0, height: 0 });
-  const [tip, setTip] = (0, import_react8.useState)(null);
-  (0, import_react8.useEffect)(() => {
+  const hostRef = (0, import_react10.useRef)(null);
+  const [size, setSize] = (0, import_react10.useState)({ width: 0, height: 0 });
+  const [tip, setTip] = (0, import_react10.useState)(null);
+  (0, import_react10.useEffect)(() => {
     const node = hostRef.current;
     if (!node || typeof ResizeObserver === "undefined") return void 0;
     const observer = new ResizeObserver((entries) => {
@@ -1241,7 +3419,7 @@ function Heatmap({ boards, activeCode, onSelect, t }) {
     setSize({ width: node.clientWidth, height: node.clientHeight });
     return () => observer.disconnect();
   }, []);
-  const rects = (0, import_react8.useMemo)(() => {
+  const rects = (0, import_react10.useMemo)(() => {
     if (!Array.isArray(boards) || size.width < 20 || size.height < 20) return [];
     const items = boards.map((board) => ({
       board,
@@ -1249,7 +3427,7 @@ function Heatmap({ boards, activeCode, onSelect, t }) {
     }));
     return squarify(items, { x: 0, y: 0, width: size.width, height: size.height });
   }, [boards, size.width, size.height]);
-  return (0, import_react8.createElement)(
+  return (0, import_react10.createElement)(
     "div",
     {
       className: "of-heat",
@@ -1264,7 +3442,7 @@ function Heatmap({ boards, activeCode, onSelect, t }) {
       const pale = Math.abs(board.pct) < 1.2;
       const showPct = height >= 32 && w >= 42;
       const showName = w >= 30 && height >= 16;
-      return (0, import_react8.createElement)(
+      return (0, import_react10.createElement)(
         "button",
         {
           key: board.code,
@@ -1285,66 +3463,66 @@ function Heatmap({ boards, activeCode, onSelect, t }) {
           onBlur: () => setTip(null),
           onClick: () => onSelect && onSelect(board)
         },
-        showName ? (0, import_react8.createElement)("div", { className: "of-heat-label" }, board.name) : null,
-        showPct ? (0, import_react8.createElement)(
+        showName ? (0, import_react10.createElement)("div", { className: "of-heat-label" }, board.name) : null,
+        showPct ? (0, import_react10.createElement)(
           "div",
           { className: "of-heat-pct of-" + direction },
           fmtPct(board.pct)
         ) : null
       );
     }),
-    tip ? (0, import_react8.createElement)(
+    tip ? (0, import_react10.createElement)(
       "div",
       {
         className: "of-heat-tip",
         style: placeTip(tip, size)
       },
-      (0, import_react8.createElement)("div", { className: "of-heat-tip-name" }, tip.board.name),
-      (0, import_react8.createElement)(
+      (0, import_react10.createElement)("div", { className: "of-heat-tip-name" }, tip.board.name),
+      (0, import_react10.createElement)(
         "div",
         { className: "of-heat-tip-row" },
-        (0, import_react8.createElement)("span", null, t("market.tooltipChange")),
-        (0, import_react8.createElement)("b", { className: "of-" + signClass(tip.board.pct) }, fmtPct(tip.board.pct))
+        (0, import_react10.createElement)("span", null, t("market.tooltipChange")),
+        (0, import_react10.createElement)("b", { className: "of-" + signClass(tip.board.pct) }, fmtPct(tip.board.pct))
       ),
-      (0, import_react8.createElement)(
+      (0, import_react10.createElement)(
         "div",
         { className: "of-heat-tip-row" },
-        (0, import_react8.createElement)("span", null, t("market.tooltipPrice")),
-        (0, import_react8.createElement)("span", null, fmtPrice(tip.board.price, 2))
+        (0, import_react10.createElement)("span", null, t("market.tooltipPrice")),
+        (0, import_react10.createElement)("span", null, fmtPrice(tip.board.price, 2))
       ),
-      (0, import_react8.createElement)(
+      (0, import_react10.createElement)(
         "div",
         { className: "of-heat-tip-row" },
-        (0, import_react8.createElement)("span", null, t("market.tooltipCap")),
-        (0, import_react8.createElement)("span", null, fmtCompact(tip.board.marketCap))
+        (0, import_react10.createElement)("span", null, t("market.tooltipCap")),
+        (0, import_react10.createElement)("span", null, fmtCompact(tip.board.marketCap))
       )
     ) : null
   );
 }
 
 // client/src/components/MarketLists.js
-var import_react9 = require("react");
+var import_react11 = require("react");
 function MoversList({ movers, t }) {
-  const [tab, setTab] = (0, import_react9.useState)("up");
+  const [tab, setTab] = (0, import_react11.useState)("up");
   const rows = Array.isArray(movers && movers[tab]) ? movers[tab] : [];
   const tabs = [
     { id: "up", label: t("market.gainers") },
     { id: "down", label: t("market.losers") },
     { id: "active", label: t("market.active") }
   ];
-  return (0, import_react9.createElement)(
+  return (0, import_react11.createElement)(
     "div",
     null,
-    (0, import_react9.createElement)(
+    (0, import_react11.createElement)(
       "div",
       { className: "of-section-head", style: { padding: "12px 14px 0" } },
-      (0, import_react9.createElement)("h3", { className: "of-section-title" }, t("market.movers"))
+      (0, import_react11.createElement)("h3", { className: "of-section-title" }, t("market.movers"))
     ),
-    (0, import_react9.createElement)(
+    (0, import_react11.createElement)(
       "div",
       { className: "of-movers-tabs", role: "tablist" },
       tabs.map(
-        (item) => (0, import_react9.createElement)(
+        (item) => (0, import_react11.createElement)(
           "button",
           {
             key: item.id,
@@ -1358,21 +3536,21 @@ function MoversList({ movers, t }) {
         )
       )
     ),
-    rows.length === 0 ? (0, import_react9.createElement)("div", { className: "of-empty", style: { padding: "14px 18px" } }, t("empty")) : (0, import_react9.createElement)(
+    rows.length === 0 ? (0, import_react11.createElement)("div", { className: "of-empty", style: { padding: "14px 18px" } }, t("empty")) : (0, import_react11.createElement)(
       "div",
       { className: "of-movers", role: "tabpanel" },
       rows.map(
-        (row, index) => (0, import_react9.createElement)(
+        (row, index) => (0, import_react11.createElement)(
           "div",
           { key: row.code || index, className: "of-mover" },
-          (0, import_react9.createElement)("span", { className: "of-mover-rank" }, index + 1),
-          (0, import_react9.createElement)(
+          (0, import_react11.createElement)("span", { className: "of-mover-rank" }, index + 1),
+          (0, import_react11.createElement)(
             "span",
             { className: "of-mover-name" },
             row.name,
-            (0, import_react9.createElement)("span", { className: "of-mover-code" }, row.code)
+            (0, import_react11.createElement)("span", { className: "of-mover-code" }, row.code)
           ),
-          (0, import_react9.createElement)(
+          (0, import_react11.createElement)(
             "span",
             { className: "of-mover-pct of-" + signClass(row.pct) },
             tab === "active" && Number.isFinite(row.amount) ? fmtCompact(row.amount) : fmtPct(row.pct)
@@ -1384,20 +3562,20 @@ function MoversList({ movers, t }) {
 }
 function NewsList({ news, t, limit = 8 }) {
   const items = Array.isArray(news) ? news.slice(0, limit) : [];
-  return (0, import_react9.createElement)(
+  return (0, import_react11.createElement)(
     "div",
     null,
-    (0, import_react9.createElement)(
+    (0, import_react11.createElement)(
       "div",
       { className: "of-section-head", style: { padding: "12px 14px 0" } },
-      (0, import_react9.createElement)("h3", { className: "of-section-title" }, t("market.news")),
-      (0, import_react9.createElement)("span", { className: "of-section-hint" }, t("market.newsHint"))
+      (0, import_react11.createElement)("h3", { className: "of-section-title" }, t("market.news")),
+      (0, import_react11.createElement)("span", { className: "of-section-hint" }, t("market.newsHint"))
     ),
-    items.length === 0 ? (0, import_react9.createElement)("div", { className: "of-empty", style: { padding: "14px 18px" } }, t("empty")) : (0, import_react9.createElement)(
+    items.length === 0 ? (0, import_react11.createElement)("div", { className: "of-empty", style: { padding: "14px 18px" } }, t("empty")) : (0, import_react11.createElement)(
       "div",
       { className: "of-news" },
       items.map(
-        (item) => (0, import_react9.createElement)(
+        (item) => (0, import_react11.createElement)(
           "a",
           {
             key: item.id,
@@ -1406,41 +3584,41 @@ function NewsList({ news, t, limit = 8 }) {
             target: "_blank",
             rel: "noreferrer noopener"
           },
-          (0, import_react9.createElement)("div", { className: "of-news-time" }, item.time || ""),
-          (0, import_react9.createElement)("div", { className: "of-news-title" }, item.title)
+          (0, import_react11.createElement)("div", { className: "of-news-time" }, item.time || ""),
+          (0, import_react11.createElement)("div", { className: "of-news-title" }, item.title)
         )
       )
     )
   );
 }
 function StockRow({ stock }) {
-  return (0, import_react9.createElement)(
+  return (0, import_react11.createElement)(
     "div",
     { className: "of-stock" },
-    (0, import_react9.createElement)("span", { className: "of-stock-name" }, stock.name),
-    (0, import_react9.createElement)("span", { className: "of-stock-code" }, stock.code),
-    (0, import_react9.createElement)("span", { className: "of-stock-pct of-" + signClass(stock.pct) }, fmtPct(stock.pct))
+    (0, import_react11.createElement)("span", { className: "of-stock-name" }, stock.name),
+    (0, import_react11.createElement)("span", { className: "of-stock-code" }, stock.code),
+    (0, import_react11.createElement)("span", { className: "of-stock-pct of-" + signClass(stock.pct) }, fmtPct(stock.pct))
   );
 }
 function SectorPanel({ sector, loading, onClose, t }) {
   const open = Boolean(sector);
   const stocks = sector && Array.isArray(sector.stocks) ? sector.stocks : [];
-  return (0, import_react9.createElement)(
+  return (0, import_react11.createElement)(
     "div",
     { className: "of-sector", "data-open": open ? "true" : "false" },
-    (0, import_react9.createElement)(
+    (0, import_react11.createElement)(
       "div",
       { className: "of-sector-inner" },
-      (0, import_react9.createElement)(
+      (0, import_react11.createElement)(
         "div",
         { className: "of-sector-pad" },
-        (0, import_react9.createElement)(
+        (0, import_react11.createElement)(
           "div",
           { className: "of-sector-head" },
-          (0, import_react9.createElement)("span", { className: "of-sector-name" }, sector ? sector.name : ""),
-          sector ? (0, import_react9.createElement)("span", { className: "of-chip", "data-tone": "brand" }, fmtPct(sector.pct)) : null,
-          (0, import_react9.createElement)("span", { style: { flex: 1 } }),
-          (0, import_react9.createElement)(
+          (0, import_react11.createElement)("span", { className: "of-sector-name" }, sector ? sector.name : ""),
+          sector ? (0, import_react11.createElement)("span", { className: "of-chip", "data-tone": "brand" }, fmtPct(sector.pct)) : null,
+          (0, import_react11.createElement)("span", { style: { flex: 1 } }),
+          (0, import_react11.createElement)(
             "button",
             {
               type: "button",
@@ -1449,15 +3627,15 @@ function SectorPanel({ sector, loading, onClose, t }) {
               onClick: onClose,
               "aria-label": t("market.closeSector")
             },
-            (0, import_react9.createElement)("span", { style: { fontSize: 14, lineHeight: 1 } }, "\xD7")
+            (0, import_react11.createElement)("span", { style: { fontSize: 14, lineHeight: 1 } }, "\xD7")
           )
         ),
-        loading ? (0, import_react9.createElement)("div", { className: "of-skeleton", style: { height: 54 } }) : stocks.length === 0 ? (0, import_react9.createElement)("div", { className: "of-empty", style: { padding: "10px 0" } }, t("market.sectorEmpty")) : (0, import_react9.createElement)(
+        loading ? (0, import_react11.createElement)("div", { className: "of-skeleton", style: { height: 54 } }) : stocks.length === 0 ? (0, import_react11.createElement)("div", { className: "of-empty", style: { padding: "10px 0" } }, t("market.sectorEmpty")) : (0, import_react11.createElement)(
           "div",
           { className: "of-sector-stocks" },
-          stocks.map((stock) => (0, import_react9.createElement)(StockRow, { key: stock.code, stock }))
+          stocks.map((stock) => (0, import_react11.createElement)(StockRow, { key: stock.code, stock }))
         ),
-        sector ? (0, import_react9.createElement)(
+        sector ? (0, import_react11.createElement)(
           "div",
           { className: "of-meta", style: { marginTop: 8 } },
           t("market.sectorHint")
@@ -1469,16 +3647,16 @@ function SectorPanel({ sector, loading, onClose, t }) {
 
 // client/src/views/Dashboard.js
 function Dashboard({ t, snapshot, loading, error, onRetry }) {
-  const [sector, setSector] = (0, import_react10.useState)(null);
-  const [sectorLoading, setSectorLoading] = (0, import_react10.useState)(false);
-  const sectorRequest = (0, import_react10.useRef)(null);
-  const clearSector = (0, import_react10.useCallback)(() => {
+  const [sector, setSector] = (0, import_react12.useState)(null);
+  const [sectorLoading, setSectorLoading] = (0, import_react12.useState)(false);
+  const sectorRequest = (0, import_react12.useRef)(null);
+  const clearSector = (0, import_react12.useCallback)(() => {
     if (sectorRequest.current) sectorRequest.current.abort();
     sectorRequest.current = null;
     setSector(null);
     setSectorLoading(false);
   }, []);
-  const selectSector = (0, import_react10.useCallback)(
+  const selectSector = (0, import_react12.useCallback)(
     (board) => {
       if (!board) return;
       if (sectorRequest.current) sectorRequest.current.abort();
@@ -1506,114 +3684,114 @@ function Dashboard({ t, snapshot, loading, error, onRetry }) {
     },
     [sector]
   );
-  (0, import_react10.useEffect)(() => () => {
+  (0, import_react12.useEffect)(() => () => {
     if (sectorRequest.current) sectorRequest.current.abort();
   }, []);
-  if (!snapshot && loading) return (0, import_react10.createElement)(DashboardSkeleton, { t });
+  if (!snapshot && loading) return (0, import_react12.createElement)(DashboardSkeleton, { t });
   if (!snapshot && error) {
-    return (0, import_react10.createElement)(ErrorState, {
+    return (0, import_react12.createElement)(ErrorState, {
       title: t("error.title"),
       body: error,
       retryLabel: t("retry"),
       onRetry
     });
   }
-  if (!snapshot) return (0, import_react10.createElement)(EmptyState, { title: t("empty") });
+  if (!snapshot) return (0, import_react12.createElement)(EmptyState, { title: t("empty") });
   const quotes = Array.isArray(snapshot.quotes) ? snapshot.quotes : [];
   const boards = Array.isArray(snapshot.boards) ? snapshot.boards : [];
   const breadth = snapshot.boardBreadth || null;
   const failedParts = Array.isArray(snapshot.parts) ? snapshot.parts.filter((part) => !part.ok) : [];
-  return (0, import_react10.createElement)(
+  return (0, import_react12.createElement)(
     "div",
     { className: "of-dashboard" },
-    failedParts.length > 0 || snapshot.stale ? (0, import_react10.createElement)(
+    failedParts.length > 0 || snapshot.stale ? (0, import_react12.createElement)(
       "div",
       { className: "of-foot", style: { margin: "0 0 12px", paddingTop: 0, borderTop: 0 } },
-      (0, import_react10.createElement)("span", { className: "of-badge" }, t("partial")),
-      (0, import_react10.createElement)(
+      (0, import_react12.createElement)("span", { className: "of-badge" }, t("partial")),
+      (0, import_react12.createElement)(
         "span",
         null,
         failedParts.map((part) => part.id).join(" \xB7 ") + (snapshot.stale ? " \xB7 cached" : "")
       )
     ) : null,
-    (0, import_react10.createElement)(
+    (0, import_react12.createElement)(
       "section",
       { className: "of-section" },
-      (0, import_react10.createElement)(
+      (0, import_react12.createElement)(
         "div",
         { className: "of-section-head" },
-        (0, import_react10.createElement)("h3", { className: "of-section-title" }, t("market.indices")),
-        (0, import_react10.createElement)("span", { className: "of-section-hint" }, t("market.indicesHint"))
+        (0, import_react12.createElement)("h3", { className: "of-section-title" }, t("market.indices")),
+        (0, import_react12.createElement)("span", { className: "of-section-hint" }, t("market.indicesHint"))
       ),
-      quotes.length === 0 ? (0, import_react10.createElement)(EmptyState, { title: t("empty"), body: t("market.partialBody") }) : (0, import_react10.createElement)(
+      quotes.length === 0 ? (0, import_react12.createElement)(EmptyState, { title: t("empty"), body: t("market.partialBody") }) : (0, import_react12.createElement)(
         "div",
         { className: "of-grid of-grid-quotes" },
-        quotes.map((quote, index) => (0, import_react10.createElement)(QuoteCard, { key: quote.id, quote, index }))
+        quotes.map((quote, index) => (0, import_react12.createElement)(QuoteCard, { key: quote.id, quote, index }))
       )
     ),
-    (0, import_react10.createElement)(
+    (0, import_react12.createElement)(
       "section",
       { className: "of-section" },
-      (0, import_react10.createElement)(
+      (0, import_react12.createElement)(
         "div",
         { className: "of-grid of-grid-main" },
-        (0, import_react10.createElement)(
+        (0, import_react12.createElement)(
           "div",
           { className: "of-card of-heat-card of-fade-in" },
-          (0, import_react10.createElement)(
+          (0, import_react12.createElement)(
             "div",
             { className: "of-heat-top" },
-            (0, import_react10.createElement)("h3", { className: "of-section-title" }, t("market.heatmap")),
-            breadth ? (0, import_react10.createElement)(
+            (0, import_react12.createElement)("h3", { className: "of-section-title" }, t("market.heatmap")),
+            breadth ? (0, import_react12.createElement)(
               "div",
               { className: "of-heat-breadth", title: t("market.breadth") },
-              (0, import_react10.createElement)("span", { className: "of-up" }, String(breadth.up || 0)),
-              (0, import_react10.createElement)(
+              (0, import_react12.createElement)("span", { className: "of-up" }, String(breadth.up || 0)),
+              (0, import_react12.createElement)(
                 "span",
                 { className: "of-breadth-bar", "aria-hidden": true },
-                (0, import_react10.createElement)("span", {
+                (0, import_react12.createElement)("span", {
                   className: "of-breadth-up",
                   style: { width: share(breadth.up, breadth.total) + "%" }
                 }),
-                (0, import_react10.createElement)("span", {
+                (0, import_react12.createElement)("span", {
                   className: "of-breadth-flat",
                   style: { width: share(breadth.flat, breadth.total) + "%" }
                 }),
-                (0, import_react10.createElement)("span", {
+                (0, import_react12.createElement)("span", {
                   className: "of-breadth-down",
                   style: { width: share(breadth.down, breadth.total) + "%" }
                 })
               ),
-              (0, import_react10.createElement)("span", { className: "of-down" }, String(breadth.down || 0))
+              (0, import_react12.createElement)("span", { className: "of-down" }, String(breadth.down || 0))
             ) : null
           ),
-          (0, import_react10.createElement)(Heatmap, {
+          (0, import_react12.createElement)(Heatmap, {
             boards,
             activeCode: sector ? sector.code : null,
             onSelect: selectSector,
             t
           }),
-          (0, import_react10.createElement)(
+          (0, import_react12.createElement)(
             "div",
             { className: "of-heat-legend" },
-            (0, import_react10.createElement)("span", null, "-5%"),
-            (0, import_react10.createElement)("span", { className: "of-legend-ramp" }),
-            (0, import_react10.createElement)("span", null, "+5%"),
-            (0, import_react10.createElement)("span", { style: { flex: 1 } }),
-            (0, import_react10.createElement)("span", null, t("market.heatmapHint"))
+            (0, import_react12.createElement)("span", null, "-5%"),
+            (0, import_react12.createElement)("span", { className: "of-legend-ramp" }),
+            (0, import_react12.createElement)("span", null, "+5%"),
+            (0, import_react12.createElement)("span", { style: { flex: 1 } }),
+            (0, import_react12.createElement)("span", null, t("market.heatmapHint"))
           ),
-          (0, import_react10.createElement)(SectorPanel, {
+          (0, import_react12.createElement)(SectorPanel, {
             sector,
             loading: sectorLoading,
             onClose: clearSector,
             t
           })
         ),
-        (0, import_react10.createElement)(
+        (0, import_react12.createElement)(
           "div",
           { className: "of-rail" },
-          (0, import_react10.createElement)("div", { className: "of-card of-fade-in" }, (0, import_react10.createElement)(MoversList, { movers: snapshot.movers, t })),
-          (0, import_react10.createElement)("div", { className: "of-card of-fade-in" }, (0, import_react10.createElement)(NewsList, { news: snapshot.news, t }))
+          (0, import_react12.createElement)("div", { className: "of-card of-fade-in" }, (0, import_react12.createElement)(MoversList, { movers: snapshot.movers, t })),
+          (0, import_react12.createElement)("div", { className: "of-card of-fade-in" }, (0, import_react12.createElement)(NewsList, { news: snapshot.news, t }))
         )
       )
     )
@@ -1626,61 +3804,61 @@ function share(value, total) {
   return Math.round(count / whole * 100);
 }
 function DashboardSkeleton({ t }) {
-  return (0, import_react10.createElement)(
+  return (0, import_react12.createElement)(
     "div",
     { "aria-label": t("loading"), "aria-busy": true },
-    (0, import_react10.createElement)(
+    (0, import_react12.createElement)(
       "div",
       { className: "of-grid of-grid-quotes" },
       Array.from(
         { length: 11 },
-        (_, index) => (0, import_react10.createElement)(
+        (_, index) => (0, import_react12.createElement)(
           "div",
           { key: index, className: "of-quote" },
-          (0, import_react10.createElement)(Skeleton, { height: 10, width: "56%" }),
-          (0, import_react10.createElement)(Skeleton, { height: 20, width: "76%", style: { marginTop: 10 } }),
-          (0, import_react10.createElement)(Skeleton, { height: 10, width: "44%", style: { marginTop: 8 } })
+          (0, import_react12.createElement)(Skeleton, { height: 10, width: "56%" }),
+          (0, import_react12.createElement)(Skeleton, { height: 20, width: "76%", style: { marginTop: 10 } }),
+          (0, import_react12.createElement)(Skeleton, { height: 10, width: "44%", style: { marginTop: 8 } })
         )
       )
     ),
-    (0, import_react10.createElement)(
+    (0, import_react12.createElement)(
       "div",
       { className: "of-grid of-grid-main", style: { marginTop: 14 } },
-      (0, import_react10.createElement)(
+      (0, import_react12.createElement)(
         "div",
         { className: "of-card of-pad" },
-        (0, import_react10.createElement)(Skeleton, { height: 400, radius: 12 })
+        (0, import_react12.createElement)(Skeleton, { height: 400, radius: 12 })
       ),
-      (0, import_react10.createElement)(
+      (0, import_react12.createElement)(
         "div",
         { className: "of-card of-pad" },
-        (0, import_react10.createElement)(SkeletonLines, { lines: 8 })
+        (0, import_react12.createElement)(SkeletonLines, { lines: 8 })
       )
     )
   );
 }
 
 // client/src/views/Academy.js
-var import_react15 = require("react");
+var import_react17 = require("react");
 
 // client/src/components/AcademyCard.js
-var import_react12 = require("react");
+var import_react14 = require("react");
 
 // client/src/components/Chip.js
-var import_react11 = require("react");
+var import_react13 = require("react");
 function Chip({ children, tone }) {
-  return (0, import_react11.createElement)("span", { className: "of-chip", "data-tone": tone }, children);
+  return (0, import_react13.createElement)("span", { className: "of-chip", "data-tone": tone }, children);
 }
 function Tag({ children }) {
-  return (0, import_react11.createElement)("span", { className: "of-tag" }, children);
+  return (0, import_react13.createElement)("span", { className: "of-tag" }, children);
 }
 function DifficultyDots({ value, label }) {
   const level = Math.max(1, Math.min(4, Number(value) || 1));
-  return (0, import_react11.createElement)(
+  return (0, import_react13.createElement)(
     "span",
     { className: "of-dots", title: label, "aria-label": label },
     [0, 1, 2, 3].map(
-      (index) => (0, import_react11.createElement)("span", { key: index, className: "of-dot" + (index < level ? " of-dot-on" : "") })
+      (index) => (0, import_react13.createElement)("span", { key: index, className: "of-dot" + (index < level ? " of-dot-on" : "") })
     )
   );
 }
@@ -1692,7 +3870,7 @@ function AcademyCard(props) {
   const index = typeof props.index === "number" ? props.index : 0;
   const readMinutes = Number(article.readMinutes);
   const difficulty = Number(article.difficulty);
-  return (0, import_react12.createElement)(
+  return (0, import_react14.createElement)(
     "button",
     {
       type: "button",
@@ -1700,30 +3878,30 @@ function AcademyCard(props) {
       style: { "--i": String(index) },
       onClick: () => props.onOpen(article.id)
     },
-    (0, import_react12.createElement)("span", { className: "of-acard-title" }, article.title || article.id),
-    article.dek ? (0, import_react12.createElement)("span", { className: "of-acard-dek" }, article.dek) : null,
-    (0, import_react12.createElement)(
+    (0, import_react14.createElement)("span", { className: "of-acard-title" }, article.title || article.id),
+    article.dek ? (0, import_react14.createElement)("span", { className: "of-acard-dek" }, article.dek) : null,
+    (0, import_react14.createElement)(
       "span",
       { className: "of-acard-meta" },
-      article.tag ? (0, import_react12.createElement)(Tag, null, article.tag) : null,
-      readMinutes > 0 ? (0, import_react12.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
-      difficulty > 0 ? (0, import_react12.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null
+      article.tag ? (0, import_react14.createElement)(Tag, null, article.tag) : null,
+      readMinutes > 0 ? (0, import_react14.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
+      difficulty > 0 ? (0, import_react14.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null
     )
   );
 }
 
 // client/src/components/FilterChips.js
-var import_react13 = require("react");
+var import_react15 = require("react");
 function FilterChips(props) {
   const sections = Array.isArray(props.sections) ? props.sections : [];
   const active = props.active;
   const onSelect = props.onSelect;
   if (sections.length === 0) return null;
-  return (0, import_react13.createElement)(
+  return (0, import_react15.createElement)(
     "div",
     { className: "of-filters", role: "group", "aria-label": props.label || void 0 },
     sections.map(
-      (section) => (0, import_react13.createElement)(
+      (section) => (0, import_react15.createElement)(
         "button",
         {
           key: section.id,
@@ -1739,16 +3917,16 @@ function FilterChips(props) {
 }
 
 // client/src/components/SearchBox.js
-var import_react14 = require("react");
+var import_react16 = require("react");
 function SearchBox(props) {
   const value = typeof props.value === "string" ? props.value : "";
   const placeholder = props.placeholder || "";
   const onChange = props.onChange;
-  return (0, import_react14.createElement)(
+  return (0, import_react16.createElement)(
     "div",
     { className: "of-search" },
-    (0, import_react14.createElement)("span", { className: "of-search-icon", "aria-hidden": "true" }, (0, import_react14.createElement)(Icon, { name: "search", size: 14 })),
-    (0, import_react14.createElement)("input", {
+    (0, import_react16.createElement)("span", { className: "of-search-icon", "aria-hidden": "true" }, (0, import_react16.createElement)(Icon, { name: "search", size: 14 })),
+    (0, import_react16.createElement)("input", {
       className: "of-search-input",
       type: "search",
       value,
@@ -1781,18 +3959,18 @@ function Academy(props) {
   const t = props.t;
   const onOpenArticle = props.onOpenArticle;
   const { loading, data, error, reload } = useResource((signal) => getAcademy(signal), []);
-  const [query, setQuery] = (0, import_react15.useState)("");
-  const [section, setSection] = (0, import_react15.useState)(ALL);
-  const rootRef = (0, import_react15.useRef)(null);
+  const [query, setQuery] = (0, import_react17.useState)("");
+  const [section, setSection] = (0, import_react17.useState)(ALL);
+  const rootRef = (0, import_react17.useRef)(null);
   const articles = data && Array.isArray(data.articles) ? data.articles : [];
   const sections = data && Array.isArray(data.sections) ? data.sections : [];
   const activeSection = sections.some((item) => item.id === section) ? section : ALL;
-  (0, import_react15.useEffect)(() => {
+  (0, import_react17.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, []);
-  const filtered = (0, import_react15.useMemo)(() => {
+  const filtered = (0, import_react17.useMemo)(() => {
     const needle = query.trim().toLowerCase();
     return articles.filter((article) => {
       if (activeSection !== ALL && article.section !== activeSection) return false;
@@ -1800,37 +3978,37 @@ function Academy(props) {
     });
   }, [articles, activeSection, query]);
   const isFiltered = query.trim() !== "" || activeSection !== ALL;
-  return (0, import_react15.createElement)(
+  return (0, import_react17.createElement)(
     "div",
     { className: "of-academy of-fade-in", ref: rootRef },
-    (0, import_react15.createElement)(
+    (0, import_react17.createElement)(
       "div",
       { className: "of-toolbar" },
-      (0, import_react15.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("academy.search") })
+      (0, import_react17.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("academy.search") })
     ),
-    sections.length > 0 ? (0, import_react15.createElement)(FilterChips, {
+    sections.length > 0 ? (0, import_react17.createElement)(FilterChips, {
       sections,
       active: activeSection,
       onSelect: setSection,
       label: t("academy.title")
     }) : null,
-    loading ? (0, import_react15.createElement)(
+    loading ? (0, import_react17.createElement)(
       "div",
       { className: "of-cards", "aria-busy": "true", "aria-label": t("a11y.loading") },
-      LOADING_CARDS.map((index) => (0, import_react15.createElement)(Skeleton, { key: index, height: 118, radius: 14 }))
-    ) : error ? (0, import_react15.createElement)(ErrorState, {
+      LOADING_CARDS.map((index) => (0, import_react17.createElement)(Skeleton, { key: index, height: 118, radius: 14 }))
+    ) : error ? (0, import_react17.createElement)(ErrorState, {
       title: t("error.title"),
       body: error,
       retryLabel: t("retry"),
       onRetry: reload
-    }) : filtered.length === 0 ? (0, import_react15.createElement)(EmptyState, {
+    }) : filtered.length === 0 ? (0, import_react17.createElement)(EmptyState, {
       title: isFiltered ? t("academy.searchEmpty") : t("academy.empty"),
-      icon: (0, import_react15.createElement)(Icon, { name: "search", size: 20 })
-    }) : (0, import_react15.createElement)(
+      icon: (0, import_react17.createElement)(Icon, { name: "search", size: 20 })
+    }) : (0, import_react17.createElement)(
       "div",
       { className: "of-cards" },
       filtered.map(
-        (article, index) => (0, import_react15.createElement)(AcademyCard, {
+        (article, index) => (0, import_react17.createElement)(AcademyCard, {
           key: article.id,
           t,
           article,
@@ -1843,13 +4021,13 @@ function Academy(props) {
 }
 
 // client/src/views/ArticleView.js
-var import_react19 = require("react");
+var import_react21 = require("react");
 
 // client/src/components/ArticleBody.js
-var import_react17 = require("react");
+var import_react19 = require("react");
 
 // client/src/md.js
-var import_react16 = require("react");
+var import_react18 = require("react");
 var HEADING_RE = /^(#{2,3})[ \t]+(.+?)[ \t]*#*[ \t]*$/;
 var UNORDERED_RE = /^([ \t]*)[-*+][ \t]+(.*)$/;
 var ORDERED_RE = /^([ \t]*)(\d{1,3})[.)][ \t]+(.*)$/;
@@ -2114,13 +4292,13 @@ function renderInline(nodes, onTerm, keyPrefix) {
     const key = `${keyPrefix}-${index}`;
     switch (node.type) {
       case "strong":
-        return (0, import_react16.createElement)("strong", { key }, ...renderInline(node.children, onTerm, key));
+        return (0, import_react18.createElement)("strong", { key }, ...renderInline(node.children, onTerm, key));
       case "em":
-        return (0, import_react16.createElement)("em", { key, className: "of-md-em" }, ...renderInline(node.children, onTerm, key));
+        return (0, import_react18.createElement)("em", { key, className: "of-md-em" }, ...renderInline(node.children, onTerm, key));
       case "code":
-        return (0, import_react16.createElement)("code", { key, className: "of-md-code" }, node.value);
+        return (0, import_react18.createElement)("code", { key, className: "of-md-code" }, node.value);
       case "term":
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           "button",
           {
             key,
@@ -2132,7 +4310,7 @@ function renderInline(nodes, onTerm, keyPrefix) {
           node.text
         );
       case "link":
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           "a",
           { key, className: "of-md-link", href: node.href, target: "_blank", rel: "noreferrer" },
           ...renderInline(node.children, onTerm, key)
@@ -2149,52 +4327,52 @@ function renderBlocks(blocks, { onTerm } = {}) {
     switch (block.type) {
       case "heading": {
         const level = block.level === 3 ? 3 : 2;
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           level === 3 ? "h3" : "h2",
           { key, className: level === 3 ? "of-md-h3" : "of-md-h2" },
           ...renderInline(block.children, onTerm, key)
         );
       }
       case "paragraph":
-        return (0, import_react16.createElement)("p", { key, className: "of-md-p" }, ...renderInline(block.children, onTerm, key));
+        return (0, import_react18.createElement)("p", { key, className: "of-md-p" }, ...renderInline(block.children, onTerm, key));
       case "hr":
-        return (0, import_react16.createElement)("hr", { key, className: "of-md-hr" });
+        return (0, import_react18.createElement)("hr", { key, className: "of-md-hr" });
       case "list": {
         const ordered = !!block.ordered;
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           ordered ? "ol" : "ul",
           { key, className: ordered ? "of-md-ol" : "of-md-ul" },
           ...block.items.map((item, itemIndex) => {
             const itemKey = `${key}-${itemIndex}`;
-            return (0, import_react16.createElement)("li", { key: itemKey, className: "of-md-li" }, ...renderInline(item, onTerm, itemKey));
+            return (0, import_react18.createElement)("li", { key: itemKey, className: "of-md-li" }, ...renderInline(item, onTerm, itemKey));
           })
         );
       }
       case "blockquote":
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           "blockquote",
           { key, className: "of-md-quote" },
           ...block.paragraphs.map((paragraph, paragraphIndex) => {
             const paragraphKey = `${key}-${paragraphIndex}`;
-            return (0, import_react16.createElement)("p", { key: paragraphKey, className: "of-md-p" }, ...renderInline(paragraph, onTerm, paragraphKey));
+            return (0, import_react18.createElement)("p", { key: paragraphKey, className: "of-md-p" }, ...renderInline(paragraph, onTerm, paragraphKey));
           })
         );
       case "table":
-        return (0, import_react16.createElement)(
+        return (0, import_react18.createElement)(
           "div",
           { key, className: "of-md-table-wrap" },
-          (0, import_react16.createElement)(
+          (0, import_react18.createElement)(
             "table",
             { className: "of-md-table" },
-            (0, import_react16.createElement)(
+            (0, import_react18.createElement)(
               "thead",
               null,
-              (0, import_react16.createElement)(
+              (0, import_react18.createElement)(
                 "tr",
                 null,
                 ...block.header.map((cell, cellIndex) => {
                   const cellKey = `${key}-h${cellIndex}`;
-                  return (0, import_react16.createElement)(
+                  return (0, import_react18.createElement)(
                     "th",
                     { key: cellKey, className: "of-md-th", scope: "col" },
                     ...renderInline(cell, onTerm, cellKey)
@@ -2202,16 +4380,16 @@ function renderBlocks(blocks, { onTerm } = {}) {
                 })
               )
             ),
-            (0, import_react16.createElement)(
+            (0, import_react18.createElement)(
               "tbody",
               null,
               ...block.rows.map(
-                (row, rowIndex) => (0, import_react16.createElement)(
+                (row, rowIndex) => (0, import_react18.createElement)(
                   "tr",
                   { key: `${key}-r${rowIndex}` },
                   ...row.map((cell, cellIndex) => {
                     const cellKey = `${key}-r${rowIndex}c${cellIndex}`;
-                    return (0, import_react16.createElement)("td", { key: cellKey, className: "of-md-td" }, ...renderInline(cell, onTerm, cellKey));
+                    return (0, import_react18.createElement)("td", { key: cellKey, className: "of-md-td" }, ...renderInline(cell, onTerm, cellKey));
                   })
                 )
               )
@@ -2219,7 +4397,7 @@ function renderBlocks(blocks, { onTerm } = {}) {
           )
         );
       default:
-        return (0, import_react16.createElement)("p", { key, className: "of-md-p" }, String(block && block.text != null ? block.text : ""));
+        return (0, import_react18.createElement)("p", { key, className: "of-md-p" }, String(block && block.text != null ? block.text : ""));
     }
   });
 }
@@ -2231,42 +4409,42 @@ function renderMarkdown(body, { onTerm } = {}) {
 function ArticleBody(props) {
   const body = props.body;
   const onTerm = props.onTerm;
-  const nodes = (0, import_react17.useMemo)(() => {
+  const nodes = (0, import_react19.useMemo)(() => {
     if (typeof body !== "string" || body.trim() === "") return null;
     try {
       const rendered = renderMarkdown(body, { onTerm });
       return Array.isArray(rendered) && rendered.length > 0 ? rendered : null;
     } catch (error) {
-      return [(0, import_react17.createElement)("p", { key: "of-md-fallback", className: "of-md-p" }, body)];
+      return [(0, import_react19.createElement)("p", { key: "of-md-fallback", className: "of-md-p" }, body)];
     }
   }, [body, onTerm]);
   if (!nodes) return null;
-  return (0, import_react17.createElement)("div", { className: "of-article-body" }, nodes);
+  return (0, import_react19.createElement)("div", { className: "of-article-body" }, nodes);
 }
 
 // client/src/components/GlossaryCard.js
-var import_react18 = require("react");
+var import_react20 = require("react");
 function Field(props) {
   if (!props.text) return null;
-  return (0, import_react18.createElement)(
+  return (0, import_react20.createElement)(
     "div",
     null,
-    (0, import_react18.createElement)("div", { className: "of-gcard-label" }, props.label),
-    (0, import_react18.createElement)("div", { className: "of-gcard-text" }, props.text)
+    (0, import_react20.createElement)("div", { className: "of-gcard-label" }, props.label),
+    (0, import_react20.createElement)("div", { className: "of-gcard-text" }, props.text)
   );
 }
 function GlossaryRecord(props) {
   const t = props.t;
   const term = props.term || {};
-  return (0, import_react18.createElement)(
+  return (0, import_react20.createElement)(
     "div",
     null,
-    (0, import_react18.createElement)("div", { className: "of-daily-term" }, term.term || term.id),
-    term.alias ? (0, import_react18.createElement)("div", { className: "of-gcard-alias" }, term.alias) : null,
-    term.one ? (0, import_react18.createElement)("p", { className: "of-daily-one" }, term.one) : null,
-    (0, import_react18.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
-    (0, import_react18.createElement)(Field, { label: t("glossary.number"), text: term.number }),
-    (0, import_react18.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
+    (0, import_react20.createElement)("div", { className: "of-daily-term" }, term.term || term.id),
+    term.alias ? (0, import_react20.createElement)("div", { className: "of-gcard-alias" }, term.alias) : null,
+    term.one ? (0, import_react20.createElement)("p", { className: "of-daily-one" }, term.one) : null,
+    (0, import_react20.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
+    (0, import_react20.createElement)(Field, { label: t("glossary.number"), text: term.number }),
+    (0, import_react20.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
   );
 }
 function GlossaryCard(props) {
@@ -2276,7 +4454,7 @@ function GlossaryCard(props) {
   const index = typeof props.index === "number" ? props.index : 0;
   const detailId = "of-gloss-" + String(term.id || index);
   const toggle = () => props.onToggle();
-  return (0, import_react18.createElement)(
+  return (0, import_react20.createElement)(
     "div",
     {
       className: "of-gcard of-stagger",
@@ -2294,22 +4472,22 @@ function GlossaryCard(props) {
         }
       }
     },
-    (0, import_react18.createElement)(
+    (0, import_react20.createElement)(
       "div",
       { className: "of-gcard-term" },
-      (0, import_react18.createElement)("span", null, term.term || term.id),
-      term.alias ? (0, import_react18.createElement)("span", { className: "of-gcard-alias" }, term.alias) : null
+      (0, import_react20.createElement)("span", null, term.term || term.id),
+      term.alias ? (0, import_react20.createElement)("span", { className: "of-gcard-alias" }, term.alias) : null
     ),
-    term.one ? (0, import_react18.createElement)("div", { className: "of-gcard-one" }, term.one) : null,
-    (0, import_react18.createElement)(
+    term.one ? (0, import_react20.createElement)("div", { className: "of-gcard-one" }, term.one) : null,
+    (0, import_react20.createElement)(
       "div",
       { className: "of-gcard-detail" },
-      (0, import_react18.createElement)(
+      (0, import_react20.createElement)(
         "div",
         { className: "of-gcard-detail-inner", id: detailId, "aria-hidden": open ? "false" : "true" },
-        (0, import_react18.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
-        (0, import_react18.createElement)(Field, { label: t("glossary.number"), text: term.number }),
-        (0, import_react18.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
+        (0, import_react20.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
+        (0, import_react20.createElement)(Field, { label: t("glossary.number"), text: term.number }),
+        (0, import_react20.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
       )
     )
   );
@@ -2317,21 +4495,21 @@ function GlossaryCard(props) {
 
 // client/src/views/ArticleView.js
 function ArticleSkeleton(props) {
-  return (0, import_react19.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     { "aria-busy": "true", "aria-label": props.t("a11y.loading") },
-    (0, import_react19.createElement)(Skeleton, { height: 26, width: "72%", radius: 8 }),
-    (0, import_react19.createElement)(Skeleton, { height: 13, width: "92%", style: { marginTop: 16 } }),
-    (0, import_react19.createElement)(Skeleton, { height: 13, width: "64%", style: { marginTop: 8 } }),
-    (0, import_react19.createElement)("div", { className: "of-section" }, (0, import_react19.createElement)(SkeletonLines, { lines: 7, gap: 11 }))
+    (0, import_react21.createElement)(Skeleton, { height: 26, width: "72%", radius: 8 }),
+    (0, import_react21.createElement)(Skeleton, { height: 13, width: "92%", style: { marginTop: 16 } }),
+    (0, import_react21.createElement)(Skeleton, { height: 13, width: "64%", style: { marginTop: 8 } }),
+    (0, import_react21.createElement)("div", { className: "of-section" }, (0, import_react21.createElement)(SkeletonLines, { lines: 7, gap: 11 }))
   );
 }
 function TermPeek(props) {
   const t = props.t;
   const termId = props.termId;
   const { loading, data, error, reload } = useResource((signal) => getGlossary(signal), []);
-  const nodeRef = (0, import_react19.useRef)(null);
-  (0, import_react19.useEffect)(() => {
+  const nodeRef = (0, import_react21.useRef)(null);
+  (0, import_react21.useEffect)(() => {
     const node = nodeRef.current;
     if (!node || typeof node.scrollIntoView !== "function") return;
     const reduce = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2339,11 +4517,11 @@ function TermPeek(props) {
   }, [termId]);
   const terms = data && Array.isArray(data.terms) ? data.terms : [];
   const term = terms.find((item) => item.id === termId) || null;
-  return (0, import_react19.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     { className: "of-section", ref: nodeRef, "aria-live": "polite" },
-    (0, import_react19.createElement)("div", { className: "of-section-head" }, (0, import_react19.createElement)("h2", { className: "of-section-title" }, t("glossary.title"))),
-    loading ? (0, import_react19.createElement)("div", { className: "of-gloss-cards" }, (0, import_react19.createElement)(Skeleton, { height: 92, radius: 12 })) : error ? (0, import_react19.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : term ? (0, import_react19.createElement)("div", { className: "of-daily" }, (0, import_react19.createElement)(GlossaryRecord, { t, term })) : (0, import_react19.createElement)(EmptyState, { title: t("glossary.empty") })
+    (0, import_react21.createElement)("div", { className: "of-section-head" }, (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("glossary.title"))),
+    loading ? (0, import_react21.createElement)("div", { className: "of-gloss-cards" }, (0, import_react21.createElement)(Skeleton, { height: 92, radius: 12 })) : error ? (0, import_react21.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : term ? (0, import_react21.createElement)("div", { className: "of-daily" }, (0, import_react21.createElement)(GlossaryRecord, { t, term })) : (0, import_react21.createElement)(EmptyState, { title: t("glossary.empty") })
   );
 }
 function ArticleView(props) {
@@ -2352,18 +4530,18 @@ function ArticleView(props) {
   const onBack = props.onBack;
   const onOpenArticle = props.onOpenArticle;
   const { data, error, reload } = useResource((signal) => getArticle(id, signal), [id]);
-  const [termId, setTermId] = (0, import_react19.useState)(null);
-  const rootRef = (0, import_react19.useRef)(null);
+  const [termId, setTermId] = (0, import_react21.useState)(null);
+  const rootRef = (0, import_react21.useRef)(null);
   const article = data && data.id === id ? data : null;
-  const onTerm = (0, import_react19.useCallback)((nextId) => {
+  const onTerm = (0, import_react21.useCallback)((nextId) => {
     setTermId((current) => current === nextId ? null : nextId);
   }, []);
-  (0, import_react19.useEffect)(() => {
+  (0, import_react21.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, [id]);
-  (0, import_react19.useEffect)(() => {
+  (0, import_react21.useEffect)(() => {
     setTermId(null);
   }, [id]);
   const phase = article ? "ready" : error ? "error" : "loading";
@@ -2372,59 +4550,59 @@ function ArticleView(props) {
   const asOf = article ? article.dataAsOfActual || article.dataAsOf : null;
   const points = article && Array.isArray(article.points) ? article.points : [];
   const related = article && Array.isArray(article.related) ? article.related : [];
-  return (0, import_react19.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     { className: "of-article", ref: rootRef },
-    (0, import_react19.createElement)(
+    (0, import_react21.createElement)(
       "button",
       { type: "button", className: "of-article-back", onClick: onBack },
-      (0, import_react19.createElement)(Icon, { name: "back", size: 13 }),
-      (0, import_react19.createElement)("span", null, t("academy.back"))
+      (0, import_react21.createElement)(Icon, { name: "back", size: 13 }),
+      (0, import_react21.createElement)("span", null, t("academy.back"))
     ),
-    (0, import_react19.createElement)(
+    (0, import_react21.createElement)(
       "div",
       { key: id + ":" + phase, className: "of-fade-in" },
-      article ? (0, import_react19.createElement)(
+      article ? (0, import_react21.createElement)(
         "div",
         null,
-        (0, import_react19.createElement)("h1", { className: "of-article-title" }, article.title || id),
-        article.dek ? (0, import_react19.createElement)("p", { className: "of-article-dek" }, article.dek) : null,
-        (0, import_react19.createElement)(
+        (0, import_react21.createElement)("h1", { className: "of-article-title" }, article.title || id),
+        article.dek ? (0, import_react21.createElement)("p", { className: "of-article-dek" }, article.dek) : null,
+        (0, import_react21.createElement)(
           "div",
           { className: "of-article-meta" },
-          article.tag ? (0, import_react19.createElement)(Tag, null, article.tag) : null,
-          readMinutes > 0 ? (0, import_react19.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
-          difficulty > 0 ? (0, import_react19.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null,
-          asOf ? (0, import_react19.createElement)("span", { className: "of-meta" }, t("academy.dataAsOf", { date: asOf })) : null
+          article.tag ? (0, import_react21.createElement)(Tag, null, article.tag) : null,
+          readMinutes > 0 ? (0, import_react21.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
+          difficulty > 0 ? (0, import_react21.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null,
+          asOf ? (0, import_react21.createElement)("span", { className: "of-meta" }, t("academy.dataAsOf", { date: asOf })) : null
         ),
-        points.length > 0 ? (0, import_react19.createElement)(
+        points.length > 0 ? (0, import_react21.createElement)(
           "div",
           { className: "of-section" },
-          (0, import_react19.createElement)(
+          (0, import_react21.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react19.createElement)("h2", { className: "of-section-title" }, t("academy.points"))
+            (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("academy.points"))
           ),
-          (0, import_react19.createElement)(
+          (0, import_react21.createElement)(
             "div",
             { className: "of-points" },
-            points.map((point, index) => (0, import_react19.createElement)("div", { key: index, className: "of-point" }, point))
+            points.map((point, index) => (0, import_react21.createElement)("div", { key: index, className: "of-point" }, point))
           )
         ) : null,
-        (0, import_react19.createElement)(ArticleBody, { body: article.body, onTerm }),
-        termId ? (0, import_react19.createElement)(TermPeek, { key: "term-peek", t, termId }) : null,
-        related.length > 0 ? (0, import_react19.createElement)(
+        (0, import_react21.createElement)(ArticleBody, { body: article.body, onTerm }),
+        termId ? (0, import_react21.createElement)(TermPeek, { key: "term-peek", t, termId }) : null,
+        related.length > 0 ? (0, import_react21.createElement)(
           "div",
           { className: "of-related" },
-          (0, import_react19.createElement)(
+          (0, import_react21.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react19.createElement)("h2", { className: "of-section-title" }, t("academy.related"))
+            (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("academy.related"))
           ),
           related.map((entry, index) => {
             const item = typeof entry === "string" ? { id: entry, title: entry } : entry || {};
             const isTerm = item.kind === "term";
-            return (0, import_react19.createElement)(
+            return (0, import_react21.createElement)(
               "button",
               {
                 key: item.id || index,
@@ -2439,13 +4617,13 @@ function ArticleView(props) {
             );
           })
         ) : null
-      ) : error ? (0, import_react19.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : (0, import_react19.createElement)(ArticleSkeleton, { t })
+      ) : error ? (0, import_react21.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : (0, import_react21.createElement)(ArticleSkeleton, { t })
     )
   );
 }
 
 // client/src/views/Glossary.js
-var import_react20 = require("react");
+var import_react22 = require("react");
 var LOADING_TERMS = [0, 1, 2, 3, 4, 5, 6, 7];
 function categoryLabel(categories, id) {
   const match = categories.find((category) => category.id === id);
@@ -2455,57 +4633,57 @@ function DailyWord(props) {
   const t = props.t;
   const daily = props.daily;
   const category = categoryLabel(props.categories, daily.cat);
-  return (0, import_react20.createElement)(
+  return (0, import_react22.createElement)(
     "section",
     { className: "of-daily of-fade-in", "aria-label": t("glossary.daily") },
-    (0, import_react20.createElement)("div", { style: { flex: "1 1 auto", minWidth: 0 } }, (0, import_react20.createElement)(GlossaryRecord, { t, term: daily })),
-    (0, import_react20.createElement)(
+    (0, import_react22.createElement)("div", { style: { flex: "1 1 auto", minWidth: 0 } }, (0, import_react22.createElement)(GlossaryRecord, { t, term: daily })),
+    (0, import_react22.createElement)(
       "div",
       { className: "of-filters" },
-      (0, import_react20.createElement)(Chip, { tone: "brand" }, t("glossary.daily")),
-      category ? (0, import_react20.createElement)(Chip, null, category) : null
+      (0, import_react22.createElement)(Chip, { tone: "brand" }, t("glossary.daily")),
+      category ? (0, import_react22.createElement)(Chip, null, category) : null
     )
   );
 }
 function Glossary(props) {
   const t = props.t;
   const { loading, data, error, reload } = useResource((signal) => getGlossary(signal), []);
-  const [query, setQuery] = (0, import_react20.useState)("");
-  const [openId, setOpenId] = (0, import_react20.useState)(null);
-  const rootRef = (0, import_react20.useRef)(null);
+  const [query, setQuery] = (0, import_react22.useState)("");
+  const [openId, setOpenId] = (0, import_react22.useState)(null);
+  const rootRef = (0, import_react22.useRef)(null);
   const terms = data && Array.isArray(data.terms) ? data.terms : [];
   const categories = data && Array.isArray(data.categories) ? data.categories : [];
   const daily = data && data.daily ? data.daily : null;
   const needle = query.trim().toLowerCase();
-  (0, import_react20.useEffect)(() => {
+  (0, import_react22.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, []);
-  const filtered = (0, import_react20.useMemo)(() => {
+  const filtered = (0, import_react22.useMemo)(() => {
     if (!needle) return terms;
     return terms.filter((term) => {
       const parts = [term.term, term.alias, term.one, term.cat, categoryLabel(categories, term.cat)];
       return parts.filter(Boolean).join(" ").toLowerCase().includes(needle);
     });
   }, [terms, categories, needle]);
-  const shown = (0, import_react20.useMemo)(() => {
+  const shown = (0, import_react22.useMemo)(() => {
     if (needle || !daily) return filtered;
     return filtered.filter((term) => term.id !== daily.id);
   }, [filtered, daily, needle]);
   const body = [];
   if (loading) {
-    body.push((0, import_react20.createElement)(Skeleton, { key: "daily-skeleton", height: 122, radius: 14 }));
+    body.push((0, import_react22.createElement)(Skeleton, { key: "daily-skeleton", height: 122, radius: 14 }));
     body.push(
-      (0, import_react20.createElement)(
+      (0, import_react22.createElement)(
         "div",
         { key: "term-skeleton", className: "of-gloss-cards", "aria-busy": "true", "aria-label": t("a11y.loading") },
-        LOADING_TERMS.map((index) => (0, import_react20.createElement)(Skeleton, { key: index, height: 76, radius: 12 }))
+        LOADING_TERMS.map((index) => (0, import_react22.createElement)(Skeleton, { key: index, height: 76, radius: 12 }))
       )
     );
   } else if (error) {
     body.push(
-      (0, import_react20.createElement)(ErrorState, {
+      (0, import_react22.createElement)(ErrorState, {
         key: "error",
         title: t("error.title"),
         body: error,
@@ -2514,22 +4692,22 @@ function Glossary(props) {
       })
     );
   } else {
-    if (!needle && daily) body.push((0, import_react20.createElement)(DailyWord, { key: "daily", t, daily, categories }));
+    if (!needle && daily) body.push((0, import_react22.createElement)(DailyWord, { key: "daily", t, daily, categories }));
     if (shown.length > 0) {
       body.push(
-        (0, import_react20.createElement)(
+        (0, import_react22.createElement)(
           "div",
           { key: "terms" },
-          (0, import_react20.createElement)(
+          (0, import_react22.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react20.createElement)("h2", { className: "of-section-title" }, t("glossary.terms"))
+            (0, import_react22.createElement)("h2", { className: "of-section-title" }, t("glossary.terms"))
           ),
-          (0, import_react20.createElement)(
+          (0, import_react22.createElement)(
             "div",
             { className: "of-gloss-cards" },
             shown.map(
-              (term, index) => (0, import_react20.createElement)(GlossaryCard, {
+              (term, index) => (0, import_react22.createElement)(GlossaryCard, {
                 key: term.id,
                 t,
                 term,
@@ -2543,21 +4721,21 @@ function Glossary(props) {
       );
     } else {
       body.push(
-        (0, import_react20.createElement)(EmptyState, {
+        (0, import_react22.createElement)(EmptyState, {
           key: "empty",
           title: needle ? t("glossary.empty") : t("empty"),
-          icon: (0, import_react20.createElement)(Icon, { name: "search", size: 20 })
+          icon: (0, import_react22.createElement)(Icon, { name: "search", size: 20 })
         })
       );
     }
   }
-  return (0, import_react20.createElement)(
+  return (0, import_react22.createElement)(
     "div",
     { className: "of-gloss of-fade-in", ref: rootRef },
-    (0, import_react20.createElement)(
+    (0, import_react22.createElement)(
       "div",
       { className: "of-toolbar" },
-      (0, import_react20.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("glossary.search") })
+      (0, import_react22.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("glossary.search") })
     ),
     ...body
   );
@@ -2584,10 +4762,10 @@ function writeTab(tab) {
   }
 }
 function useSnapshotFeed() {
-  const [state, setState] = (0, import_react21.useState)({ snapshot: null, loading: true, error: null });
-  const [generation, setGeneration] = (0, import_react21.useState)(0);
-  const refresh = (0, import_react21.useCallback)(() => setGeneration((value) => value + 1), []);
-  (0, import_react21.useEffect)(() => {
+  const [state, setState] = (0, import_react23.useState)({ snapshot: null, loading: true, error: null });
+  const [generation, setGeneration] = (0, import_react23.useState)(0);
+  const refresh = (0, import_react23.useCallback)(() => setGeneration((value) => value + 1), []);
+  (0, import_react23.useEffect)(() => {
     const controller = new AbortController();
     let alive = true;
     let timer = 0;
@@ -2625,41 +4803,85 @@ function useSnapshotFeed() {
   }, [generation]);
   return { ...state, refresh };
 }
+function HudLayer({ t, onOpenDashboard }) {
+  const [config, setConfig] = (0, import_react23.useState)(loadHudConfig);
+  const [settingsOpen, setSettingsOpen] = (0, import_react23.useState)(false);
+  const [status, setStatus] = (0, import_react23.useState)(null);
+  (0, import_react23.useEffect)(() => subscribeHudConfig(setConfig), []);
+  (0, import_react23.useEffect)(() => onOpenHudSettings(() => setSettingsOpen(true)), []);
+  const update = (0, import_react23.useCallback)((partial) => {
+    const next = saveHudConfig(partial);
+    setConfig(next);
+    if (partial && partial.desktop !== void 0) pushDesktop(partial.desktop);
+    else syncHudConfig(next);
+  }, []);
+  const refreshStatus = (0, import_react23.useCallback)(() => {
+    getHud().then(setStatus, () => setStatus(null));
+  }, []);
+  (0, import_react23.useEffect)(() => {
+    if (!config.desktop && !settingsOpen) return void 0;
+    refreshStatus();
+    const timer = setInterval(() => {
+      if (config.desktop) refreshStatus();
+    }, 15e3);
+    return () => clearInterval(timer);
+  }, [config.desktop, settingsOpen, refreshStatus]);
+  if (!config.inline && !settingsOpen) return null;
+  return (0, import_react23.createElement)(
+    "div",
+    { className: "of-hud-layer" },
+    config.inline ? (0, import_react23.createElement)(FloatingHud, {
+      t,
+      config,
+      onChange: update,
+      onConfigure: () => setSettingsOpen(true),
+      onOpenDashboard
+    }) : null,
+    settingsOpen ? (0, import_react23.createElement)(HudSettings, {
+      t,
+      config,
+      status,
+      onChange: update,
+      onRefreshStatus: refreshStatus,
+      onClose: () => setSettingsOpen(false)
+    }) : null
+  );
+}
 function OpenFinPage({ t }) {
-  const [tab, setTab] = (0, import_react21.useState)(readTab);
-  const [articleId, setArticleId] = (0, import_react21.useState)(null);
+  const [tab, setTab] = (0, import_react23.useState)(readTab);
+  const [articleId, setArticleId] = (0, import_react23.useState)(null);
   const feed = useSnapshotFeed();
   const direction = t("meta.direction") === "intl" ? "intl" : "cn";
-  const changeTab = (0, import_react21.useCallback)((next) => {
+  const changeTab = (0, import_react23.useCallback)((next) => {
     setArticleId(null);
     setTab(next);
     writeTab(next);
   }, []);
-  const openArticle = (0, import_react21.useCallback)((id) => {
+  const openArticle = (0, import_react23.useCallback)((id) => {
     setArticleId(id);
     setTab("academy");
   }, []);
   const updated = feed.snapshot && feed.snapshot.updatedAt;
-  return (0, import_react21.createElement)(
+  return (0, import_react23.createElement)(
     "div",
     { className: "of-page", "data-direction": direction },
-    (0, import_react21.createElement)(
+    (0, import_react23.createElement)(
       "div",
       { className: "of-inner" },
-      (0, import_react21.createElement)(
+      (0, import_react23.createElement)(
         "header",
         { className: "of-head" },
-        (0, import_react21.createElement)("div", { className: "of-mark" }, (0, import_react21.createElement)(Mark, { size: 23 })),
-        (0, import_react21.createElement)(
+        (0, import_react23.createElement)("div", { className: "of-mark" }, (0, import_react23.createElement)(Mark, { size: 23 })),
+        (0, import_react23.createElement)(
           "div",
           { className: "of-titles" },
-          (0, import_react21.createElement)("h1", { className: "of-title" }, t("title")),
-          (0, import_react21.createElement)("div", { className: "of-sub" }, t("subtitle"))
+          (0, import_react23.createElement)("h1", { className: "of-title" }, t("title")),
+          (0, import_react23.createElement)("div", { className: "of-sub" }, t("subtitle"))
         ),
-        (0, import_react21.createElement)(
+        (0, import_react23.createElement)(
           "div",
           { className: "of-head-actions" },
-          (0, import_react21.createElement)(Tabs, {
+          (0, import_react23.createElement)(Tabs, {
             items: [
               { id: "market", label: t("tab.market") },
               { id: "academy", label: t("tab.academy") },
@@ -2669,53 +4891,64 @@ function OpenFinPage({ t }) {
             onChange: changeTab,
             ariaLabel: t("title")
           }),
-          tab === "market" ? (0, import_react21.createElement)(RefreshButton, {
+          (0, import_react23.createElement)(
+            "button",
+            {
+              type: "button",
+              className: "of-icon-btn",
+              title: t("hud.settings"),
+              "aria-label": t("hud.settings"),
+              onClick: () => openHudSettings()
+            },
+            (0, import_react23.createElement)(Icon, { name: "float", size: 15 })
+          ),
+          tab === "market" ? (0, import_react23.createElement)(RefreshButton, {
             label: t("refresh"),
             busy: feed.loading,
             onClick: feed.refresh
           }) : null
         )
       ),
-      (0, import_react21.createElement)(
+      (0, import_react23.createElement)(
         "main",
         { id: "of-panel-" + tab, role: "tabpanel" },
-        tab === "market" ? (0, import_react21.createElement)(Dashboard, {
+        tab === "market" ? (0, import_react23.createElement)(Dashboard, {
           t,
           snapshot: feed.snapshot,
           loading: feed.loading,
           error: feed.error,
           onRetry: feed.refresh
-        }) : tab === "academy" ? articleId ? (0, import_react21.createElement)(ArticleView, {
+        }) : tab === "academy" ? articleId ? (0, import_react23.createElement)(ArticleView, {
           t,
           id: articleId,
           onBack: () => setArticleId(null),
           onOpenArticle: openArticle
-        }) : (0, import_react21.createElement)(Academy, { t, onOpenArticle: openArticle }) : (0, import_react21.createElement)(Glossary, { t })
+        }) : (0, import_react23.createElement)(Academy, { t, onOpenArticle: openArticle }) : (0, import_react23.createElement)(Glossary, { t })
       ),
-      (0, import_react21.createElement)(
+      (0, import_react23.createElement)(
         "footer",
         { className: "of-foot" },
-        (0, import_react21.createElement)("span", { className: "of-live-dot", "data-stale": feed.snapshot && feed.snapshot.stale ? "true" : "false" }),
-        (0, import_react21.createElement)(
+        (0, import_react23.createElement)("span", { className: "of-live-dot", "data-stale": feed.snapshot && feed.snapshot.stale ? "true" : "false" }),
+        (0, import_react23.createElement)(
           "span",
           { className: "of-foot-meta" },
           t("market.updated") + " " + (updated ? new Date(updated).toLocaleTimeString() : "\u2014")
         ),
-        feed.snapshot && feed.snapshot.stale ? (0, import_react21.createElement)("span", { className: "of-badge" }, t("stale")) : null,
-        (0, import_react21.createElement)("span", { style: { flex: 1 } }),
-        (0, import_react21.createElement)(
+        feed.snapshot && feed.snapshot.stale ? (0, import_react23.createElement)("span", { className: "of-badge" }, t("stale")) : null,
+        (0, import_react23.createElement)("span", { style: { flex: 1 } }),
+        (0, import_react23.createElement)(
           "a",
           { href: "https://github.com/5777-wq/openfinlens", target: "_blank", rel: "noreferrer noopener" },
           "OpenFinLens"
         ),
-        (0, import_react21.createElement)("span", null, "\xB7"),
-        (0, import_react21.createElement)(
+        (0, import_react23.createElement)("span", null, "\xB7"),
+        (0, import_react23.createElement)(
           "a",
           { href: "https://github.com/5777-wq/openfin-academy", target: "_blank", rel: "noreferrer noopener" },
           "OpenFin Academy"
         ),
-        (0, import_react21.createElement)("span", null, "\xB7"),
-        (0, import_react21.createElement)("span", null, t("market.disclaimer"))
+        (0, import_react23.createElement)("span", null, "\xB7"),
+        (0, import_react23.createElement)("span", null, t("market.disclaimer"))
       )
     )
   );
@@ -2735,7 +4968,7 @@ function apply(ctx) {
   ctx.effect(() => {
     const tag = document.createElement("style");
     tag.setAttribute("data-dsh-openfin", "");
-    tag.textContent = CSS;
+    tag.textContent = CSS + HUD_CSS;
     document.head.appendChild(tag);
     return () => {
       tag.remove();
@@ -2752,7 +4985,7 @@ function apply(ctx) {
         locale: NS,
         inject: () => ({ t })
       },
-      (owner) => (0, import_react21.createElement)(Mark, { size: owner && owner.size || 16 })
+      (owner) => (0, import_react23.createElement)(Mark, { size: owner && owner.size || 16 })
     )
   );
   ctx.slots.inject(
@@ -2764,7 +4997,27 @@ function apply(ctx) {
         locale: NS,
         inject: () => ({ t })
       },
-      (ownerProps) => (0, import_react21.createElement)(OpenFinPage, { t: ownerProps && ownerProps.t || t })
+      (ownerProps) => (0, import_react23.createElement)(OpenFinPage, { t: ownerProps && ownerProps.t || t })
+    )
+  );
+  const layout = ctx.get ? ctx.get("layout") : void 0;
+  ctx.slots.inject(
+    "shell.overlay",
+    () => ctx.slots.register(
+      {
+        name: "shell.overlay",
+        id: "dsh-openfin-hud",
+        order: 60,
+        label: () => t("hud.title"),
+        locale: NS,
+        inject: () => ({ t })
+      },
+      (ownerProps) => (0, import_react23.createElement)(HudLayer, {
+        t: ownerProps && ownerProps.t || t,
+        onOpenDashboard: () => {
+          if (layout && typeof layout.selectPanel === "function") layout.selectPanel(PANEL_ID);
+        }
+      })
     )
   );
 }
