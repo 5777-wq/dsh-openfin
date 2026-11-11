@@ -254,7 +254,8 @@ describe('createHud', () => {
     assert.ok(args.some((arg) => arg.startsWith('--openfin-config=')))
     assert.ok(args.some((arg) => arg.startsWith('--openfin-parent-pid=')))
     assert.ok(args.includes('--openfin-size=m'))
-    assert.ok(args.every((arg) => arg.startsWith('--')), 'every helper arg is a --key=value token')
+    assert.ok(args[0].endsWith('electron-helper'), 'the first argument is the helper app path')
+    assert.ok(args.slice(1).every((arg) => arg.startsWith('--')), 'every flag after the app path is a --key=value token')
     assert.equal(options.env.ELECTRON_RUN_AS_NODE, undefined)
     assert.equal(options.env.KEEP_ME, 'yes')
     assert.equal(hud.status().running, true)
@@ -329,6 +330,100 @@ describe('createHud', () => {
     const home = makeHome()
     const hud = createHud({ home, platform: 'win32', env: {}, exists: () => false, origin: 'http://127.0.0.1:1' })
     assert.equal(existsSync(join(home, 'dsh-openfin', 'hud.json')), false)
+    hud.dispose()
+  })
+})
+
+describe('v0.3 custom instruments and boss key', () => {
+  it('accepts em: symbols and keeps only relevant catalog entries', () => {
+    const config = normalizeConfig(HUD_DEFAULTS, {
+      symbols: ['em:1.600519', 'nope', 'sh000001', 'em:1.600519', 'em:bad'],
+      catalog: {
+        'em:1.600519': { name: '贵州茅台', secid: '1.600519', code: '600519', market: '沪A', kind: 'stock' },
+        'em:9.999999': { name: '不该留下' },
+        'sh000001': { name: '内置不该被覆盖' },
+      },
+    })
+    assert.deepEqual(config.symbols, ['em:1.600519', 'sh000001'])
+    assert.deepEqual(Object.keys(config.catalog), ['em:1.600519'])
+    assert.equal(config.catalog['em:1.600519'].name, '贵州茅台')
+    assert.equal(config.catalog['em:1.600519'].secid, '1.600519')
+  })
+
+  it('validates the panic shortcut against the presets', () => {
+    assert.equal(normalizeConfig(HUD_DEFAULTS, { panicShortcut: 'Alt+X' }).panicShortcut, 'Alt+X')
+    assert.equal(normalizeConfig(HUD_DEFAULTS, { panicShortcut: 'Ctrl+Q' }).panicShortcut, HUD_DEFAULTS.panicShortcut)
+    assert.equal(normalizeConfig(HUD_DEFAULTS, { panicEnabled: false }).panicEnabled, false)
+    assert.equal(normalizeConfig(HUD_DEFAULTS, { panicEnabled: 'no' }).panicEnabled, true)
+  })
+
+  it('serves search and quotes through the instrument service', async () => {
+    const home = makeHome()
+    const calls = []
+    const instruments = {
+      async search(query, { limit }) {
+        calls.push(['search', query, limit])
+        return { query, results: [{ id: 'em:1.600519', secid: '1.600519', code: '600519', name: '贵州茅台', market: '沪A', kind: 'stock' }] }
+      },
+      async quotes(ids) {
+        calls.push(['quotes', ids])
+        return { updatedAt: 7, stale: false, quotes: ids.map((id) => ({ id, name: id, price: 1, pct: 0, digits: 2, spark: null })) }
+      },
+    }
+    const hud = createHud({ home, platform: 'win32', env: {}, exists: () => false, origin: 'http://127.0.0.1:1', instruments })
+
+    const search = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/search?q=茅台&limit=5'))
+    assert.equal(search.status, 200)
+    const searchBody = await search.json()
+    assert.equal(searchBody.results[0].id, 'em:1.600519')
+    assert.deepEqual(calls[0], ['search', '茅台', 5])
+
+    const quotes = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/quotes?ids=sh000001,em:1.600519'))
+    assert.equal(quotes.status, 200)
+    const quotesBody = await quotes.json()
+    assert.deepEqual(quotesBody.quotes.map((quote) => quote.id), ['sh000001', 'em:1.600519'])
+    assert.deepEqual(calls[1], ['quotes', ['sh000001', 'em:1.600519']])
+
+    const wrongMethod = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/search', { method: 'POST' }))
+    assert.equal(wrongMethod.status, 405)
+    const unknown = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/nope'))
+    assert.equal(unknown.status, 404)
+    hud.dispose()
+  })
+
+  it('answers 503 for instrument routes when the service is absent', async () => {
+    const home = makeHome()
+    const hud = createHud({ home, platform: 'win32', env: {}, exists: () => false, origin: 'http://127.0.0.1:1' })
+    const search = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/search?q=茅台'))
+    assert.equal(search.status, 503)
+    const quotes = await hud.handle(new Request('http://127.0.0.1/dsh-openfin/api/hud/quotes?ids=sh000001'))
+    assert.equal(quotes.status, 503)
+    hud.dispose()
+  })
+
+  it('records a panic request for the helper to pick up', async () => {
+    const home = makeHome()
+    const hud = createHud({ home, platform: 'win32', env: {}, exists: () => false, origin: 'http://127.0.0.1:1' })
+    const response = await hud.handle(postRequest({ action: 'panic', hidden: true }))
+    assert.equal(response.status, 200)
+    const state = JSON.parse(readFileSync(join(home, 'dsh-openfin', 'hud-window.json'), 'utf8'))
+    assert.equal(state.hidden, true)
+    assert.equal(typeof state.panicAt, 'number')
+    const bad = await hud.handle(postRequest({ action: 'panic', hidden: 'yes' }))
+    assert.equal(bad.status, 400)
+    hud.dispose()
+  })
+
+  it('reports panic visibility together with bounds', async () => {
+    const home = makeHome()
+    mkdirSync(join(home, 'dsh-openfin'), { recursive: true })
+    writeFileSync(
+      join(home, 'dsh-openfin', 'hud-window.json'),
+      JSON.stringify({ bounds: { x: 10, y: 20, width: 340, height: 235 }, hidden: true, panicAt: 5 }),
+      'utf8',
+    )
+    const hud = createHud({ home, platform: 'win32', env: {}, exists: () => false, origin: 'http://127.0.0.1:1' })
+    assert.deepEqual(hud.status().window, { x: 10, y: 20, width: 340, height: 235, hidden: true })
     hud.dispose()
   })
 })

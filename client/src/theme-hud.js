@@ -259,6 +259,7 @@ export const HUD_CSS = String.raw`
 }
 .of-hud-ibtn:hover { color: var(--of-hud-ink); background: var(--of-hud-soft); }
 .of-hud-ibtn:active { transform: scale(0.92); }
+.of-hud-panic-btn:hover { color: var(--of-gold); background: color-mix(in srgb, var(--of-gold) 14%, transparent); }
 .of-hud-ibtn[data-danger="true"]:hover {
   color: #ffb6ae;
   background: rgba(255, 107, 107, 0.14);
@@ -618,6 +619,114 @@ button.of-hud-foot-note:hover { color: rgba(255, 210, 205, 0.9); }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* instrument search (v0.3) */
+.of-hset-search { display: flex; flex-direction: column; gap: 6px; }
+.of-hset-search-input { flex: none; width: 100%; }
+.of-hset-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 208px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 10px;
+  background: var(--of-surface-2);
+  scrollbar-width: thin;
+}
+.of-hset-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 8px;
+  border-radius: 8px;
+}
+.of-hset-result:hover { background: var(--of-surface); }
+.of-hset-result[data-selected="true"] { opacity: 0.72; }
+.of-hset-result-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.of-hset-result-name {
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.of-hset-result-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--of-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.of-hset-result-code { font-family: var(--of-mono); }
+.of-hset-result-market {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--of-text-2) 12%, transparent);
+}
+.of-hset-result-add { flex: none; padding: 4px 9px; font-size: 10.5px; }
+.of-hset-result-add:disabled { opacity: 0.55; cursor: default; }
+.of-hset-result-empty {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--of-text-2);
+}
+
+/* selected custom instrument chips */
+.of-hset-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.of-hset-chips-head { flex: none; font-size: 10.5px; color: var(--of-text-2); }
+.of-hset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  padding: 3px 4px 3px 9px;
+  border: 0.5px solid color-mix(in srgb, var(--of-brand) 34%, transparent);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--of-brand) 8%, transparent);
+  color: var(--of-text);
+  font-size: 11px;
+}
+.of-hset-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.of-hset-chip-remove {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--of-text-2);
+  cursor: pointer;
+  transition: background-color 140ms var(--of-ease), color 140ms var(--of-ease);
+}
+.of-hset-chip-remove:hover {
+  background: color-mix(in srgb, var(--of-text-2) 18%, transparent);
+  color: var(--of-text);
+}
+.of-hset-chip-remove:disabled { opacity: 0.4; cursor: default; }
+.of-hset-warn { color: color-mix(in srgb, var(--of-gold) 72%, var(--of-text)); }
+
+/* boss key */
+.of-hset-combo {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 6px;
+  background: var(--of-surface-2);
+  color: var(--of-text-2);
+  font-family: var(--of-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.01em;
+}
+.of-hset-combo[data-off="true"] { opacity: 0.6; }
+.of-hset-panic .of-hset-actions { margin-top: 2px; }
 
 /* slider / select / input / segmented */
 .of-hset-range {

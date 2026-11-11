@@ -16,7 +16,7 @@
  * This file is CommonJS with no dependencies on purpose: it is shipped inside
  * the plugin package and launched by path with no install step.
  */
-const { app, BrowserWindow, ipcMain, screen, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, screen, Menu, globalShortcut } = require('electron')
 const fs = require('node:fs')
 const path = require('node:path')
 
@@ -47,6 +47,9 @@ const DEFAULT_CONFIG = {
   showSpark: true,
   direction: 'cn',
   position: { x: 0, y: 0 },
+  catalog: {},
+  panicEnabled: true,
+  panicShortcut: 'CommandOrControl+Shift+H',
 }
 
 /** Parse `--key value` pairs from argv. */
@@ -87,6 +90,9 @@ let hovering = false
 let idleTimer = null
 let configStamp = ''
 let lastRecenterAt = 0
+let lastPanicAt = 0
+let panicHidden = false
+let registeredShortcut = ''
 let saveTimer = null
 let quitting = false
 
@@ -114,9 +120,13 @@ function writeJson(file, value) {
 function sanitizeConfig(raw) {
   const source = raw && typeof raw === 'object' ? raw : {}
   const size = ['s', 'm', 'l'].includes(source.size) ? source.size : DEFAULT_CONFIG.size
+  const looksKnown = (id) => typeof id === 'string' && (id.startsWith('em:') ? /^\d{1,3}\.[A-Za-z0-9_]+$/.test(id.slice(3)) : true)
   const symbols = Array.isArray(source.symbols) && source.symbols.length > 0
-    ? source.symbols.filter((id) => typeof id === 'string').slice(0, 6)
+    ? source.symbols.filter((id) => looksKnown(id)).slice(0, 6)
     : DEFAULT_CONFIG.symbols
+  const catalog = source.catalog && typeof source.catalog === 'object' && !Array.isArray(source.catalog)
+    ? Object.fromEntries(Object.entries(source.catalog).filter(([id, entry]) => symbols.includes(id) && entry && typeof entry === 'object').slice(0, 12))
+    : {}
   const clamp = (value, min, max, fallback) => {
     const number = Number(value)
     if (!Number.isFinite(number)) return fallback
@@ -134,6 +144,9 @@ function sanitizeConfig(raw) {
     showSpark: source.showSpark !== false,
     hoverFull: source.hoverFull !== false,
     direction: source.direction === 'intl' ? 'intl' : 'cn',
+    catalog,
+    panicEnabled: source.panicEnabled !== false,
+    panicShortcut: typeof source.panicShortcut === 'string' && source.panicShortcut !== '' ? source.panicShortcut : DEFAULT_CONFIG.panicShortcut,
   }
 }
 
@@ -243,6 +256,8 @@ function setHovering(next) {
 
 function applyConfig() {
   if (win === null || win.isDestroyed()) return
+  applyPanicShortcut()
+  fetchSnapshot()
   const height = windowHeight()
   const width = windowWidth()
   const bounds = win.getBounds()
@@ -272,7 +287,8 @@ async function fetchSnapshot() {
   try {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 8000)
-    const response = await fetch(`${hostOrigin}/dsh-openfin/api/snapshot`, {
+    const ids = (config.symbols || []).join(',')
+    const response = await fetch(`${hostOrigin}/dsh-openfin/api/hud/quotes?ids=${encodeURIComponent(ids)}`, {
       signal: controller.signal,
       headers: { accept: 'application/json' },
     })
@@ -286,10 +302,72 @@ async function fetchSnapshot() {
   sendState()
 }
 
+function writeWindowState(patch) {
+  if (windowConfigPath === '') return
+  const state = readJson(windowConfigPath, {})
+  writeJson(windowConfigPath, { ...state, ...patch })
+}
+
+/** Hide or show the window. The boss key and the Host's panic fallback both use this. */
+function applyPanicHidden(next, { fromFile = false } = {}) {
+  if (win === null || win.isDestroyed()) return
+  if (next === panicHidden) return
+  panicHidden = next
+  if (next) win.hide()
+  else win.showInactive()
+  if (!fromFile) {
+    lastPanicAt = Date.now()
+    writeWindowState({ hidden: next, panicAt: lastPanicAt })
+  }
+}
+
+function togglePanic() {
+  applyPanicHidden(!panicHidden)
+}
+
+/** Register the boss key system-wide; re-register when the config changes. */
+let shortcutDiagnostic = null
+function applyPanicShortcut() {
+  const wanted = config.panicEnabled ? config.panicShortcut : ''
+  if (wanted === registeredShortcut) {
+    if (shortcutDiagnostic !== registeredShortcut) {
+      shortcutDiagnostic = registeredShortcut
+      writeWindowState({ shortcut: registeredShortcut === '' ? 'off' : 'ok' })
+    }
+    return
+  }
+  if (registeredShortcut !== '') {
+    try {
+      globalShortcut.unregister(registeredShortcut)
+    } catch {
+      /* not registered */
+    }
+    registeredShortcut = ''
+  }
+  if (wanted !== '') {
+    try {
+      if (globalShortcut.register(wanted, togglePanic)) registeredShortcut = wanted
+    } catch {
+      /* a conflicting accelerator leaves the key unbound */
+    }
+  }
+  const state = registeredShortcut === '' ? (wanted === '' ? 'off' : 'failed') : 'ok'
+  if (shortcutDiagnostic !== state) {
+    shortcutDiagnostic = state
+    writeWindowState({ shortcut: state })
+  }
+}
+
 function checkRecenter() {
   if (windowConfigPath === '') return
   const state = readJson(windowConfigPath, null)
-  if (!state || !Number.isFinite(state.recenterAt)) return
+  if (!state) return
+  // Host-requested panic from the page (fallback when the global key is taken).
+  if (Number.isFinite(state.panicAt) && state.panicAt > lastPanicAt && typeof state.hidden === 'boolean') {
+    lastPanicAt = state.panicAt
+    applyPanicHidden(state.hidden, { fromFile: true })
+  }
+  if (!Number.isFinite(state.recenterAt)) return
   if (state.recenterAt <= lastRecenterAt) return
   lastRecenterAt = state.recenterAt
   if (win === null || win.isDestroyed()) return
@@ -309,7 +387,13 @@ function parentAlive() {
 }
 
 function createWindow() {
-  const bounds = savedBounds() ?? defaultBounds()
+  // The saved bounds keep the user's position, but the size always follows the
+  // current config: the row count (and therefore the height) may have changed
+  // since that state was written.
+  const saved = savedBounds()
+  const bounds = saved === null
+    ? defaultBounds()
+    : clampBounds({ x: saved.x, y: saved.y, width: windowWidth(), height: windowHeight() })
   win = new BrowserWindow({
     ...bounds,
     width: bounds.width,
@@ -373,9 +457,11 @@ function start() {
   app.whenReady().then(() => {
     loadConfig()
     createWindow()
+    applyPanicShortcut()
     setInterval(() => {
       loadConfig()
       checkRecenter()
+      applyPanicShortcut()
     }, CONFIG_POLL_MS).unref?.()
     setInterval(fetchSnapshot, SNAPSHOT_POLL_MS).unref?.()
     setInterval(() => {
@@ -402,6 +488,10 @@ function start() {
 
 app.on('before-quit', () => {
   quitting = true
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 start()

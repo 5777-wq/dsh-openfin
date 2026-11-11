@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "OpenFin market and academy",
-    "description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent always-on-top market HUD as native DeepSeek Harness surfaces.",
+    "description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent market HUD with searchable custom instruments and a boss key, as native DeepSeek Harness surfaces.",
     "direction": "intl"
   },
   "nav": "OpenFin",
@@ -97,5 +97,20 @@
   "hud.disclaimer": "Informational only",
   "hud.waiting": "Waiting for quotes",
   "hud.error": "Quote feed unavailable",
-  "hud.saved": "Changes save automatically"
+  "hud.saved": "Changes save automatically",
+  "hud.searchPlaceholder": "Search stocks / codes",
+  "hud.searchHint": "Server-side search; pick a stock to pin it to the card.",
+  "hud.searchEmpty": "No matching instruments",
+  "hud.searching": "Searching…",
+  "hud.custom": "Custom",
+  "hud.remove": "Remove",
+  "hud.add": "Add",
+  "hud.selectedCount": "Selected",
+  "hud.market": "Market",
+  "hud.customLimit": "Up to 6 instruments in total.",
+  "hud.panic": "Boss key",
+  "hud.panicHint": "Press it once to hide the floating card instantly; the same combo brings it back.",
+  "hud.panicNow": "Hide now",
+  "hud.panicShortcut": "Shortcut",
+  "hud.panicOff": "Off"
 }

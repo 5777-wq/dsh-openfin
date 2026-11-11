@@ -29,6 +29,7 @@ import { createAcademy } from './lib/academy.js'
 import { buildSnapshot } from './lib/snapshot.js'
 import { createRouter, ROUTE_PREFIX } from './lib/routes.js'
 import { createHud } from './lib/hud.js'
+import { createInstruments } from './lib/instruments.js'
 
 export const name = 'dsh-openfin'
 
@@ -79,7 +80,9 @@ export function apply(ctx) {
 
   // Floating HUD: the desktop helper is opt-in, but a profile that already has
   // it enabled restores the window on boot.
+  const instruments = createInstruments({ cache, loadBuiltinQuotes: quotes.load })
   const hud = createHud({
+    instruments,
     origin: () => {
       try {
         return ctx.webServer.getOrigin ? ctx.webServer.getOrigin() : ''
@@ -93,10 +96,12 @@ export function apply(ctx) {
   ctx.effect(
     () =>
       ctx.webServer.register({
-        kind: 'exact',
+        // Prefix, not exact: the HUD also owns `/api/hud/search` and
+        // `/api/hud/quotes`. A `handler` route, not a `resource`, because
+        // turning the desktop window on/off is a POST and resources only
+        // receive GET/HEAD.
+        kind: 'prefix',
         path: `${ROUTE_PREFIX}/api/hud`,
-        // A `handler` route, not a `resource`: resources only receive GET and
-        // HEAD, while turning the desktop window on/off is a POST.
         handler: (request, response) => hud.handleNode(request, response),
       }),
     'dsh-openfin: hud route',

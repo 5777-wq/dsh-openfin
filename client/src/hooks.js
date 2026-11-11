@@ -4,15 +4,26 @@ import { createElement as h, useEffect, useRef, useState } from 'react'
 export function useCountUp(value, duration = 420) {
   const [display, setDisplay] = useState(value)
   const current = useRef(value)
+  // The value actually painted. `current` is the tween cursor; this is what the
+  // caller last received, so a late numeric value (a row that first rendered
+  // before its quote arrived) still lands instead of staying at `null`/'—'.
+  const painted = useRef(value)
 
   useEffect(() => {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
       current.current = value
+      painted.current = value
       setDisplay(value)
       return undefined
     }
     const from = typeof current.current === 'number' && Number.isFinite(current.current) ? current.current : value
-    if (from === value) return undefined
+    if (from === value) {
+      if (painted.current !== value) {
+        painted.current = value
+        setDisplay(value)
+      }
+      return undefined
+    }
     const reduce =
       typeof window !== 'undefined' &&
       window.matchMedia &&
@@ -29,10 +40,12 @@ export function useCountUp(value, duration = 420) {
       const eased = 1 - Math.pow(1 - progress, 3)
       const next = from + (value - from) * eased
       current.current = next
+      painted.current = next
       setDisplay(next)
       if (progress < 1) frame = requestAnimationFrame(tick)
       else {
         current.current = value
+        painted.current = value
         setDisplay(value)
       }
     }

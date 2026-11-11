@@ -1,4 +1,4 @@
-/* dsh-openfin 0.2.0 — built by scripts/build-client.mjs. Do not edit. */
+/* dsh-openfin 0.3.0 — built by scripts/build-client.mjs. Do not edit. */
 window.__ModuleLoader__.load({
   id: "dsh-openfin",
   factory(require) {
@@ -80,6 +80,15 @@ async function postJson(path, body, options = {}) {
 }
 var getHud = (signal) => getJson("/hud", { signal });
 var postHud = (body, signal) => postJson("/hud", body, { signal });
+async function searchInstruments(query, signal) {
+  const text = String(query ?? "").trim();
+  if (text === "") return { query: "", results: [] };
+  return getJson("/hud/search?q=" + encodeURIComponent(text) + "&limit=8", { signal });
+}
+async function getHudQuotes(ids, signal) {
+  const list = Array.isArray(ids) ? ids.join(",") : String(ids ?? "");
+  return getJson("/hud/quotes?ids=" + encodeURIComponent(list), { signal });
+}
 function useResource(loader, deps = []) {
   const [state, setState] = (0, import_react.useState)({ loading: true, data: null, error: null });
   const [nonce, setNonce] = (0, import_react.useState)(0);
@@ -718,7 +727,7 @@ var CSS = String.raw`
 // client/src/generated-locales.js
 var en = {
   "meta.title": "OpenFin market and academy",
-  "meta.description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent always-on-top market HUD as native DeepSeek Harness surfaces.",
+  "meta.description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent market HUD with searchable custom instruments and a boss key, as native DeepSeek Harness surfaces.",
   "meta.direction": "intl",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -813,11 +822,26 @@ var en = {
   "hud.disclaimer": "Informational only",
   "hud.waiting": "Waiting for quotes",
   "hud.error": "Quote feed unavailable",
-  "hud.saved": "Changes save automatically"
+  "hud.saved": "Changes save automatically",
+  "hud.searchPlaceholder": "Search stocks / codes",
+  "hud.searchHint": "Server-side search; pick a stock to pin it to the card.",
+  "hud.searchEmpty": "No matching instruments",
+  "hud.searching": "Searching\u2026",
+  "hud.custom": "Custom",
+  "hud.remove": "Remove",
+  "hud.add": "Add",
+  "hud.selectedCount": "Selected",
+  "hud.market": "Market",
+  "hud.customLimit": "Up to 6 instruments in total.",
+  "hud.panic": "Boss key",
+  "hud.panicHint": "Press it once to hide the floating card instantly; the same combo brings it back.",
+  "hud.panicNow": "Hide now",
+  "hud.panicShortcut": "Shortcut",
+  "hud.panicOff": "Off"
 };
 var zh = {
   "meta.title": "OpenFin \u91D1\u878D\u770B\u677F",
-  "meta.description": "A\u80A1\u4E0E\u5168\u7403\u884C\u60C5\u3001\u884C\u4E1A\u70ED\u529B\u56FE\u3001\u8D22\u7ECF\u5FEB\u8BAF\u3001\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\uFF0C\u5916\u52A0\u53EF\u62D6\u52A8\u3001\u53EF\u8C03\u900F\u660E\u5EA6\u7684\u60AC\u6D6E\u884C\u60C5\u7A97\uFF0C\u4F5C\u4E3A DeepSeek Harness \u7684\u539F\u751F\u9875\u9762\u4E0E\u684C\u9762\u5C0F\u7EC4\u4EF6\u3002",
+  "meta.description": "A\u80A1\u4E0E\u5168\u7403\u884C\u60C5\u3001\u884C\u4E1A\u70ED\u529B\u56FE\u3001\u8D22\u7ECF\u5FEB\u8BAF\u3001\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\uFF0C\u5916\u52A0\u53EF\u62D6\u52A8\u3001\u53EF\u8C03\u900F\u660E\u5EA6\u3001\u53EF\u81EA\u9009\u4EFB\u610F\u6807\u7684\u7684\u60AC\u6D6E\u884C\u60C5\u7A97\u4E0E\u9632\u8001\u677F\u5FEB\u6377\u952E\uFF0C\u4F5C\u4E3A DeepSeek Harness \u7684\u539F\u751F\u9875\u9762\u4E0E\u684C\u9762\u5C0F\u7EC4\u4EF6\u3002",
   "meta.direction": "cn",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -912,7 +936,22 @@ var zh = {
   "hud.disclaimer": "\u4EC5\u4F9B\u53C2\u8003",
   "hud.waiting": "\u7B49\u5F85\u884C\u60C5\u6570\u636E",
   "hud.error": "\u884C\u60C5\u6682\u65F6\u53D6\u4E0D\u5230",
-  "hud.saved": "\u8BBE\u7F6E\u4F1A\u81EA\u52A8\u4FDD\u5B58"
+  "hud.saved": "\u8BBE\u7F6E\u4F1A\u81EA\u52A8\u4FDD\u5B58",
+  "hud.searchPlaceholder": "\u641C\u7D22\u80A1\u7968 / \u4EE3\u7801",
+  "hud.searchHint": "\u670D\u52A1\u7AEF\u641C\u7D22\uFF0C\u9009\u4E2D\u540E\u628A\u8BE5\u6807\u7684\u56FA\u5B9A\u5230\u5C0F\u5361\u4E0A\u3002",
+  "hud.searchEmpty": "\u6CA1\u6709\u5339\u914D\u7684\u6807\u7684",
+  "hud.searching": "\u641C\u7D22\u4E2D\u2026",
+  "hud.custom": "\u81EA\u5B9A\u4E49",
+  "hud.remove": "\u79FB\u9664",
+  "hud.add": "\u6DFB\u52A0",
+  "hud.selectedCount": "\u5DF2\u9009",
+  "hud.market": "\u5E02\u573A",
+  "hud.customLimit": "\u6700\u591A\u540C\u65F6\u663E\u793A 6 \u4E2A\u6807\u7684\u3002",
+  "hud.panic": "\u8001\u677F\u952E",
+  "hud.panicHint": "\u6309\u4E00\u6B21\u7ACB\u5373\u9690\u85CF\u60AC\u6D6E\u5361\uFF0C\u518D\u6309\u4E00\u6B21\u6062\u590D\u663E\u793A\u3002",
+  "hud.panicNow": "\u7ACB\u5373\u9690\u85CF",
+  "hud.panicShortcut": "\u5FEB\u6377\u952E",
+  "hud.panicOff": "\u5173\u95ED"
 };
 
 // client/src/components/Icon.js
@@ -1249,6 +1288,7 @@ var HUD_CSS = String.raw`
 }
 .of-hud-ibtn:hover { color: var(--of-hud-ink); background: var(--of-hud-soft); }
 .of-hud-ibtn:active { transform: scale(0.92); }
+.of-hud-panic-btn:hover { color: var(--of-gold); background: color-mix(in srgb, var(--of-gold) 14%, transparent); }
 .of-hud-ibtn[data-danger="true"]:hover {
   color: #ffb6ae;
   background: rgba(255, 107, 107, 0.14);
@@ -1609,6 +1649,114 @@ button.of-hud-foot-note:hover { color: rgba(255, 210, 205, 0.9); }
   white-space: nowrap;
 }
 
+/* instrument search (v0.3) */
+.of-hset-search { display: flex; flex-direction: column; gap: 6px; }
+.of-hset-search-input { flex: none; width: 100%; }
+.of-hset-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 208px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 10px;
+  background: var(--of-surface-2);
+  scrollbar-width: thin;
+}
+.of-hset-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 8px;
+  border-radius: 8px;
+}
+.of-hset-result:hover { background: var(--of-surface); }
+.of-hset-result[data-selected="true"] { opacity: 0.72; }
+.of-hset-result-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.of-hset-result-name {
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.of-hset-result-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--of-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.of-hset-result-code { font-family: var(--of-mono); }
+.of-hset-result-market {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--of-text-2) 12%, transparent);
+}
+.of-hset-result-add { flex: none; padding: 4px 9px; font-size: 10.5px; }
+.of-hset-result-add:disabled { opacity: 0.55; cursor: default; }
+.of-hset-result-empty {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--of-text-2);
+}
+
+/* selected custom instrument chips */
+.of-hset-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.of-hset-chips-head { flex: none; font-size: 10.5px; color: var(--of-text-2); }
+.of-hset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  padding: 3px 4px 3px 9px;
+  border: 0.5px solid color-mix(in srgb, var(--of-brand) 34%, transparent);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--of-brand) 8%, transparent);
+  color: var(--of-text);
+  font-size: 11px;
+}
+.of-hset-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.of-hset-chip-remove {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--of-text-2);
+  cursor: pointer;
+  transition: background-color 140ms var(--of-ease), color 140ms var(--of-ease);
+}
+.of-hset-chip-remove:hover {
+  background: color-mix(in srgb, var(--of-text-2) 18%, transparent);
+  color: var(--of-text);
+}
+.of-hset-chip-remove:disabled { opacity: 0.4; cursor: default; }
+.of-hset-warn { color: color-mix(in srgb, var(--of-gold) 72%, var(--of-text)); }
+
+/* boss key */
+.of-hset-combo {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 0.5px solid var(--of-border);
+  border-radius: 6px;
+  background: var(--of-surface-2);
+  color: var(--of-text-2);
+  font-family: var(--of-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.01em;
+}
+.of-hset-combo[data-off="true"] { opacity: 0.6; }
+.of-hset-panic .of-hset-actions { margin-top: 2px; }
+
 /* slider / select / input / segmented */
 .of-hset-range {
   flex: 1;
@@ -1727,12 +1875,30 @@ var STORAGE_KEY = "dsh-openfin:hud";
 var SETTINGS_EVENT = "dsh-openfin:hud-settings";
 var SYNC_DELAY_MS = 400;
 var MAX_SYMBOLS = 6;
+var MAX_CATALOG = 12;
+var CATALOG_NAME_MAX = 24;
 var MIN_OPACITY = 20;
 var MAX_OPACITY = 100;
 var MIN_IDLE_MS = 5e3;
 var MAX_IDLE_MS = 6e5;
 var TITLE_MAX = 18;
 var SIZES = /* @__PURE__ */ new Set(["s", "m", "l"]);
+var SECID_RE = /^\d{1,3}\.[A-Za-z0-9_]+$/;
+var CUSTOM_PREFIX = "em:";
+var DEFAULT_PANIC_SHORTCUT = "CommandOrControl+Shift+H";
+var PANIC_SHORTCUTS = Object.freeze(
+  [
+    { id: "CommandOrControl+Shift+H", accelerator: "CommandOrControl+Shift+H", label: "Ctrl/\u2318 + Shift + H" },
+    { id: "Alt+X", accelerator: "Alt+X", label: "Alt + X" },
+    { id: "CommandOrControl+Alt+H", accelerator: "CommandOrControl+Alt+H", label: "Ctrl/\u2318 + Alt + H" },
+    {
+      id: "CommandOrControl+Shift+Space",
+      accelerator: "CommandOrControl+Shift+Space",
+      label: "Ctrl/\u2318 + Shift + Space"
+    }
+  ].map((entry) => Object.freeze(entry))
+);
+var PANIC_ACCELERATORS = new Set(PANIC_SHORTCUTS.map((entry) => entry.accelerator));
 var SYMBOLS = Object.freeze(
   [
     { id: "sh000001", name: "\u4E0A\u8BC1\u6307\u6570", kind: "index" },
@@ -1749,12 +1915,14 @@ var SYMBOLS = Object.freeze(
   ].map((symbol) => Object.freeze(symbol))
 );
 var SYMBOL_IDS = new Set(SYMBOLS.map((symbol) => symbol.id));
+var SYMBOL_BY_ID = new Map(SYMBOLS.map((symbol) => [symbol.id, symbol]));
 var DEFAULT_HUD = Object.freeze({
   version: 1,
   inline: false,
   desktop: false,
   collapsed: false,
   symbols: Object.freeze(["sh000001", "sz399001", "hkHSI", "usIXIC", "btc"]),
+  catalog: Object.freeze({}),
   opacity: 85,
   idleOpacity: 35,
   idleAfterMs: 3e4,
@@ -1762,7 +1930,9 @@ var DEFAULT_HUD = Object.freeze({
   size: "m",
   title: "OpenFin",
   showSpark: true,
-  position: Object.freeze({ x: 0, y: 0 })
+  position: Object.freeze({ x: 0, y: 0 }),
+  panicEnabled: true,
+  panicShortcut: DEFAULT_PANIC_SHORTCUT
 });
 var cache = null;
 var listeners = /* @__PURE__ */ new Set();
@@ -1802,17 +1972,71 @@ function normalizeTitle(value, fallback) {
   const trimmed = value.replace(/\s+/g, " ").trim().slice(0, TITLE_MAX);
   return trimmed.length > 0 ? trimmed : fallback;
 }
+function customSecid(id) {
+  if (typeof id !== "string" || !id.startsWith(CUSTOM_PREFIX)) return null;
+  const secid = id.slice(CUSTOM_PREFIX.length);
+  return SECID_RE.test(secid) ? secid : null;
+}
+function isCustomSymbol(id) {
+  return customSecid(id) !== null;
+}
+function instrumentName(id, config) {
+  const key = typeof id === "string" ? id : "";
+  const catalog = config && typeof config === "object" ? config.catalog : null;
+  const entry = catalog && typeof catalog === "object" ? catalog[key] : null;
+  if (entry && typeof entry.name === "string" && entry.name !== "") return entry.name;
+  const builtIn = SYMBOL_BY_ID.get(key);
+  if (builtIn) return builtIn.name;
+  return key;
+}
+function panicShortcutLabel(accelerator) {
+  const entry = PANIC_SHORTCUTS.find((preset) => preset.accelerator === accelerator || preset.id === accelerator);
+  return entry ? entry.label : "";
+}
 function normalizeSymbols(value, fallback) {
   if (!Array.isArray(value)) return fallback.slice();
   const seen = /* @__PURE__ */ new Set();
   const picked = [];
   for (const id of value) {
-    if (typeof id !== "string" || !SYMBOL_IDS.has(id) || seen.has(id)) continue;
+    if (typeof id !== "string" || seen.has(id)) continue;
+    if (!SYMBOL_IDS.has(id) && customSecid(id) === null) continue;
     seen.add(id);
     picked.push(id);
     if (picked.length >= MAX_SYMBOLS) break;
   }
   return picked.length > 0 ? picked : fallback.slice();
+}
+function normalizeCatalog(value, symbols) {
+  const source = value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const out = {};
+  let count = 0;
+  for (const id of symbols) {
+    if (count >= MAX_CATALOG) break;
+    const secid = customSecid(id);
+    if (secid === null) continue;
+    const entry = source[id];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const name2 = typeof entry.name === "string" ? entry.name.trim().slice(0, CATALOG_NAME_MAX) : "";
+    if (name2 === "") continue;
+    out[id] = {
+      name: name2,
+      secid,
+      code: typeof entry.code === "string" ? entry.code.slice(0, 12) : "",
+      market: typeof entry.market === "string" ? entry.market.slice(0, 12) : "",
+      kind: entry.kind === "index" ? "index" : "stock"
+    };
+    count += 1;
+  }
+  return out;
+}
+function normalizePanic(source, base) {
+  const enabled = bool(source.panicEnabled, base.panicEnabled !== false);
+  if (!enabled) return { panicEnabled: false, panicShortcut: "" };
+  const candidate = typeof source.panicShortcut === "string" ? source.panicShortcut : typeof base.panicShortcut === "string" ? base.panicShortcut : "";
+  return {
+    panicEnabled: true,
+    panicShortcut: PANIC_ACCELERATORS.has(candidate) ? candidate : DEFAULT_PANIC_SHORTCUT
+  };
 }
 function normalizePosition(value, fallback) {
   if (value === null || typeof value !== "object") return { x: fallback.x, y: fallback.y };
@@ -1823,12 +2047,16 @@ function normalizePosition(value, fallback) {
 }
 function normalizeConfig(base, patch) {
   const source = patch !== null && typeof patch === "object" ? patch : {};
+  const symbols = source.symbols === void 0 ? base.symbols.slice() : normalizeSymbols(source.symbols, base.symbols);
+  const catalog = normalizeCatalog(source.catalog === void 0 ? base.catalog : source.catalog, symbols);
+  const panic = normalizePanic(source, base);
   return {
     version: 1,
     inline: bool(source.inline, base.inline),
     desktop: bool(source.desktop, base.desktop),
     collapsed: bool(source.collapsed, base.collapsed),
-    symbols: source.symbols === void 0 ? base.symbols.slice() : normalizeSymbols(source.symbols, base.symbols),
+    symbols,
+    catalog,
     opacity: source.opacity === void 0 ? base.opacity : clampNumber(source.opacity, MIN_OPACITY, MAX_OPACITY, base.opacity),
     idleOpacity: source.idleOpacity === void 0 ? base.idleOpacity : clampNumber(source.idleOpacity, MIN_OPACITY, MAX_OPACITY, base.idleOpacity),
     idleAfterMs: source.idleAfterMs === void 0 ? base.idleAfterMs : source.idleAfterMs === 0 ? 0 : clampNumber(source.idleAfterMs, MIN_IDLE_MS, MAX_IDLE_MS, base.idleAfterMs),
@@ -1836,11 +2064,25 @@ function normalizeConfig(base, patch) {
     size: typeof source.size === "string" && SIZES.has(source.size) ? source.size : base.size,
     title: source.title === void 0 ? base.title : normalizeTitle(source.title, base.title),
     showSpark: bool(source.showSpark, base.showSpark),
-    position: source.position === void 0 ? { x: base.position.x, y: base.position.y } : normalizePosition(source.position, base.position)
+    position: source.position === void 0 ? { x: base.position.x, y: base.position.y } : normalizePosition(source.position, base.position),
+    panicEnabled: panic.panicEnabled,
+    panicShortcut: panic.panicShortcut
   };
 }
+function cloneCatalog(catalog) {
+  const out = {};
+  if (catalog !== null && typeof catalog === "object") {
+    for (const [id, entry] of Object.entries(catalog)) out[id] = { ...entry };
+  }
+  return out;
+}
 function cloneConfig(config) {
-  return { ...config, symbols: config.symbols.slice(), position: { x: config.position.x, y: config.position.y } };
+  return {
+    ...config,
+    symbols: Array.isArray(config.symbols) ? config.symbols.slice() : [],
+    catalog: cloneCatalog(config.catalog),
+    position: { x: config.position.x, y: config.position.y }
+  };
 }
 function sameConfig(left, right) {
   return JSON.stringify(cloneConfig(left)) === JSON.stringify(cloneConfig(right));
@@ -2023,14 +2265,22 @@ var import_react3 = require("react");
 function useCountUp(value, duration = 420) {
   const [display, setDisplay] = (0, import_react3.useState)(value);
   const current = (0, import_react3.useRef)(value);
+  const painted = (0, import_react3.useRef)(value);
   (0, import_react3.useEffect)(() => {
     if (typeof value !== "number" || !Number.isFinite(value)) {
       current.current = value;
+      painted.current = value;
       setDisplay(value);
       return void 0;
     }
     const from = typeof current.current === "number" && Number.isFinite(current.current) ? current.current : value;
-    if (from === value) return void 0;
+    if (from === value) {
+      if (painted.current !== value) {
+        painted.current = value;
+        setDisplay(value);
+      }
+      return void 0;
+    }
     const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       current.current = value;
@@ -2044,10 +2294,12 @@ function useCountUp(value, duration = 420) {
       const eased = 1 - Math.pow(1 - progress, 3);
       const next = from + (value - from) * eased;
       current.current = next;
+      painted.current = next;
       setDisplay(next);
       if (progress < 1) frame = requestAnimationFrame(tick);
       else {
         current.current = value;
+        painted.current = value;
         setDisplay(value);
       }
     };
@@ -2180,7 +2432,16 @@ var HUD_GLYPHS = {
       strokeWidth
     })
   ),
-  collapse: (strokeWidth) => (0, import_react5.createElement)("path", { d: "M6.5 12h11", strokeWidth })
+  collapse: (strokeWidth) => (0, import_react5.createElement)("path", { d: "M6.5 12h11", strokeWidth }),
+  eye: (strokeWidth) => (0, import_react5.createElement)(
+    "g",
+    null,
+    (0, import_react5.createElement)("path", {
+      d: "M2.8 12S6.4 5.6 12 5.6 21.2 12 21.2 12 17.6 18.4 12 18.4 2.8 12 2.8 12Z",
+      strokeWidth
+    }),
+    (0, import_react5.createElement)("circle", { cx: 12, cy: 12, r: 2.7, strokeWidth })
+  )
 };
 function HudGlyph({ name: name2, size = 13, strokeWidth = 1.6 }) {
   const draw = HUD_GLYPHS[name2];
@@ -2202,11 +2463,11 @@ function HudGlyph({ name: name2, size = 13, strokeWidth = 1.6 }) {
     draw(strokeWidth)
   );
 }
-function HudRow({ symbol, quote, showSpark, onOpen }) {
+function HudRow({ fallbackName, quote, showSpark, onOpen }) {
   const animated = useCountUp(quote && typeof quote.price === "number" ? quote.price : null, 420);
   const pct = quote && typeof quote.pct === "number" ? quote.pct : null;
   const tone = quote ? signClass(pct) : "flat";
-  const name2 = quote && quote.name || symbol.name;
+  const name2 = quote && quote.name || fallbackName || "";
   const digits = quote && typeof quote.digits === "number" ? quote.digits : 2;
   const priceText = quote ? fmtPrice(animated, digits) : "\u2014";
   const pctText = quote ? fmtPct(pct) : "\u2014";
@@ -2236,7 +2497,7 @@ function HudRow({ symbol, quote, showSpark, onOpen }) {
     ) : null
   );
 }
-function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden }) {
+function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden, onPanic }) {
   const viewport = useViewport();
   const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [snapshot, setSnapshot] = (0, import_react5.useState)(null);
@@ -2264,8 +2525,9 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
   const cardW = CARD_W[size];
   const rows = (0, import_react5.useMemo)(() => {
     const ids = Array.isArray(config.symbols) ? config.symbols : [];
-    return ids.map((id) => SYMBOLS.find((symbol) => symbol.id === id)).filter(Boolean);
-  }, [config.symbols]);
+    return ids.map((id) => ({ id, fallbackName: instrumentName(id, config) }));
+  }, [config.symbols, config.catalog]);
+  const symbolsKey = Array.isArray(config.symbols) ? config.symbols.join("|") : "";
   const quoteMap = (0, import_react5.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     const quotes = snapshot && Array.isArray(snapshot.quotes) ? snapshot.quotes : [];
@@ -2284,13 +2546,15 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
   const left = collapsed ? anchor.x : anchor.x + COLLAPSED_W - cardW;
   const top = collapsed ? anchor.y : anchor.y + COLLAPSED_H - cardH;
   (0, import_react5.useEffect)(() => {
+    if (hidden) return void 0;
     let alive = true;
     const controller = new AbortController();
+    const requestIds = Array.isArray(config.symbols) ? config.symbols.slice() : [];
     let timer = 0;
     const load = async () => {
       if (typeof document !== "undefined" && document.hidden) return;
       try {
-        const data = await getSnapshot(controller.signal);
+        const data = await getHudQuotes(requestIds, controller.signal);
         if (!alive) return;
         setSnapshot(data);
         setError(null);
@@ -2302,6 +2566,7 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
       }
     };
     reloadRef.current = load;
+    setLoading(true);
     const schedule = () => {
       clearTimeout(timer);
       timer = setTimeout(async () => {
@@ -2328,7 +2593,7 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
       reloadRef.current = null;
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+  }, [symbolsKey, hidden]);
   (0, import_react5.useEffect)(() => {
     if (!editingTitle) setDraftTitle(config.title || "");
   }, [config.title, editingTitle]);
@@ -2343,7 +2608,6 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
       }
     }
   }, [editingTitle]);
-  const symbolKey = rows.map((row) => row.id).join("|");
   (0, import_react5.useLayoutEffect)(() => {
     if (collapsed) {
       setMeasuredHeight(0);
@@ -2364,7 +2628,7 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
     return () => {
       if (observer) observer.disconnect();
     };
-  }, [collapsed, size, symbolKey, config.showSpark]);
+  }, [collapsed, size, symbolsKey, config.showSpark]);
   (0, import_react5.useEffect)(() => {
     const timeout = Number(config.idleAfterMs) || 0;
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
@@ -2533,7 +2797,7 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
       {
         className: "of-hud-pill",
         "data-tone": pillTone,
-        title: firstSymbol ? firstSymbol.name + " " + pillText : t("hud.waiting")
+        title: firstSymbol ? firstSymbol.fallbackName + " " + pillText : t("hud.waiting")
       },
       pillText
     ),
@@ -2585,6 +2849,18 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
     (0, import_react5.createElement)(
       "div",
       { className: "of-hud-actions" },
+      typeof onPanic === "function" ? (0, import_react5.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-hud-ibtn of-hud-panic-btn",
+          "data-hud-no-drag": "true",
+          title: t("hud.panicNow"),
+          "aria-label": t("hud.panicNow"),
+          onClick: () => onPanic()
+        },
+        (0, import_react5.createElement)(HudGlyph, { name: "eye" })
+      ) : null,
       (0, import_react5.createElement)(
         "button",
         {
@@ -2628,10 +2904,10 @@ function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden
     "div",
     { className: "of-hud-rows" },
     rows.length === 0 ? (0, import_react5.createElement)("div", { className: "of-hud-row", style: { cursor: "default" } }, (0, import_react5.createElement)("span", { className: "of-hud-row-name" }, t("empty"))) : rows.map(
-      (symbol) => (0, import_react5.createElement)(HudRow, {
-        key: symbol.id,
-        symbol,
-        quote: quoteMap.get(symbol.id) || null,
+      (row) => (0, import_react5.createElement)(HudRow, {
+        key: row.id,
+        fallbackName: row.fallbackName,
+        quote: quoteMap.get(row.id) || null,
         showSpark: config.showSpark !== false,
         onOpen: onOpenDashboard
       })
@@ -2743,11 +3019,14 @@ function SettingSwitch({ checked, label, disabled, onChange, autoFocus }) {
     onClick: () => onChange(!checked)
   });
 }
-function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) {
+function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose, onPanicNow }) {
   const [localStatus, setLocalStatus] = (0, import_react6.useState)(null);
   const [recentering, setRecentering] = (0, import_react6.useState)(false);
   const [desktopPending, setDesktopPending] = (0, import_react6.useState)(false);
   const [titleDraft, setTitleDraft] = (0, import_react6.useState)(config.title || "");
+  const [searchQuery, setSearchQuery] = (0, import_react6.useState)("");
+  const [searchResults, setSearchResults] = (0, import_react6.useState)([]);
+  const [searching, setSearching] = (0, import_react6.useState)(false);
   const sheetRef = (0, import_react6.useRef)(null);
   const titleFocusedRef = (0, import_react6.useRef)(false);
   const cancelTitleRef = (0, import_react6.useRef)(false);
@@ -2777,6 +3056,34 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
     if (!titleFocusedRef.current) setTitleDraft(typeof config.title === "string" ? config.title : "");
   }, [config.title]);
   (0, import_react6.useEffect)(() => {
+    const query = searchQuery.trim();
+    if (query === "") {
+      setSearchResults([]);
+      setSearching(false);
+      return void 0;
+    }
+    const controller = new AbortController();
+    setSearching(true);
+    const timer = setTimeout(() => {
+      searchInstruments(query, controller.signal).then(
+        (payload) => {
+          if (controller.signal.aborted) return;
+          setSearchResults(Array.isArray(payload && payload.results) ? payload.results.slice(0, 8) : []);
+          setSearching(false);
+        },
+        (reason2) => {
+          if (controller.signal.aborted || reason2 && reason2.name === "AbortError") return;
+          setSearchResults([]);
+          setSearching(false);
+        }
+      );
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchQuery]);
+  (0, import_react6.useEffect)(() => {
     const sheet = sheetRef.current;
     const opener = typeof document !== "undefined" ? document.activeElement : null;
     const focusables = () => {
@@ -2797,7 +3104,7 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
     const onKeyDown = (event) => {
       if (event.key === "Escape") {
         const target = event.target;
-        const typing = target && target.tagName === "INPUT" && target.type === "text";
+        const typing = target && target.tagName === "INPUT" && (target.type === "text" || target.type === "search");
         if (typing) return;
         event.preventDefault();
         event.stopPropagation();
@@ -2866,14 +3173,53 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
     );
   };
   const symbols = Array.isArray(config.symbols) ? config.symbols : [];
+  const catalog = config.catalog !== null && typeof config.catalog === "object" ? config.catalog : {};
+  const customSymbols = symbols.filter((id) => isCustomSymbol(id));
+  const atCap = symbols.length >= 6;
+  const panicEnabled = config.panicEnabled !== false;
+  const panicShortcut = typeof config.panicShortcut === "string" ? config.panicShortcut : "";
+  const panicLabel = panicShortcutLabel(panicShortcut);
   const toggleSymbol = (id) => {
     if (symbols.includes(id)) {
       if (symbols.length <= 1) return;
-      onChange?.({ symbols: symbols.filter((entry) => entry !== id) });
+      const nextSymbols = symbols.filter((entry) => entry !== id);
+      if (!isCustomSymbol(id)) {
+        onChange?.({ symbols: nextSymbols });
+        return;
+      }
+      const nextCatalog = { ...catalog };
+      delete nextCatalog[id];
+      onChange?.({ symbols: nextSymbols, catalog: nextCatalog });
       return;
     }
     if (symbols.length >= 6) return;
     onChange?.({ symbols: [...symbols, id] });
+  };
+  const resultId = (result) => {
+    if (result && typeof result.id === "string" && result.id.startsWith("em:")) return result.id;
+    const secid = result && typeof result.secid === "string" ? result.secid : "";
+    return secid ? "em:" + secid : "";
+  };
+  const addInstrument = (result) => {
+    const id = resultId(result);
+    if (!id || symbols.includes(id) || symbols.length >= 6) return;
+    const secid = id.slice(3);
+    const name2 = ((result && typeof result.name === "string" ? result.name : "") || secid).trim().slice(0, 24);
+    const nextCatalog = {
+      ...catalog,
+      [id]: {
+        name: name2,
+        secid,
+        code: result && typeof result.code === "string" && result.code !== "" ? result.code : secid.slice(secid.indexOf(".") + 1),
+        market: result && typeof result.market === "string" ? result.market : "",
+        kind: result && typeof result.kind === "string" && result.kind !== "" ? result.kind : "stock"
+      }
+    };
+    onChange?.({ symbols: [...symbols, id], catalog: nextCatalog });
+  };
+  const removeSymbol = (id) => {
+    if (symbols.length <= 1) return;
+    toggleSymbol(id);
   };
   const hud = status !== null && status !== void 0 ? status : localStatus;
   const available = hud ? hud.available !== false : null;
@@ -3007,7 +3353,7 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
             "div",
             { className: "of-hset-section-head" },
             (0, import_react6.createElement)("span", { className: "of-hset-section-label" }, t("hud.symbols")),
-            (0, import_react6.createElement)("span", { className: "of-hset-section-meta" }, symbols.length + "/6")
+            (0, import_react6.createElement)("span", { className: "of-hset-section-meta", title: t("hud.selectedCount") }, symbols.length + "/6")
           ),
           (0, import_react6.createElement)(
             "div",
@@ -3029,7 +3375,95 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
               );
             })
           ),
-          (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.symbolsHint"))
+          (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.symbolsHint")),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-search" },
+            (0, import_react6.createElement)("input", {
+              type: "search",
+              className: "of-hset-input of-hset-search-input",
+              value: searchQuery,
+              placeholder: t("hud.searchPlaceholder"),
+              "aria-label": t("hud.searchPlaceholder"),
+              onChange: (event) => setSearchQuery(event.target.value),
+              onKeyDown: (event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setSearchQuery("");
+                }
+              }
+            }),
+            searchQuery.trim() === "" ? null : (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-results", role: "list" },
+              searching ? (0, import_react6.createElement)("div", { className: "of-hset-result-empty" }, t("hud.searching")) : searchResults.length === 0 ? (0, import_react6.createElement)("div", { className: "of-hset-result-empty" }, t("hud.searchEmpty")) : searchResults.map((result) => {
+                const id = resultId(result);
+                const selected = symbols.includes(id);
+                const disabled = selected || atCap;
+                return (0, import_react6.createElement)(
+                  "div",
+                  {
+                    key: id || result.code || result.name,
+                    className: "of-hset-result",
+                    "data-selected": selected ? "true" : "false",
+                    role: "listitem"
+                  },
+                  (0, import_react6.createElement)(
+                    "div",
+                    { className: "of-hset-result-main" },
+                    (0, import_react6.createElement)("span", { className: "of-hset-result-name" }, result.name || id),
+                    (0, import_react6.createElement)(
+                      "div",
+                      { className: "of-hset-result-meta" },
+                      result.code ? (0, import_react6.createElement)("span", { className: "of-hset-result-code" }, String(result.code)) : null,
+                      result.market ? (0, import_react6.createElement)("span", { className: "of-hset-result-market", title: t("hud.market") }, String(result.market)) : null
+                    )
+                  ),
+                  (0, import_react6.createElement)(
+                    "button",
+                    {
+                      type: "button",
+                      className: "of-btn of-hset-result-add",
+                      disabled,
+                      onClick: () => addInstrument(result)
+                    },
+                    selected ? t("hud.selectedCount") : t("hud.add")
+                  )
+                );
+              })
+            ),
+            (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.searchHint"))
+          ),
+          atCap ? (0, import_react6.createElement)("div", { className: "of-hset-hint of-hset-warn" }, t("hud.customLimit")) : null,
+          customSymbols.length > 0 ? (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-chips" },
+            (0, import_react6.createElement)("span", { className: "of-hset-chips-head" }, t("hud.custom")),
+            customSymbols.map(
+              (id) => (0, import_react6.createElement)(
+                "span",
+                {
+                  key: id,
+                  className: "of-hset-chip",
+                  title: catalog[id] && catalog[id].code ? String(catalog[id].code) : id
+                },
+                (0, import_react6.createElement)("span", { className: "of-hset-chip-name" }, instrumentName(id, config)),
+                (0, import_react6.createElement)(
+                  "button",
+                  {
+                    type: "button",
+                    className: "of-hset-chip-remove",
+                    title: t("hud.remove"),
+                    "aria-label": t("hud.remove"),
+                    disabled: symbols.length <= 1,
+                    onClick: () => removeSymbol(id)
+                  },
+                  (0, import_react6.createElement)(Icon, { name: "close", size: 10 })
+                )
+              )
+            )
+          ) : null
         ),
         // -------------------------------------------------------- appearance
         (0, import_react6.createElement)(
@@ -3173,6 +3607,79 @@ function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) 
                 label: t("hud.spark"),
                 onChange: (next) => onChange?.({ showSpark: next })
               })
+            )
+          )
+        ),
+        // ------------------------------------------------------------- panic
+        (0, import_react6.createElement)(
+          "section",
+          { className: "of-hset-section of-hset-panic" },
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-section-head" },
+            (0, import_react6.createElement)("span", { className: "of-hset-section-label" }, t("hud.panic"))
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.panic")),
+              (0, import_react6.createElement)(SettingSwitch, {
+                checked: panicEnabled,
+                label: t("hud.panic"),
+                onChange: (next) => onChange?.({ panicEnabled: next })
+              })
+            ),
+            (0, import_react6.createElement)("div", { className: "of-hset-hint" }, t("hud.panicHint"))
+          ),
+          (0, import_react6.createElement)(
+            "div",
+            { className: "of-hset-field" },
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-line" },
+              (0, import_react6.createElement)("span", { className: "of-hset-label" }, t("hud.panicShortcut")),
+              (0, import_react6.createElement)(
+                "select",
+                {
+                  className: "of-hset-select",
+                  value: panicEnabled ? panicShortcut : "",
+                  disabled: !panicEnabled,
+                  "aria-label": t("hud.panicShortcut"),
+                  onChange: (event) => {
+                    const value = event.target.value;
+                    if (value === "") onChange?.({ panicEnabled: false });
+                    else onChange?.({ panicEnabled: true, panicShortcut: value });
+                  }
+                },
+                (0, import_react6.createElement)("option", { value: "" }, t("hud.panicOff")),
+                PANIC_SHORTCUTS.map(
+                  (preset) => (0, import_react6.createElement)("option", { key: preset.id, value: preset.accelerator }, preset.label)
+                )
+              )
+            ),
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-combo", "data-off": panicEnabled ? "false" : "true" },
+              panicEnabled ? panicLabel || panicShortcut : t("hud.panicOff")
+            ),
+            (0, import_react6.createElement)(
+              "div",
+              { className: "of-hset-actions" },
+              (0, import_react6.createElement)(
+                "button",
+                {
+                  type: "button",
+                  className: "of-btn",
+                  disabled: typeof onPanicNow !== "function",
+                  onClick: () => {
+                    if (typeof onPanicNow === "function") onPanicNow();
+                  }
+                },
+                t("hud.panicNow")
+              )
             )
           )
         ),
@@ -4803,12 +5310,49 @@ function useSnapshotFeed() {
   }, [generation]);
   return { ...state, refresh };
 }
+function matchesAccelerator(event, accelerator) {
+  if (typeof accelerator !== "string" || accelerator === "") return false;
+  const parts = accelerator.split("+").map((part) => part.trim()).filter(Boolean);
+  if (parts.length === 0) return false;
+  const key = parts[parts.length - 1].toLowerCase();
+  const modifiers = new Set(parts.slice(0, -1).map((part) => part.toLowerCase()));
+  const wantsCtrl = modifiers.has("commandorcontrol") || modifiers.has("control") || modifiers.has("ctrl") || modifiers.has("command") || modifiers.has("cmd");
+  const wantsShift = modifiers.has("shift");
+  const wantsAlt = modifiers.has("alt") || modifiers.has("option");
+  if (event.ctrlKey !== wantsCtrl && !(modifiers.has("commandorcontrol") && event.metaKey)) return false;
+  if (event.shiftKey !== wantsShift) return false;
+  if (event.altKey !== wantsAlt) return false;
+  if (key === "space") return event.code === "Space" || event.key === " ";
+  return event.key.toLowerCase() === key;
+}
 function HudLayer({ t, onOpenDashboard }) {
   const [config, setConfig] = (0, import_react23.useState)(loadHudConfig);
   const [settingsOpen, setSettingsOpen] = (0, import_react23.useState)(false);
   const [status, setStatus] = (0, import_react23.useState)(null);
+  const [hidden, setHidden] = (0, import_react23.useState)(false);
+  const hiddenRef = (0, import_react23.useRef)(false);
+  const setPanic = (0, import_react23.useCallback)((next) => {
+    hiddenRef.current = next;
+    setHidden(next);
+    postHud({ action: "panic", hidden: next }).catch(() => {
+    });
+  }, []);
   (0, import_react23.useEffect)(() => subscribeHudConfig(setConfig), []);
   (0, import_react23.useEffect)(() => onOpenHudSettings(() => setSettingsOpen(true)), []);
+  (0, import_react23.useEffect)(() => {
+    if (!config.panicEnabled) return void 0;
+    const onKeyDown = (event) => {
+      if (!matchesAccelerator(event, config.panicShortcut)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPanic(!hiddenRef.current);
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [config.panicEnabled, config.panicShortcut, setPanic]);
+  (0, import_react23.useEffect)(() => {
+    if (!config.inline && hidden) setPanic(false);
+  }, [config.inline, hidden, setPanic]);
   const update = (0, import_react23.useCallback)((partial) => {
     const next = saveHudConfig(partial);
     setConfig(next);
@@ -4835,7 +5379,9 @@ function HudLayer({ t, onOpenDashboard }) {
       config,
       onChange: update,
       onConfigure: () => setSettingsOpen(true),
-      onOpenDashboard
+      onOpenDashboard,
+      hidden,
+      onPanic: () => setPanic(true)
     }) : null,
     settingsOpen ? (0, import_react23.createElement)(HudSettings, {
       t,
@@ -4843,7 +5389,11 @@ function HudLayer({ t, onOpenDashboard }) {
       status,
       onChange: update,
       onRefreshStatus: refreshStatus,
-      onClose: () => setSettingsOpen(false)
+      onClose: () => setSettingsOpen(false),
+      onPanicNow: () => {
+        setPanic(true);
+        setSettingsOpen(false);
+      }
     }) : null
   );
 }

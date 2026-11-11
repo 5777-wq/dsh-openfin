@@ -15,7 +15,7 @@ OpenFin puts two things on one DSH page:
 
 - **Markets** — 11 global instruments (Shanghai, Shenzhen, ChiNext, Hang Seng, Nasdaq, S&P 500, Dow, COMEX gold, dollar index, BTC, ETH), a market-cap treemap of 96 A-share industry sectors, gainers/losers/turnover lists, and an Eastmoney news feed. Click any sector to expand its constituents underneath the heatmap.
 - **Academy** — 25 plain-language finance articles (7 crisis replays, 13 asset explainers, concepts and cycles) with glossary cross-links, plus a 293-term finance glossary with a term of the day.
-- **Floating HUD ("slacking mode")** — a small draggable quote card, inside the page or **always-on-top on the desktop**: pick up to six instruments, set opacity, idle fade, card title and size. Collapsed, it is a mascot chip showing the first instrument's change.
+- **Floating HUD ("slacking mode")** — a small draggable quote card, inside the page or **always-on-top on the desktop**: pick the eleven built-in instruments or search any A-share/HK/US symbol (e.g. Kweichow Moutai), set opacity, idle fade, card title and size. Collapsed, it is a mascot chip showing the first instrument's change. A **boss key** hides everything instantly and brings it back.
 
 The page is one row in the DSH sidebar that opens a full page. It follows the host theme (light, dark, or a community skin), locale (zh/en), and window width; motion only touches `transform`/`opacity` and respects `prefers-reduced-motion`.
 
@@ -33,7 +33,8 @@ Open **OpenFin → the floating-window button (top right)**:
 
 - **In-page card** — a draggable card over the DSH window, bottom-right by default; collapsed it becomes a 44 px mascot chip that expands on click. Opacity 20–100%, fade to an "idle opacity" after N seconds, full opacity on hover.
 - **Desktop window** — a transparent **always-on-top** window outside the app, still visible when DSH is behind other windows; native window opacity, remembered position, close button to quit. It needs an Electron runtime on the machine (other DSH desktop plugins usually leave one in `$DSH_HOME/electron`; alternatively point `DSH_OPENFIN_ELECTRON` at one, or have `electron` on `PATH`).
-- **Instruments** — choose 1–6 of the eleven quotes; order follows your selection. Optional sparklines, a custom card title, and a one-click position reset.
+- **Instruments** — choose from the eleven built-in quotes, or search any stock, fund or index by name/code (typing “茅台” finds Kweichow Moutai, “五粮液” another) and add it to the HUD; up to six in total, rendered in your selection order. Optional sparklines, a custom card title, and a one-click position reset.
+- **Boss key** — default `Ctrl+Shift+H` (presets: `Alt+X`, `Ctrl+Alt+H`, `Ctrl+Shift+Space`, or off). One press hides the in-page card and the desktop window instantly; another press brings them back. The desktop window registers it **system-wide**, so it works while DSH is not focused; if the combination is already taken, the page still works and the desktop window follows within ~2 s through the Host fallback.
 
 | In-page card | Desktop always-on-top |
 |---|---|
@@ -90,6 +91,7 @@ After installing, click **OpenFin** in the sidebar. Refresh the page; if the row
 | **Academy** tab | Search, filter by section, open an article; green term links open a definition |
 | **Glossary** tab | Term of the day plus 293 terms; clicking a card expands metaphor/number/pitfall |
 | Refresh button (top right) | Fetches a snapshot immediately (polling continues) |
+| `Ctrl+Shift+H` | Hide / restore the floating HUD instantly (boss key) |
 
 ## Development
 
@@ -124,6 +126,7 @@ docs/SPEC.md              interface and module contracts
 - Quotes are an aggregation of public endpoints and may be late or missing; the page says so, and nothing here is investment advice.
 - The desktop window is unavailable without an Electron runtime (the reason is shown in settings); the in-page card is unaffected.
 - The desktop window is always-on-top and does not steal focus or block other apps' clicks; lower the opacity or close it if you want it out of the way.
+- Custom instruments depend on eastmoney's public search/quote endpoints; a suspended or missing symbol leaves that row blank while the others keep rendering.
 - Article bodies are Chinese originals; the English UI translates interface copy only.
 - Tested on DSH 0.2.2-rc.1 desktop and `dsh web` only.
 

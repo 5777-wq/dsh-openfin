@@ -8,7 +8,8 @@
  * debounce; the Host normalizes the same way, so the two copies converge.
  *
  * `inline` is opt-in: nothing floats on first load until the user turns it on
- * from the settings sheet.
+ * from the settings sheet. v0.3 adds custom instruments (`em:<secid>` symbols
+ * with a small name/market `catalog`) and the boss-key panic settings.
  */
 
 import { getHud, postHud } from './api.js'
@@ -21,17 +22,43 @@ export const SETTINGS_EVENT = 'dsh-openfin:hud-settings'
 /** Debounce for `syncHudConfig`; a desktop toggle bypasses it. */
 const SYNC_DELAY_MS = 400
 const MAX_SYMBOLS = 6
+const MAX_CATALOG = 12
+const CATALOG_NAME_MAX = 24
 const MIN_OPACITY = 20
 const MAX_OPACITY = 100
 const MIN_IDLE_MS = 5000
 const MAX_IDLE_MS = 600000
 const TITLE_MAX = 18
 const SIZES = new Set(['s', 'm', 'l'])
+/** An eastmoney `QuoteID`: market number + `.` + code (`1.600519`, `105.AAPL`). */
+const SECID_RE = /^\d{1,3}\.[A-Za-z0-9_]+$/
+const CUSTOM_PREFIX = 'em:'
+const DEFAULT_PANIC_SHORTCUT = 'CommandOrControl+Shift+H'
 
 /**
- * The eleven instruments the HUD may show, in display order.
+ * The boss-key accelerators the Host accepts (Electron accelerator strings).
+ * `label` is the human combo for the settings sheet; it stays locale-neutral
+ * because the modifier glyphs read the same in both dictionaries.
+ */
+export const PANIC_SHORTCUTS = Object.freeze(
+  [
+    { id: 'CommandOrControl+Shift+H', accelerator: 'CommandOrControl+Shift+H', label: 'Ctrl/⌘ + Shift + H' },
+    { id: 'Alt+X', accelerator: 'Alt+X', label: 'Alt + X' },
+    { id: 'CommandOrControl+Alt+H', accelerator: 'CommandOrControl+Alt+H', label: 'Ctrl/⌘ + Alt + H' },
+    {
+      id: 'CommandOrControl+Shift+Space',
+      accelerator: 'CommandOrControl+Shift+Space',
+      label: 'Ctrl/⌘ + Shift + Space',
+    },
+  ].map((entry) => Object.freeze(entry)),
+)
+const PANIC_ACCELERATORS = new Set(PANIC_SHORTCUTS.map((entry) => entry.accelerator))
+
+/**
+ * The eleven built-in instruments the HUD may show, in display order.
  * Ids are the `/api/snapshot` `quotes[].id` values (the Host's `HudConfig`
  * symbol ids and the ids the Electron helper receives are the same list).
+ * Custom instruments use `em:<secid>` on top of these.
  */
 export const SYMBOLS = Object.freeze(
   [
@@ -50,10 +77,11 @@ export const SYMBOLS = Object.freeze(
 )
 
 const SYMBOL_IDS = new Set(SYMBOLS.map((symbol) => symbol.id))
+const SYMBOL_BY_ID = new Map(SYMBOLS.map((symbol) => [symbol.id, symbol]))
 
 /**
  * Defaults — mirrors SPEC's `HudConfig`. `inline` and `desktop` are off: the
- * HUD has to be invited in.
+ * HUD has to be invited in. The boss key is on by default.
  */
 export const DEFAULT_HUD = Object.freeze({
   version: 1,
@@ -61,6 +89,7 @@ export const DEFAULT_HUD = Object.freeze({
   desktop: false,
   collapsed: false,
   symbols: Object.freeze(['sh000001', 'sz399001', 'hkHSI', 'usIXIC', 'btc']),
+  catalog: Object.freeze({}),
   opacity: 85,
   idleOpacity: 35,
   idleAfterMs: 30000,
@@ -69,6 +98,8 @@ export const DEFAULT_HUD = Object.freeze({
   title: 'OpenFin',
   showSpark: true,
   position: Object.freeze({ x: 0, y: 0 }),
+  panicEnabled: true,
+  panicShortcut: DEFAULT_PANIC_SHORTCUT,
 })
 
 /** @type {object | null} */
@@ -119,17 +150,102 @@ function normalizeTitle(value, fallback) {
   return trimmed.length > 0 ? trimmed : fallback
 }
 
+/** `em:1.600519` → `1.600519`; anything malformed → null. */
+function customSecid(id) {
+  if (typeof id !== 'string' || !id.startsWith(CUSTOM_PREFIX)) return null
+  const secid = id.slice(CUSTOM_PREFIX.length)
+  return SECID_RE.test(secid) ? secid : null
+}
+
+/** True for a well-formed `em:<secid>` custom instrument id. */
+export function isCustomSymbol(id) {
+  return customSecid(id) !== null
+}
+
+/**
+ * Human label for a symbol id: catalog name first (customs), then the built-in
+ * table, finally the raw id (which is still better than an empty row).
+ *
+ * @param {string} id
+ * @param {object} [config]
+ * @returns {string}
+ */
+export function instrumentName(id, config) {
+  const key = typeof id === 'string' ? id : ''
+  const catalog = config && typeof config === 'object' ? config.catalog : null
+  const entry = catalog && typeof catalog === 'object' ? catalog[key] : null
+  if (entry && typeof entry.name === 'string' && entry.name !== '') return entry.name
+  const builtIn = SYMBOL_BY_ID.get(key)
+  if (builtIn) return builtIn.name
+  return key
+}
+
+/** Display label for one of the `PANIC_SHORTCUTS` accelerators ('' if none). */
+export function panicShortcutLabel(accelerator) {
+  const entry = PANIC_SHORTCUTS.find((preset) => preset.accelerator === accelerator || preset.id === accelerator)
+  return entry ? entry.label : ''
+}
+
 function normalizeSymbols(value, fallback) {
   if (!Array.isArray(value)) return fallback.slice()
   const seen = new Set()
   const picked = []
   for (const id of value) {
-    if (typeof id !== 'string' || !SYMBOL_IDS.has(id) || seen.has(id)) continue
+    if (typeof id !== 'string' || seen.has(id)) continue
+    if (!SYMBOL_IDS.has(id) && customSecid(id) === null) continue
     seen.add(id)
     picked.push(id)
     if (picked.length >= MAX_SYMBOLS) break
   }
   return picked.length > 0 ? picked : fallback.slice()
+}
+
+/**
+ * Keep the small name/market catalog for custom instruments only. Entries are
+ * pruned to the final `symbols` list (and capped), so removing a chip drops its
+ * label as well.
+ *
+ * @param {object} value
+ * @param {string[]} symbols
+ * @returns {Record<string, { name: string, secid: string, code: string, market: string, kind: string }>}
+ */
+function normalizeCatalog(value, symbols) {
+  const source = value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {}
+  const out = {}
+  let count = 0
+  for (const id of symbols) {
+    if (count >= MAX_CATALOG) break
+    const secid = customSecid(id)
+    if (secid === null) continue
+    const entry = source[id]
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue
+    const name = typeof entry.name === 'string' ? entry.name.trim().slice(0, CATALOG_NAME_MAX) : ''
+    if (name === '') continue
+    out[id] = {
+      name,
+      secid,
+      code: typeof entry.code === 'string' ? entry.code.slice(0, 12) : '',
+      market: typeof entry.market === 'string' ? entry.market.slice(0, 12) : '',
+      kind: entry.kind === 'index' ? 'index' : 'stock',
+    }
+    count += 1
+  }
+  return out
+}
+
+function normalizePanic(source, base) {
+  const enabled = bool(source.panicEnabled, base.panicEnabled !== false)
+  if (!enabled) return { panicEnabled: false, panicShortcut: '' }
+  const candidate =
+    typeof source.panicShortcut === 'string'
+      ? source.panicShortcut
+      : typeof base.panicShortcut === 'string'
+        ? base.panicShortcut
+        : ''
+  return {
+    panicEnabled: true,
+    panicShortcut: PANIC_ACCELERATORS.has(candidate) ? candidate : DEFAULT_PANIC_SHORTCUT,
+  }
 }
 
 function normalizePosition(value, fallback) {
@@ -150,13 +266,16 @@ function normalizePosition(value, fallback) {
  */
 function normalizeConfig(base, patch) {
   const source = patch !== null && typeof patch === 'object' ? patch : {}
+  const symbols = source.symbols === undefined ? base.symbols.slice() : normalizeSymbols(source.symbols, base.symbols)
+  const catalog = normalizeCatalog(source.catalog === undefined ? base.catalog : source.catalog, symbols)
+  const panic = normalizePanic(source, base)
   return {
     version: 1,
     inline: bool(source.inline, base.inline),
     desktop: bool(source.desktop, base.desktop),
     collapsed: bool(source.collapsed, base.collapsed),
-    symbols:
-      source.symbols === undefined ? base.symbols.slice() : normalizeSymbols(source.symbols, base.symbols),
+    symbols,
+    catalog,
     opacity:
       source.opacity === undefined
         ? base.opacity
@@ -176,12 +295,29 @@ function normalizeConfig(base, patch) {
     title: source.title === undefined ? base.title : normalizeTitle(source.title, base.title),
     showSpark: bool(source.showSpark, base.showSpark),
     position:
-      source.position === undefined ? { x: base.position.x, y: base.position.y } : normalizePosition(source.position, base.position),
+      source.position === undefined
+        ? { x: base.position.x, y: base.position.y }
+        : normalizePosition(source.position, base.position),
+    panicEnabled: panic.panicEnabled,
+    panicShortcut: panic.panicShortcut,
   }
 }
 
+function cloneCatalog(catalog) {
+  const out = {}
+  if (catalog !== null && typeof catalog === 'object') {
+    for (const [id, entry] of Object.entries(catalog)) out[id] = { ...entry }
+  }
+  return out
+}
+
 function cloneConfig(config) {
-  return { ...config, symbols: config.symbols.slice(), position: { x: config.position.x, y: config.position.y } }
+  return {
+    ...config,
+    symbols: Array.isArray(config.symbols) ? config.symbols.slice() : [],
+    catalog: cloneCatalog(config.catalog),
+    position: { x: config.position.x, y: config.position.y },
+  }
 }
 
 function sameConfig(left, right) {

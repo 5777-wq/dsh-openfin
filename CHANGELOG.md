@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.3.0 — 2026-11-11
+
+### Added
+
+- **Custom instruments** in the floating HUD: search any eastmoney instrument
+  (A-share, HK, US, funds, indices) by name or code, add it to the HUD as an
+  `em:<secid>` symbol with a catalog label, up to six symbols in total. Search
+  and quotes run in the Host (`/api/hud/search`, `/api/hud/quotes`) because the
+  upstream has no CORS; custom quotes carry a 30 s cache and a 5 min sparkline.
+- **Boss key**: one keystroke hides the floating HUD and the desktop window
+  instantly, the same keystroke brings them back. Default `Ctrl+Shift+H`
+  (presets: `Alt+X`, `Ctrl+Alt+H`, `Ctrl+Shift+Space`, or off), configurable in
+  the HUD settings. The desktop window registers it system-wide through Electron
+  `globalShortcut`; the page listens while focused; a Host panic fallback
+  (`action: 'panic'`) covers a taken accelerator.
+- Settings: instrument search with add/remove chips, selected-symbol count, and
+  a panic section (switch, shortcut preset, "hide now").
+- Tests: 13 instrument tests (search/quote normalization, caching, failure
+  isolation) and 6 new HUD tests (catalog validation, panic routes, shortcut
+  validation) — 153 overall.
+
+### Fixed
+
+- The helper is now spawned with its app path as the first argument; without it
+  Electron booted its default app instead of the HUD window.
+- `useCountUp` now lands a value that arrives after the first render, so a HUD
+  row no longer keeps showing "—" for its price.
+
 ## 0.2.0 — 2026-11-11
 
 ### Added

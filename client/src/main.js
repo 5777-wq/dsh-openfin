@@ -1,5 +1,5 @@
-import { createElement as h, useCallback, useEffect, useState } from 'react'
-import { getSnapshot, getHud } from './api.js'
+import { createElement as h, useCallback, useEffect, useRef, useState } from 'react'
+import { getSnapshot, getHud, postHud } from './api.js'
 import { CSS } from './theme.js'
 import { en, zh } from './generated-locales.js'
 import { Mark, Icon } from './components/Icon.js'
@@ -97,13 +97,61 @@ function useSnapshotFeed() {
  * opens the settings sheet, the sheet edits the config, and every change is
  * mirrored to the Host for the desktop helper.
  */
+/**
+ * Match a keyboard event against an Electron-style accelerator such as
+ * `CommandOrControl+Shift+H` (the same string the desktop helper registers).
+ * @param {KeyboardEvent} event
+ * @param {string} accelerator
+ */
+function matchesAccelerator(event, accelerator) {
+  if (typeof accelerator !== 'string' || accelerator === '') return false
+  const parts = accelerator.split('+').map((part) => part.trim()).filter(Boolean)
+  if (parts.length === 0) return false
+  const key = parts[parts.length - 1].toLowerCase()
+  const modifiers = new Set(parts.slice(0, -1).map((part) => part.toLowerCase()))
+  const wantsCtrl = modifiers.has('commandorcontrol') || modifiers.has('control') || modifiers.has('ctrl') || modifiers.has('command') || modifiers.has('cmd')
+  const wantsShift = modifiers.has('shift')
+  const wantsAlt = modifiers.has('alt') || modifiers.has('option')
+  if (event.ctrlKey !== wantsCtrl && !(modifiers.has('commandorcontrol') && event.metaKey)) return false
+  if (event.shiftKey !== wantsShift) return false
+  if (event.altKey !== wantsAlt) return false
+  if (key === 'space') return event.code === 'Space' || event.key === ' '
+  return event.key.toLowerCase() === key
+}
+
 function HudLayer({ t, onOpenDashboard }) {
   const [config, setConfig] = useState(loadHudConfig)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [status, setStatus] = useState(null)
+  // Boss key visibility is deliberately ephemeral: reloading DSH brings the HUD back.
+  const [hidden, setHidden] = useState(false)
+  const hiddenRef = useRef(false)
+
+  const setPanic = useCallback((next) => {
+    hiddenRef.current = next
+    setHidden(next)
+    postHud({ action: 'panic', hidden: next }).catch(() => {})
+  }, [])
 
   useEffect(() => subscribeHudConfig(setConfig), [])
   useEffect(() => onOpenHudSettings(() => setSettingsOpen(true)), [])
+
+  useEffect(() => {
+    if (!config.panicEnabled) return undefined
+    const onKeyDown = (event) => {
+      if (!matchesAccelerator(event, config.panicShortcut)) return
+      event.preventDefault()
+      event.stopPropagation()
+      setPanic(!hiddenRef.current)
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [config.panicEnabled, config.panicShortcut, setPanic])
+
+  // Leaving the page hidden or turning the HUD off must not trap the state.
+  useEffect(() => {
+    if (!config.inline && hidden) setPanic(false)
+  }, [config.inline, hidden, setPanic])
 
   const update = useCallback((partial) => {
     const next = saveHudConfig(partial)
@@ -137,6 +185,8 @@ function HudLayer({ t, onOpenDashboard }) {
           onChange: update,
           onConfigure: () => setSettingsOpen(true),
           onOpenDashboard,
+          hidden,
+          onPanic: () => setPanic(true),
         })
       : null,
     settingsOpen
@@ -147,6 +197,10 @@ function HudLayer({ t, onOpenDashboard }) {
           onChange: update,
           onRefreshStatus: refreshStatus,
           onClose: () => setSettingsOpen(false),
+          onPanicNow: () => {
+            setPanic(true)
+            setSettingsOpen(false)
+          },
         })
       : null,
   )

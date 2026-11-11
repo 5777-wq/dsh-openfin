@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "OpenFin 金融看板",
-    "description": "A股与全球行情、行业热力图、财经快讯、白话金融学院与词典，外加可拖动、可调透明度的悬浮行情窗，作为 DeepSeek Harness 的原生页面与桌面小组件。",
+    "description": "A股与全球行情、行业热力图、财经快讯、白话金融学院与词典，外加可拖动、可调透明度、可自选任意标的的悬浮行情窗与防老板快捷键，作为 DeepSeek Harness 的原生页面与桌面小组件。",
     "direction": "cn"
   },
   "nav": "OpenFin",
@@ -97,5 +97,20 @@
   "hud.disclaimer": "仅供参考",
   "hud.waiting": "等待行情数据",
   "hud.error": "行情暂时取不到",
-  "hud.saved": "设置会自动保存"
+  "hud.saved": "设置会自动保存",
+  "hud.searchPlaceholder": "搜索股票 / 代码",
+  "hud.searchHint": "服务端搜索，选中后把该标的固定到小卡上。",
+  "hud.searchEmpty": "没有匹配的标的",
+  "hud.searching": "搜索中…",
+  "hud.custom": "自定义",
+  "hud.remove": "移除",
+  "hud.add": "添加",
+  "hud.selectedCount": "已选",
+  "hud.market": "市场",
+  "hud.customLimit": "最多同时显示 6 个标的。",
+  "hud.panic": "老板键",
+  "hud.panicHint": "按一次立即隐藏悬浮卡，再按一次恢复显示。",
+  "hud.panicNow": "立即隐藏",
+  "hud.panicShortcut": "快捷键",
+  "hud.panicOff": "关闭"
 }

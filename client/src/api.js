@@ -80,8 +80,31 @@ export async function postJson(path, body, options = {}) {
 /** Floating-HUD status: Electron availability, helper state and shared config. */
 export const getHud = (signal) => getJson('/hud', { signal })
 
-/** Change the HUD: `{ desktop }`, `{ config }` or `{ action: 'recenter' }`. */
+/** Change the HUD: `{ desktop }`, `{ config }`, `{ action: 'recenter' }` or `{ action: 'panic' }`. */
 export const postHud = (body, signal) => postJson('/hud', body, { signal })
+
+/**
+ * Search instruments for the HUD picker (server-side; the upstream has no CORS).
+ * @param {string} query
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<{ query: string, results: Array<{ id: string, secid: string, code: string, name: string, market: string, kind: string }> }>}
+ */
+export async function searchInstruments(query, signal) {
+  const text = String(query ?? '').trim()
+  if (text === '') return { query: '', results: [] }
+  return getJson('/hud/search?q=' + encodeURIComponent(text) + '&limit=8', { signal })
+}
+
+/**
+ * Quotes for the exact HUD symbol list (built-in ids and `em:<secid>` customs).
+ * @param {string[]} ids
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<{ updatedAt: number, stale: boolean, quotes: Array<object> }>}
+ */
+export async function getHudQuotes(ids, signal) {
+  const list = Array.isArray(ids) ? ids.join(',') : String(ids ?? '')
+  return getJson('/hud/quotes?ids=' + encodeURIComponent(list), { signal })
+}
 
 /**
  * One-shot resource fetch with loading/error state and a manual reload.

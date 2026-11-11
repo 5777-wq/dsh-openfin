@@ -10,8 +10,8 @@
  * report available / running / reason without a reload.
  */
 import { createElement as h, useCallback, useEffect, useRef, useState } from 'react'
-import { getHud, postHud } from '../api.js'
-import { SYMBOLS } from '../hud-config.js'
+import { getHud, postHud, searchInstruments } from '../api.js'
+import { PANIC_SHORTCUTS, SYMBOLS, instrumentName, isCustomSymbol, panicShortcutLabel } from '../hud-config.js'
 import { Icon, Mark } from './Icon.js'
 
 const TITLE_MAX = 18
@@ -36,11 +36,14 @@ function SettingSwitch({ checked, label, disabled, onChange, autoFocus }) {
   })
 }
 
-export function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose }) {
+export function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose, onPanicNow }) {
   const [localStatus, setLocalStatus] = useState(null)
   const [recentering, setRecentering] = useState(false)
   const [desktopPending, setDesktopPending] = useState(false)
   const [titleDraft, setTitleDraft] = useState(config.title || '')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searching, setSearching] = useState(false)
   const sheetRef = useRef(null)
   const titleFocusedRef = useRef(false)
   const cancelTitleRef = useRef(false)
@@ -76,6 +79,37 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
     if (!titleFocusedRef.current) setTitleDraft(typeof config.title === 'string' ? config.title : '')
   }, [config.title])
 
+  // Debounced server-side instrument search; the upstream suggest endpoint has
+  // no CORS headers, so the Host proxies it.
+  useEffect(() => {
+    const query = searchQuery.trim()
+    if (query === '') {
+      setSearchResults([])
+      setSearching(false)
+      return undefined
+    }
+    const controller = new AbortController()
+    setSearching(true)
+    const timer = setTimeout(() => {
+      searchInstruments(query, controller.signal).then(
+        (payload) => {
+          if (controller.signal.aborted) return
+          setSearchResults(Array.isArray(payload && payload.results) ? payload.results.slice(0, 8) : [])
+          setSearching(false)
+        },
+        (reason) => {
+          if (controller.signal.aborted || (reason && reason.name === 'AbortError')) return
+          setSearchResults([])
+          setSearching(false)
+        },
+      )
+    }, 250)
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [searchQuery])
+
   // Esc to close + keep Tab inside the dialog + restore focus to the opener.
   useEffect(() => {
     const sheet = sheetRef.current
@@ -99,8 +133,8 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
     const onKeyDown = (event) => {
       if (event.key === 'Escape') {
         const target = event.target
-        const typing = target && target.tagName === 'INPUT' && target.type === 'text'
-        if (typing) return // the title input cancels its own edit
+        const typing = target && target.tagName === 'INPUT' && (target.type === 'text' || target.type === 'search')
+        if (typing) return // the title/search input cancels its own edit
         event.preventDefault()
         event.stopPropagation()
         onClose?.()
@@ -174,14 +208,61 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
   }
 
   const symbols = Array.isArray(config.symbols) ? config.symbols : []
+  const catalog = config.catalog !== null && typeof config.catalog === 'object' ? config.catalog : {}
+  const customSymbols = symbols.filter((id) => isCustomSymbol(id))
+  const atCap = symbols.length >= 6
+  const panicEnabled = config.panicEnabled !== false
+  const panicShortcut = typeof config.panicShortcut === 'string' ? config.panicShortcut : ''
+  const panicLabel = panicShortcutLabel(panicShortcut)
+
   const toggleSymbol = (id) => {
     if (symbols.includes(id)) {
       if (symbols.length <= 1) return
-      onChange?.({ symbols: symbols.filter((entry) => entry !== id) })
+      const nextSymbols = symbols.filter((entry) => entry !== id)
+      if (!isCustomSymbol(id)) {
+        onChange?.({ symbols: nextSymbols })
+        return
+      }
+      const nextCatalog = { ...catalog }
+      delete nextCatalog[id]
+      onChange?.({ symbols: nextSymbols, catalog: nextCatalog })
       return
     }
     if (symbols.length >= 6) return
     onChange?.({ symbols: [...symbols, id] })
+  }
+
+  /** `em:<secid>` for a search result, '' when the payload is malformed. */
+  const resultId = (result) => {
+    if (result && typeof result.id === 'string' && result.id.startsWith('em:')) return result.id
+    const secid = result && typeof result.secid === 'string' ? result.secid : ''
+    return secid ? 'em:' + secid : ''
+  }
+
+  const addInstrument = (result) => {
+    const id = resultId(result)
+    if (!id || symbols.includes(id) || symbols.length >= 6) return
+    const secid = id.slice(3)
+    const name = ((result && typeof result.name === 'string' ? result.name : '') || secid).trim().slice(0, 24)
+    const nextCatalog = {
+      ...catalog,
+      [id]: {
+        name,
+        secid,
+        code:
+          result && typeof result.code === 'string' && result.code !== ''
+            ? result.code
+            : secid.slice(secid.indexOf('.') + 1),
+        market: result && typeof result.market === 'string' ? result.market : '',
+        kind: result && typeof result.kind === 'string' && result.kind !== '' ? result.kind : 'stock',
+      },
+    }
+    onChange?.({ symbols: [...symbols, id], catalog: nextCatalog })
+  }
+
+  const removeSymbol = (id) => {
+    if (symbols.length <= 1) return
+    toggleSymbol(id)
   }
 
   const hud = status !== null && status !== undefined ? status : localStatus
@@ -318,7 +399,7 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
             'div',
             { className: 'of-hset-section-head' },
             h('span', { className: 'of-hset-section-label' }, t('hud.symbols')),
-            h('span', { className: 'of-hset-section-meta' }, symbols.length + '/6'),
+            h('span', { className: 'of-hset-section-meta', title: t('hud.selectedCount') }, symbols.length + '/6'),
           ),
           h(
             'div',
@@ -341,6 +422,104 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
             }),
           ),
           h('div', { className: 'of-hset-hint' }, t('hud.symbolsHint')),
+          h(
+            'div',
+            { className: 'of-hset-search' },
+            h('input', {
+              type: 'search',
+              className: 'of-hset-input of-hset-search-input',
+              value: searchQuery,
+              placeholder: t('hud.searchPlaceholder'),
+              'aria-label': t('hud.searchPlaceholder'),
+              onChange: (event) => setSearchQuery(event.target.value),
+              onKeyDown: (event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setSearchQuery('')
+                }
+              },
+            }),
+            searchQuery.trim() === ''
+              ? null
+              : h(
+                  'div',
+                  { className: 'of-hset-results', role: 'list' },
+                  searching
+                    ? h('div', { className: 'of-hset-result-empty' }, t('hud.searching'))
+                    : searchResults.length === 0
+                      ? h('div', { className: 'of-hset-result-empty' }, t('hud.searchEmpty'))
+                      : searchResults.map((result) => {
+                          const id = resultId(result)
+                          const selected = symbols.includes(id)
+                          const disabled = selected || atCap
+                          return h(
+                            'div',
+                            {
+                              key: id || result.code || result.name,
+                              className: 'of-hset-result',
+                              'data-selected': selected ? 'true' : 'false',
+                              role: 'listitem',
+                            },
+                            h(
+                              'div',
+                              { className: 'of-hset-result-main' },
+                              h('span', { className: 'of-hset-result-name' }, result.name || id),
+                              h(
+                                'div',
+                                { className: 'of-hset-result-meta' },
+                                result.code ? h('span', { className: 'of-hset-result-code' }, String(result.code)) : null,
+                                result.market
+                                  ? h('span', { className: 'of-hset-result-market', title: t('hud.market') }, String(result.market))
+                                  : null,
+                              ),
+                            ),
+                            h(
+                              'button',
+                              {
+                                type: 'button',
+                                className: 'of-btn of-hset-result-add',
+                                disabled,
+                                onClick: () => addInstrument(result),
+                              },
+                              selected ? t('hud.selectedCount') : t('hud.add'),
+                            ),
+                          )
+                        }),
+                ),
+            h('div', { className: 'of-hset-hint' }, t('hud.searchHint')),
+          ),
+          atCap ? h('div', { className: 'of-hset-hint of-hset-warn' }, t('hud.customLimit')) : null,
+          customSymbols.length > 0
+            ? h(
+                'div',
+                { className: 'of-hset-chips' },
+                h('span', { className: 'of-hset-chips-head' }, t('hud.custom')),
+                customSymbols.map((id) =>
+                  h(
+                    'span',
+                    {
+                      key: id,
+                      className: 'of-hset-chip',
+                      title: catalog[id] && catalog[id].code ? String(catalog[id].code) : id,
+                    },
+                    h('span', { className: 'of-hset-chip-name' }, instrumentName(id, config)),
+                    h(
+                      'button',
+                      {
+                        type: 'button',
+                        className: 'of-hset-chip-remove',
+                        title: t('hud.remove'),
+                        'aria-label': t('hud.remove'),
+                        disabled: symbols.length <= 1,
+                        onClick: () => removeSymbol(id),
+                      },
+                      h(Icon, { name: 'close', size: 10 }),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         ),
         // -------------------------------------------------------- appearance
         h(
@@ -484,6 +663,79 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
                 label: t('hud.spark'),
                 onChange: (next) => onChange?.({ showSpark: next }),
               }),
+            ),
+          ),
+        ),
+        // ------------------------------------------------------------- panic
+        h(
+          'section',
+          { className: 'of-hset-section of-hset-panic' },
+          h(
+            'div',
+            { className: 'of-hset-section-head' },
+            h('span', { className: 'of-hset-section-label' }, t('hud.panic')),
+          ),
+          h(
+            'div',
+            { className: 'of-hset-field' },
+            h(
+              'div',
+              { className: 'of-hset-line' },
+              h('span', { className: 'of-hset-label' }, t('hud.panic')),
+              h(SettingSwitch, {
+                checked: panicEnabled,
+                label: t('hud.panic'),
+                onChange: (next) => onChange?.({ panicEnabled: next }),
+              }),
+            ),
+            h('div', { className: 'of-hset-hint' }, t('hud.panicHint')),
+          ),
+          h(
+            'div',
+            { className: 'of-hset-field' },
+            h(
+              'div',
+              { className: 'of-hset-line' },
+              h('span', { className: 'of-hset-label' }, t('hud.panicShortcut')),
+              h(
+                'select',
+                {
+                  className: 'of-hset-select',
+                  value: panicEnabled ? panicShortcut : '',
+                  disabled: !panicEnabled,
+                  'aria-label': t('hud.panicShortcut'),
+                  onChange: (event) => {
+                    const value = event.target.value
+                    if (value === '') onChange?.({ panicEnabled: false })
+                    else onChange?.({ panicEnabled: true, panicShortcut: value })
+                  },
+                },
+                h('option', { value: '' }, t('hud.panicOff')),
+                PANIC_SHORTCUTS.map((preset) =>
+                  h('option', { key: preset.id, value: preset.accelerator }, preset.label),
+                ),
+              ),
+            ),
+            h(
+              'div',
+              { className: 'of-hset-combo', 'data-off': panicEnabled ? 'false' : 'true' },
+              panicEnabled ? panicLabel || panicShortcut : t('hud.panicOff'),
+            ),
+            h(
+              'div',
+              { className: 'of-hset-actions' },
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'of-btn',
+                  disabled: typeof onPanicNow !== 'function',
+                  onClick: () => {
+                    if (typeof onPanicNow === 'function') onPanicNow()
+                  },
+                },
+                t('hud.panicNow'),
+              ),
             ),
           ),
         ),

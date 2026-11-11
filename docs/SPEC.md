@@ -425,3 +425,70 @@ CommonJS, no build, no dependencies. Files: `package.json`, `main.js`,
 - `node --test "tests/**/*.test.mjs"` covers config validation, discovery order,
   status shape, spawn/kill with a fake child process, and (when a real Electron
   binary is present) a documented manual capture check via `--capture`.
+
+---
+
+# Custom instruments and the boss key (v0.3)
+
+## HudConfig additions
+
+```jsonc
+{
+  "symbols": ["sh000001", "em:1.600519"],   // built-in ids or `em:<eastmoney secid>`
+  "catalog": {
+    "em:1.600519": { "name": "贵州茅台", "secid": "1.600519", "code": "600519", "market": "沪A", "kind": "stock" }
+  },
+  "panicEnabled": true,
+  "panicShortcut": "CommandOrControl+Shift+H" // Electron accelerator; '' when disabled
+}
+```
+
+- `symbols` stays 1..6 entries. A custom entry is `em:<secid>` where `<secid>` matches
+  `^\d{1,3}\.[A-Za-z0-9_]+$` (eastmoney `QuoteID`, e.g. `1.600519`, `116.00700`, `105.AAPL`).
+  Unknown or malformed entries are dropped; the first valid one survives when all are invalid.
+- `catalog` keeps the human label and market for custom ids (the quote response also carries a
+  name; the catalog covers a temporarily unavailable upstream). Max 12 entries, `name` ≤ 24 chars.
+- `panicShortcut` presets: `CommandOrControl+Shift+H` (default), `Alt+X`,
+  `CommandOrControl+Alt+H`, `CommandOrControl+Shift+Space`. `panicEnabled: false` removes it.
+
+## Host routes
+
+One prefix route owns the HUD surface (registered as a `handler`, not a `resource`):
+
+```
+GET  /dsh-openfin/api/hud                 -> HudStatus (unchanged, config has the new fields)
+POST /dsh-openfin/api/hud                 -> { desktop?, config?, action?: 'recenter'|'panic' }
+GET  /dsh-openfin/api/hud/search?q=茅台&limit=8
+     -> { query, results: [{ id, secid, code, name, market, kind }] }
+GET  /dsh-openfin/api/hud/quotes?ids=sh000001,em:1.600519
+     -> { updatedAt, stale, quotes: [{ id, name, price, change, pct, digits, spark }] }
+```
+
+- `action: 'panic'` with `{ hidden: boolean }` writes `panicAt` + `hidden` into
+  `hud-window.json`; a running helper polls that file and hides/shows its window
+  (fallback for when the global shortcut is not registered).
+- `/search` is server-side on purpose (eastmoney's suggest endpoint has no CORS
+  headers). Results are cached 60 s per query; `limit` 1..10, default 8.
+- `/quotes` resolves built-in ids from the existing quotes loader (30 s cache) and
+  `em:` ids from eastmoney `stock/get` (30 s per-secid cache, `fields=f43,f57,f58,
+  f59,f60,f169,f170&fltt=2`), plus a 5 min-cached `trends2` spark. A failing
+  custom symbol is omitted, it never fails the batch.
+- Search endpoint: `searchapi.eastmoney.com/api/suggest/get?input=<q>&type=14&token=
+  D43BF722C8E33BDC906FB84D85E326E8&count=<n>`; map `QuoteID` → `id = 'em:' + QuoteID`,
+  `Code`, `Name`, `SecurityTypeName` → `market`; `Classify`/`SecurityType` → `kind`
+  (`stock` unless it looks like an index/fund).
+
+## Boss key
+
+- **In-page HUD**: `HudLayer` owns an ephemeral `hidden` state (never persisted) and a
+  `keydown` listener matching the configured accelerator. Pressing it hides the
+  floating card instantly and POSTs `{ action: 'panic', hidden: true }`; pressing it
+  again shows the card and POSTs `{ hidden: false }`.
+- **Desktop window**: the helper registers the same accelerator with Electron
+  `globalShortcut` (system-wide, works when DSH is not focused) and toggles
+  `win.hide()` / `win.showInactive()`. If registration fails, the host panic fallback
+  above still hides it within one poll (~2 s). Bounds are preserved.
+- A **panic button** (eye icon) in the card header does the same without the keyboard,
+  and the settings sheet offers the switch, the shortcut preset and a "hide now" action.
+- Hiding is a display state: config, position and window bounds are untouched, and a
+  fresh DSH start shows the HUD again.

@@ -1,7 +1,11 @@
 /**
  * The in-page "摸鱼" HUD: a 44 px mascot chip that expands into a quiet dark
- * quote card. Presentational apart from its own snapshot poll — the page shell
+ * quote card. Presentational apart from its own quote poll — the page shell
  * owns the shared config and passes `onChange` down.
+ *
+ * Data comes from `/api/hud/quotes`, which renders exactly the requested
+ * `config.symbols` order (built-in ids and `em:<secid>` customs); the config
+ * catalog supplies a name fallback when the quote payload has none.
  *
  * Geometry: `config.position` is the top-left of the *collapsed* chip row
  * (`{x:0,y:0}` = bottom-right with a 24 px margin). The card grows up-left from
@@ -17,10 +21,10 @@ import {
   useRef,
   useState,
 } from 'react'
-import { getSnapshot } from '../api.js'
+import { getHudQuotes } from '../api.js'
 import { fmtClock, fmtPct, fmtPrice, signClass } from '../format.js'
 import { useCountUp, useMediaQuery } from '../hooks.js'
-import { SYMBOLS } from '../hud-config.js'
+import { instrumentName } from '../hud-config.js'
 import { Icon, Mark } from './Icon.js'
 import { Sparkline } from './Sparkline.js'
 
@@ -113,6 +117,16 @@ const HUD_GLYPHS = {
       }),
     ),
   collapse: (strokeWidth) => h('path', { d: 'M6.5 12h11', strokeWidth }),
+  eye: (strokeWidth) =>
+    h(
+      'g',
+      null,
+      h('path', {
+        d: 'M2.8 12S6.4 5.6 12 5.6 21.2 12 21.2 12 17.6 18.4 12 18.4 2.8 12 2.8 12Z',
+        strokeWidth,
+      }),
+      h('circle', { cx: 12, cy: 12, r: 2.7, strokeWidth }),
+    ),
 }
 
 function HudGlyph({ name, size = 13, strokeWidth = 1.6 }) {
@@ -137,11 +151,11 @@ function HudGlyph({ name, size = 13, strokeWidth = 1.6 }) {
 }
 
 /** One quote row; its own component so the price can tween via `useCountUp`. */
-function HudRow({ symbol, quote, showSpark, onOpen }) {
+function HudRow({ fallbackName, quote, showSpark, onOpen }) {
   const animated = useCountUp(quote && typeof quote.price === 'number' ? quote.price : null, 420)
   const pct = quote && typeof quote.pct === 'number' ? quote.pct : null
   const tone = quote ? signClass(pct) : 'flat'
-  const name = (quote && quote.name) || symbol.name
+  const name = (quote && quote.name) || fallbackName || ''
   const digits = quote && typeof quote.digits === 'number' ? quote.digits : 2
   const priceText = quote ? fmtPrice(animated, digits) : '—'
   const pctText = quote ? fmtPct(pct) : '—'
@@ -174,7 +188,7 @@ function HudRow({ symbol, quote, showSpark, onOpen }) {
   )
 }
 
-export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden }) {
+export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard, hidden, onPanic }) {
   const viewport = useViewport()
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [snapshot, setSnapshot] = useState(null)
@@ -205,8 +219,9 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
 
   const rows = useMemo(() => {
     const ids = Array.isArray(config.symbols) ? config.symbols : []
-    return ids.map((id) => SYMBOLS.find((symbol) => symbol.id === id)).filter(Boolean)
-  }, [config.symbols])
+    return ids.map((id) => ({ id, fallbackName: instrumentName(id, config) }))
+  }, [config.symbols, config.catalog])
+  const symbolsKey = Array.isArray(config.symbols) ? config.symbols.join('|') : ''
 
   const quoteMap = useMemo(() => {
     const map = new Map()
@@ -229,14 +244,16 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
 
   /* ------------------------------------------------------------- data poll */
   useEffect(() => {
+    if (hidden) return undefined
     let alive = true
     const controller = new AbortController()
+    const requestIds = Array.isArray(config.symbols) ? config.symbols.slice() : []
     let timer = 0
 
     const load = async () => {
       if (typeof document !== 'undefined' && document.hidden) return
       try {
-        const data = await getSnapshot(controller.signal)
+        const data = await getHudQuotes(requestIds, controller.signal)
         if (!alive) return
         setSnapshot(data)
         setError(null)
@@ -248,6 +265,7 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
       }
     }
     reloadRef.current = load
+    setLoading(true)
 
     const schedule = () => {
       clearTimeout(timer)
@@ -276,7 +294,10 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
       reloadRef.current = null
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [])
+    // `symbolsKey` covers the numeric symbols array without depending on its
+    // identity; changing the pick triggers an immediate refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbolsKey, hidden])
 
   /* ------------------------------------------------------------- title edit */
   useEffect(() => {
@@ -297,7 +318,6 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
   }, [editingTitle])
 
   /* -------------------------------------------------------- card height map */
-  const symbolKey = rows.map((row) => row.id).join('|')
   useLayoutEffect(() => {
     if (collapsed) {
       setMeasuredHeight(0)
@@ -318,7 +338,7 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
     return () => {
       if (observer) observer.disconnect()
     }
-  }, [collapsed, size, symbolKey, config.showSpark])
+  }, [collapsed, size, symbolsKey, config.showSpark])
 
   /* ----------------------------------------------------------- idle fade */
   useEffect(() => {
@@ -511,7 +531,7 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
           {
             className: 'of-hud-pill',
             'data-tone': pillTone,
-            title: firstSymbol ? firstSymbol.name + ' ' + pillText : t('hud.waiting'),
+            title: firstSymbol ? firstSymbol.fallbackName + ' ' + pillText : t('hud.waiting'),
           },
           pillText,
         ),
@@ -568,6 +588,20 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
     h(
       'div',
       { className: 'of-hud-actions' },
+      typeof onPanic === 'function'
+        ? h(
+            'button',
+            {
+              type: 'button',
+              className: 'of-hud-ibtn of-hud-panic-btn',
+              'data-hud-no-drag': 'true',
+              title: t('hud.panicNow'),
+              'aria-label': t('hud.panicNow'),
+              onClick: () => onPanic(),
+            },
+            h(HudGlyph, { name: 'eye' }),
+          )
+        : null,
       h(
         'button',
         {
@@ -613,11 +647,11 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
     { className: 'of-hud-rows' },
     rows.length === 0
       ? h('div', { className: 'of-hud-row', style: { cursor: 'default' } }, h('span', { className: 'of-hud-row-name' }, t('empty')))
-      : rows.map((symbol) =>
+      : rows.map((row) =>
           h(HudRow, {
-            key: symbol.id,
-            symbol,
-            quote: quoteMap.get(symbol.id) || null,
+            key: row.id,
+            fallbackName: row.fallbackName,
+            quote: quoteMap.get(row.id) || null,
             showSpark: config.showSpark !== false,
             onOpen: onOpenDashboard,
           }),
