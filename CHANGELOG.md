@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.4.0 — 2026-11-11
+
+### Added
+
+- **The complete OpenFinLens terminal** as the default tab — not a subset. The
+  original MIT-licensed app is vendored under `lens/` (130 runtime files,
+  ~2 MB), served by the Host from `/dsh-openfin/lens/`, and embedded full-bleed
+  in the DSH page with the host light/dark theme. Every upstream feature is
+  available: multi-market heatmaps with zoom/pan and legend filters, the global
+  event map, prediction markets, stock K-lines with technical indicators, fund
+  profiles / risk quiz / comparison, portfolio tracking, macro curves, industry
+  chains, dragon-tiger / 13F / southbound flows, the ⌘K command palette and
+  deep links.
+- `scripts/sync-lens.mjs`: deterministic vendoring from the upstream checkout
+  with commit provenance (`lens/SOURCES.json`), only the runtime file set, and
+  the one-line embed adapter injection.
+- `lens/dsh-embed.js`: theme handshake (initial `?theme=` + live `dsh-theme`
+  messages) and a readiness message that clears the DSH loading veil.
+- `lib/lens.js`: a hardened static server (GET/HEAD only, traversal/symlink
+  containment, MIME, ETag/304, document no-cache) with 8 unit tests.
+- `client/src/views/Terminal.js`: terminal tab with loading veil, reload and
+  open-in-new-tab controls; the frame stays mounted across tab switches so the
+  app keeps its tab/scroll/chart state.
+- Tests: 161 total.
+
 ## 0.3.0 — 2026-11-11
 
 ### Added

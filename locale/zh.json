@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "OpenFin 金融看板",
-    "description": "A股与全球行情、行业热力图、财经快讯、白话金融学院与词典，外加可拖动、可调透明度、可自选任意标的的悬浮行情窗与防老板快捷键，作为 DeepSeek Harness 的原生页面与桌面小组件。",
+    "description": "DSH 里的 OpenFin：完整 OpenFinLens 终端（多市场热力图、事件地图、预测市场、K线、基金、持仓、宏观、产业链等原版全部功能），加上原生行情页、白话金融学院与词典、可自选标的的悬浮窗与防老板快捷键。",
     "direction": "cn"
   },
   "nav": "OpenFin",
@@ -112,5 +112,13 @@
   "hud.panicHint": "按一次立即隐藏悬浮卡，再按一次恢复显示。",
   "hud.panicNow": "立即隐藏",
   "hud.panicShortcut": "快捷键",
-  "hud.panicOff": "关闭"
+  "hud.panicOff": "关闭",
+  "tab.terminal": "终端",
+  "terminal.title": "OpenFinLens 完整终端",
+  "terminal.hint": "原版全部功能：多市场热力图、事件地图、预测市场、个股 K 线、基金与持仓…",
+  "terminal.reload": "重新加载终端",
+  "terminal.openExternal": "在新标签打开",
+  "terminal.loading": "正在加载完整终端…",
+  "terminal.slow": "加载较慢：终端资源较大，仍不出现可点「重新加载」。",
+  "terminal.frameTitle": "OpenFinLens 完整终端"
 }

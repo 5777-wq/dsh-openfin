@@ -39,6 +39,40 @@ export const CSS = String.raw`
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--of-text) 18%, transparent) transparent;
 }
+.of-page[data-view="terminal"] { overflow: hidden; }
+.of-page[data-view="terminal"] .of-inner {
+  display: flex; flex-direction: column;
+  height: 100%;
+  max-width: none;
+  padding: calc(18px + var(--dsh-frame-top-clearance, 0px)) clamp(10px, 1.4vw, 22px) 12px;
+}
+.of-page[data-view="terminal"] .of-head { flex: none; margin-bottom: 12px; }
+.of-page[data-view="terminal"] main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.of-terminal-holder { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+.of-terminal-holder[data-active="true"] { display: flex; }
+.of-terminal { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.of-terminal-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; min-height: 30px; font-size: 11.5px; color: var(--of-text-2); }
+.of-terminal-title { font-size: 12.5px; font-weight: 600; color: var(--of-text); white-space: nowrap; }
+.of-terminal-hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.of-terminal-frame {
+  flex: 1 1 auto; min-height: 0; width: 100%;
+  border: 0; border-radius: 12px; background: #fff; color-scheme: normal;
+  box-shadow: 0 14px 40px -32px rgba(0, 0, 0, 0.6);
+}
+.of-terminal-veil {
+  position: absolute; inset: 38px 0 0; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base, #faf9f7) 72%, transparent);
+  backdrop-filter: blur(2px); border-radius: 12px; z-index: 2;
+}
+.of-terminal-veil-card {
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  padding: 16px 22px; border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1, #fff); border: 0.5px solid var(--of-border);
+  box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.5); text-align: center;
+}
+.of-terminal-veil-title { font-size: 12.5px; font-weight: 600; color: var(--of-text); }
+.of-terminal-veil-hint { font-size: 11px; color: var(--of-text-2); max-width: 46ch; }
+
 .of-page[data-direction="intl"] {
   --of-up: var(--dsw-alias-state-success-primary, #1f9d63);
   --of-down: var(--dsw-alias-state-error-primary, #d93a3a);

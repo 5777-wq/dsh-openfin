@@ -152,6 +152,25 @@ if (existsSync(resolve(root, 'data/academy/index.json'))) {
   if (size > 260 * 1024) fail(`data/glossary.json is ${size} bytes (limit 260 KiB)`)
 }
 
+// ------------------------------------------------------- vendored terminal
+if (!existsSync(resolve(root, 'lens/index.html'))) {
+  fail('lens/index.html is missing (run npm run sync:lens)')
+} else {
+  if (!existsSync(resolve(root, 'lens/dsh-embed.js'))) fail('lens/dsh-embed.js is missing')
+  const html = await readText('lens/index.html')
+  if (!html.includes('src="dsh-embed.js"')) fail('lens/index.html does not load the DSH embed adapter')
+  if (!existsSync(resolve(root, 'lens/SOURCES.json'))) fail('lens/SOURCES.json provenance is missing')
+  else {
+    const sources = await readJson('lens/SOURCES.json')
+    if (!sources.commit || !sources.repo) fail('lens/SOURCES.json is missing repo/commit provenance')
+  }
+  const mounted = existsSync(resolve(root, 'lens/js/bundle.js'))
+    && existsSync(resolve(root, 'lens/css/bundle.css'))
+    && existsSync(resolve(root, 'lens/lib/d3-geo.min.js'))
+  if (!mounted) fail('lens/ is missing the runtime bundle (js/bundle.js, css/bundle.css, lib/)')
+  if (pkg.files && !pkg.files.includes('lens')) fail('package.json files must include "lens"')
+}
+
 // ----------------------------------------------------- generated locale copy
 const generated = resolve(root, 'client/src/generated-locales.js')
 if (!existsSync(generated)) warn('client/src/generated-locales.js is missing (created by npm run build)')

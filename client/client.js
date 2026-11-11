@@ -1,4 +1,4 @@
-/* dsh-openfin 0.3.0 — built by scripts/build-client.mjs. Do not edit. */
+/* dsh-openfin 0.4.0 — built by scripts/build-client.mjs. Do not edit. */
 window.__ModuleLoader__.load({
   id: "dsh-openfin",
   factory(require) {
@@ -30,7 +30,7 @@ __export(main_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(main_exports);
-var import_react23 = require("react");
+var import_react24 = require("react");
 
 // client/src/api.js
 var import_react = require("react");
@@ -150,6 +150,40 @@ var CSS = String.raw`
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--of-text) 18%, transparent) transparent;
 }
+.of-page[data-view="terminal"] { overflow: hidden; }
+.of-page[data-view="terminal"] .of-inner {
+  display: flex; flex-direction: column;
+  height: 100%;
+  max-width: none;
+  padding: calc(18px + var(--dsh-frame-top-clearance, 0px)) clamp(10px, 1.4vw, 22px) 12px;
+}
+.of-page[data-view="terminal"] .of-head { flex: none; margin-bottom: 12px; }
+.of-page[data-view="terminal"] main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.of-terminal-holder { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+.of-terminal-holder[data-active="true"] { display: flex; }
+.of-terminal { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.of-terminal-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; min-height: 30px; font-size: 11.5px; color: var(--of-text-2); }
+.of-terminal-title { font-size: 12.5px; font-weight: 600; color: var(--of-text); white-space: nowrap; }
+.of-terminal-hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.of-terminal-frame {
+  flex: 1 1 auto; min-height: 0; width: 100%;
+  border: 0; border-radius: 12px; background: #fff; color-scheme: normal;
+  box-shadow: 0 14px 40px -32px rgba(0, 0, 0, 0.6);
+}
+.of-terminal-veil {
+  position: absolute; inset: 38px 0 0; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base, #faf9f7) 72%, transparent);
+  backdrop-filter: blur(2px); border-radius: 12px; z-index: 2;
+}
+.of-terminal-veil-card {
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  padding: 16px 22px; border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1, #fff); border: 0.5px solid var(--of-border);
+  box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.5); text-align: center;
+}
+.of-terminal-veil-title { font-size: 12.5px; font-weight: 600; color: var(--of-text); }
+.of-terminal-veil-hint { font-size: 11px; color: var(--of-text-2); max-width: 46ch; }
+
 .of-page[data-direction="intl"] {
   --of-up: var(--dsw-alias-state-success-primary, #1f9d63);
   --of-down: var(--dsw-alias-state-error-primary, #d93a3a);
@@ -727,7 +761,7 @@ var CSS = String.raw`
 // client/src/generated-locales.js
 var en = {
   "meta.title": "OpenFin market and academy",
-  "meta.description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent market HUD with searchable custom instruments and a boss key, as native DeepSeek Harness surfaces.",
+  "meta.description": "OpenFin inside DeepSeek Harness: the complete OpenFinLens terminal (multi-market heatmaps, event map, prediction markets, K-lines, funds, portfolio, macro, industry chains and every other upstream feature), plus a native market page, a plain-language finance academy and glossary, and a floating HUD with custom instruments and a boss key.",
   "meta.direction": "intl",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -837,11 +871,19 @@ var en = {
   "hud.panicHint": "Press it once to hide the floating card instantly; the same combo brings it back.",
   "hud.panicNow": "Hide now",
   "hud.panicShortcut": "Shortcut",
-  "hud.panicOff": "Off"
+  "hud.panicOff": "Off",
+  "tab.terminal": "Terminal",
+  "terminal.title": "OpenFinLens terminal",
+  "terminal.hint": "The full app: multi-market treemap, event map, prediction markets, K-lines, funds and portfolio\u2026",
+  "terminal.reload": "Reload the terminal",
+  "terminal.openExternal": "Open in a new tab",
+  "terminal.loading": "Loading the full terminal\u2026",
+  "terminal.slow": "Still loading \u2014 the terminal bundle is large. You can retry with \u201Creload\u201D.",
+  "terminal.frameTitle": "OpenFinLens terminal"
 };
 var zh = {
   "meta.title": "OpenFin \u91D1\u878D\u770B\u677F",
-  "meta.description": "A\u80A1\u4E0E\u5168\u7403\u884C\u60C5\u3001\u884C\u4E1A\u70ED\u529B\u56FE\u3001\u8D22\u7ECF\u5FEB\u8BAF\u3001\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\uFF0C\u5916\u52A0\u53EF\u62D6\u52A8\u3001\u53EF\u8C03\u900F\u660E\u5EA6\u3001\u53EF\u81EA\u9009\u4EFB\u610F\u6807\u7684\u7684\u60AC\u6D6E\u884C\u60C5\u7A97\u4E0E\u9632\u8001\u677F\u5FEB\u6377\u952E\uFF0C\u4F5C\u4E3A DeepSeek Harness \u7684\u539F\u751F\u9875\u9762\u4E0E\u684C\u9762\u5C0F\u7EC4\u4EF6\u3002",
+  "meta.description": "DSH \u91CC\u7684 OpenFin\uFF1A\u5B8C\u6574 OpenFinLens \u7EC8\u7AEF\uFF08\u591A\u5E02\u573A\u70ED\u529B\u56FE\u3001\u4E8B\u4EF6\u5730\u56FE\u3001\u9884\u6D4B\u5E02\u573A\u3001K\u7EBF\u3001\u57FA\u91D1\u3001\u6301\u4ED3\u3001\u5B8F\u89C2\u3001\u4EA7\u4E1A\u94FE\u7B49\u539F\u7248\u5168\u90E8\u529F\u80FD\uFF09\uFF0C\u52A0\u4E0A\u539F\u751F\u884C\u60C5\u9875\u3001\u767D\u8BDD\u91D1\u878D\u5B66\u9662\u4E0E\u8BCD\u5178\u3001\u53EF\u81EA\u9009\u6807\u7684\u7684\u60AC\u6D6E\u7A97\u4E0E\u9632\u8001\u677F\u5FEB\u6377\u952E\u3002",
   "meta.direction": "cn",
   "nav": "OpenFin",
   "title": "OpenFin",
@@ -951,7 +993,15 @@ var zh = {
   "hud.panicHint": "\u6309\u4E00\u6B21\u7ACB\u5373\u9690\u85CF\u60AC\u6D6E\u5361\uFF0C\u518D\u6309\u4E00\u6B21\u6062\u590D\u663E\u793A\u3002",
   "hud.panicNow": "\u7ACB\u5373\u9690\u85CF",
   "hud.panicShortcut": "\u5FEB\u6377\u952E",
-  "hud.panicOff": "\u5173\u95ED"
+  "hud.panicOff": "\u5173\u95ED",
+  "tab.terminal": "\u7EC8\u7AEF",
+  "terminal.title": "OpenFinLens \u5B8C\u6574\u7EC8\u7AEF",
+  "terminal.hint": "\u539F\u7248\u5168\u90E8\u529F\u80FD\uFF1A\u591A\u5E02\u573A\u70ED\u529B\u56FE\u3001\u4E8B\u4EF6\u5730\u56FE\u3001\u9884\u6D4B\u5E02\u573A\u3001\u4E2A\u80A1 K \u7EBF\u3001\u57FA\u91D1\u4E0E\u6301\u4ED3\u2026",
+  "terminal.reload": "\u91CD\u65B0\u52A0\u8F7D\u7EC8\u7AEF",
+  "terminal.openExternal": "\u5728\u65B0\u6807\u7B7E\u6253\u5F00",
+  "terminal.loading": "\u6B63\u5728\u52A0\u8F7D\u5B8C\u6574\u7EC8\u7AEF\u2026",
+  "terminal.slow": "\u52A0\u8F7D\u8F83\u6162\uFF1A\u7EC8\u7AEF\u8D44\u6E90\u8F83\u5927\uFF0C\u4ECD\u4E0D\u51FA\u73B0\u53EF\u70B9\u300C\u91CD\u65B0\u52A0\u8F7D\u300D\u3002",
+  "terminal.frameTitle": "OpenFinLens \u5B8C\u6574\u7EC8\u7AEF"
 };
 
 // client/src/components/Icon.js
@@ -3838,10 +3888,10 @@ function squarify(items, box) {
   let x = box.x;
   let y = box.y;
   let w = width;
-  let h23 = height;
+  let h24 = height;
   let index = 0;
   while (index < entries.length) {
-    const side = Math.min(w, h23);
+    const side = Math.min(w, h24);
     if (side <= 0) break;
     const row = [];
     let previousRatio = Infinity;
@@ -3856,10 +3906,10 @@ function squarify(items, box) {
     if (row.length === 0) break;
     const rowArea = row.reduce((sum, entry) => sum + entry.area, 0);
     const thickness = side > 0 ? rowArea / side : 0;
-    if (w >= h23) {
+    if (w >= h24) {
       let cursor = y;
       for (const entry of row) {
-        const cellHeight = rowArea > 0 ? entry.area / rowArea * h23 : 0;
+        const cellHeight = rowArea > 0 ? entry.area / rowArea * h24 : 0;
         rects.push({ item: entry.item, x, y: cursor, w: thickness, h: cellHeight });
         cursor += cellHeight;
       }
@@ -3873,7 +3923,7 @@ function squarify(items, box) {
         cursor += cellWidth;
       }
       y += thickness;
-      h23 -= thickness;
+      h24 -= thickness;
     }
   }
   return rects;
@@ -4345,27 +4395,184 @@ function DashboardSkeleton({ t }) {
   );
 }
 
+// client/src/views/Terminal.js
+var import_react13 = require("react");
+var LENS_URL = "/dsh-openfin/lens/index.html";
+var READY_TIMEOUT_MS = 12e3;
+function channel(value) {
+  const text = String(value).trim();
+  if (text.startsWith("#")) {
+    const hex = text.slice(1);
+    const full = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex.slice(0, 6);
+    const number = Number.parseInt(full, 16);
+    if (!Number.isFinite(number) || full.length !== 6) return null;
+    return [number >> 16 & 255, number >> 8 & 255, number & 255];
+  }
+  const match = /^rgba?\(([^)]+)\)$/i.exec(text);
+  if (!match) return null;
+  const parts = match[1].split(/[, /]+/).filter(Boolean).slice(0, 3).map(Number);
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
+  return parts;
+}
+function hostTerminalTheme() {
+  try {
+    const styles = getComputedStyle(document.documentElement);
+    const parts = channel(styles.getPropertyValue("--dsw-alias-bg-base"));
+    if (parts !== null) {
+      const [r, g, b] = parts.map((part) => part / 255);
+      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      return luminance < 0.42 ? "nexus" : "daylight";
+    }
+    const attribute = String(document.documentElement.getAttribute("data-theme") ?? "");
+    if (/dark/i.test(attribute)) return "nexus";
+  } catch {
+  }
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "nexus";
+  } catch {
+  }
+  return "daylight";
+}
+function frameSrc(theme) {
+  return `${LENS_URL}?embed=1&theme=${theme}`;
+}
+function Terminal({ t }) {
+  const [src, setSrc] = (0, import_react13.useState)(() => frameSrc(hostTerminalTheme()));
+  const [ready, setReady] = (0, import_react13.useState)(false);
+  const [slow, setSlow] = (0, import_react13.useState)(false);
+  const frameRef = (0, import_react13.useRef)(null);
+  const timeoutRef = (0, import_react13.useRef)(0);
+  const armTimeout = (0, import_react13.useCallback)(() => {
+    clearTimeout(timeoutRef.current);
+    setSlow(false);
+    timeoutRef.current = setTimeout(() => setSlow(true), READY_TIMEOUT_MS);
+  }, []);
+  const reload = (0, import_react13.useCallback)(() => {
+    setReady(false);
+    setSrc(frameSrc(hostTerminalTheme()));
+    armTimeout();
+  }, [armTimeout]);
+  (0, import_react13.useEffect)(() => {
+    armTimeout();
+    return () => clearTimeout(timeoutRef.current);
+  }, [armTimeout]);
+  (0, import_react13.useEffect)(() => {
+    const onMessage = (event) => {
+      const frame = frameRef.current;
+      if (!frame || event.source !== frame.contentWindow) return;
+      const data = event.data;
+      if (!data || data.type !== "dsh-lens-ready") return;
+      setReady(true);
+      setSlow(false);
+      clearTimeout(timeoutRef.current);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+  (0, import_react13.useEffect)(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const send = () => {
+      const frame = frameRef.current;
+      if (!frame || !frame.contentWindow) return;
+      try {
+        frame.contentWindow.postMessage({ type: "dsh-theme", theme: hostTerminalTheme() }, "*");
+      } catch {
+      }
+    };
+    const observer = new MutationObserver(send);
+    observer.observe(root, { attributes: true, attributeFilter: ["style", "class", "data-theme"] });
+    if (body) observer.observe(body, { attributes: true, attributeFilter: ["style", "class", "data-theme"] });
+    let query = null;
+    try {
+      query = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+      query?.addEventListener?.("change", send);
+    } catch {
+      query = null;
+    }
+    return () => {
+      observer.disconnect();
+      query?.removeEventListener?.("change", send);
+    };
+  }, []);
+  const openExternal = (0, import_react13.useCallback)((event) => {
+    event.preventDefault();
+    const current = frameRef.current && frameRef.current.getAttribute("src") || src;
+    window.open(current, "_blank", "noopener,noreferrer");
+  }, [src]);
+  return (0, import_react13.createElement)(
+    "div",
+    { className: "of-terminal" },
+    (0, import_react13.createElement)(
+      "div",
+      { className: "of-terminal-bar" },
+      (0, import_react13.createElement)("span", { className: "of-terminal-title" }, t("terminal.title")),
+      (0, import_react13.createElement)("span", { className: "of-terminal-hint" }, t("terminal.hint")),
+      (0, import_react13.createElement)("span", { style: { flex: "1 1 auto" } }),
+      (0, import_react13.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-icon-btn",
+          title: t("terminal.reload"),
+          "aria-label": t("terminal.reload"),
+          onClick: reload
+        },
+        (0, import_react13.createElement)("span", { style: { fontSize: 13, lineHeight: 1 } }, "\u27F3")
+      ),
+      (0, import_react13.createElement)(
+        "button",
+        {
+          type: "button",
+          className: "of-icon-btn",
+          title: t("terminal.openExternal"),
+          "aria-label": t("terminal.openExternal"),
+          onClick: openExternal
+        },
+        (0, import_react13.createElement)("span", { style: { fontSize: 12, lineHeight: 1 } }, "\u2197")
+      )
+    ),
+    (0, import_react13.createElement)("iframe", {
+      ref: frameRef,
+      className: "of-terminal-frame",
+      src,
+      title: t("terminal.frameTitle"),
+      allow: "clipboard-write; fullscreen"
+    }),
+    !ready ? (0, import_react13.createElement)(
+      "div",
+      { className: "of-terminal-veil", "aria-live": "polite" },
+      (0, import_react13.createElement)(
+        "div",
+        { className: "of-terminal-veil-card" },
+        (0, import_react13.createElement)("div", { className: "of-terminal-veil-title" }, t("terminal.loading")),
+        slow ? (0, import_react13.createElement)("div", { className: "of-terminal-veil-hint" }, t("terminal.slow")) : (0, import_react13.createElement)("div", { className: "of-terminal-veil-hint" }, t("terminal.hint"))
+      )
+    ) : null
+  );
+}
+
 // client/src/views/Academy.js
-var import_react17 = require("react");
+var import_react18 = require("react");
 
 // client/src/components/AcademyCard.js
-var import_react14 = require("react");
+var import_react15 = require("react");
 
 // client/src/components/Chip.js
-var import_react13 = require("react");
+var import_react14 = require("react");
 function Chip({ children, tone }) {
-  return (0, import_react13.createElement)("span", { className: "of-chip", "data-tone": tone }, children);
+  return (0, import_react14.createElement)("span", { className: "of-chip", "data-tone": tone }, children);
 }
 function Tag({ children }) {
-  return (0, import_react13.createElement)("span", { className: "of-tag" }, children);
+  return (0, import_react14.createElement)("span", { className: "of-tag" }, children);
 }
 function DifficultyDots({ value, label }) {
   const level = Math.max(1, Math.min(4, Number(value) || 1));
-  return (0, import_react13.createElement)(
+  return (0, import_react14.createElement)(
     "span",
     { className: "of-dots", title: label, "aria-label": label },
     [0, 1, 2, 3].map(
-      (index) => (0, import_react13.createElement)("span", { key: index, className: "of-dot" + (index < level ? " of-dot-on" : "") })
+      (index) => (0, import_react14.createElement)("span", { key: index, className: "of-dot" + (index < level ? " of-dot-on" : "") })
     )
   );
 }
@@ -4377,7 +4584,7 @@ function AcademyCard(props) {
   const index = typeof props.index === "number" ? props.index : 0;
   const readMinutes = Number(article.readMinutes);
   const difficulty = Number(article.difficulty);
-  return (0, import_react14.createElement)(
+  return (0, import_react15.createElement)(
     "button",
     {
       type: "button",
@@ -4385,30 +4592,30 @@ function AcademyCard(props) {
       style: { "--i": String(index) },
       onClick: () => props.onOpen(article.id)
     },
-    (0, import_react14.createElement)("span", { className: "of-acard-title" }, article.title || article.id),
-    article.dek ? (0, import_react14.createElement)("span", { className: "of-acard-dek" }, article.dek) : null,
-    (0, import_react14.createElement)(
+    (0, import_react15.createElement)("span", { className: "of-acard-title" }, article.title || article.id),
+    article.dek ? (0, import_react15.createElement)("span", { className: "of-acard-dek" }, article.dek) : null,
+    (0, import_react15.createElement)(
       "span",
       { className: "of-acard-meta" },
-      article.tag ? (0, import_react14.createElement)(Tag, null, article.tag) : null,
-      readMinutes > 0 ? (0, import_react14.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
-      difficulty > 0 ? (0, import_react14.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null
+      article.tag ? (0, import_react15.createElement)(Tag, null, article.tag) : null,
+      readMinutes > 0 ? (0, import_react15.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
+      difficulty > 0 ? (0, import_react15.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null
     )
   );
 }
 
 // client/src/components/FilterChips.js
-var import_react15 = require("react");
+var import_react16 = require("react");
 function FilterChips(props) {
   const sections = Array.isArray(props.sections) ? props.sections : [];
   const active = props.active;
   const onSelect = props.onSelect;
   if (sections.length === 0) return null;
-  return (0, import_react15.createElement)(
+  return (0, import_react16.createElement)(
     "div",
     { className: "of-filters", role: "group", "aria-label": props.label || void 0 },
     sections.map(
-      (section) => (0, import_react15.createElement)(
+      (section) => (0, import_react16.createElement)(
         "button",
         {
           key: section.id,
@@ -4424,16 +4631,16 @@ function FilterChips(props) {
 }
 
 // client/src/components/SearchBox.js
-var import_react16 = require("react");
+var import_react17 = require("react");
 function SearchBox(props) {
   const value = typeof props.value === "string" ? props.value : "";
   const placeholder = props.placeholder || "";
   const onChange = props.onChange;
-  return (0, import_react16.createElement)(
+  return (0, import_react17.createElement)(
     "div",
     { className: "of-search" },
-    (0, import_react16.createElement)("span", { className: "of-search-icon", "aria-hidden": "true" }, (0, import_react16.createElement)(Icon, { name: "search", size: 14 })),
-    (0, import_react16.createElement)("input", {
+    (0, import_react17.createElement)("span", { className: "of-search-icon", "aria-hidden": "true" }, (0, import_react17.createElement)(Icon, { name: "search", size: 14 })),
+    (0, import_react17.createElement)("input", {
       className: "of-search-input",
       type: "search",
       value,
@@ -4466,18 +4673,18 @@ function Academy(props) {
   const t = props.t;
   const onOpenArticle = props.onOpenArticle;
   const { loading, data, error, reload } = useResource((signal) => getAcademy(signal), []);
-  const [query, setQuery] = (0, import_react17.useState)("");
-  const [section, setSection] = (0, import_react17.useState)(ALL);
-  const rootRef = (0, import_react17.useRef)(null);
+  const [query, setQuery] = (0, import_react18.useState)("");
+  const [section, setSection] = (0, import_react18.useState)(ALL);
+  const rootRef = (0, import_react18.useRef)(null);
   const articles = data && Array.isArray(data.articles) ? data.articles : [];
   const sections = data && Array.isArray(data.sections) ? data.sections : [];
   const activeSection = sections.some((item) => item.id === section) ? section : ALL;
-  (0, import_react17.useEffect)(() => {
+  (0, import_react18.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, []);
-  const filtered = (0, import_react17.useMemo)(() => {
+  const filtered = (0, import_react18.useMemo)(() => {
     const needle = query.trim().toLowerCase();
     return articles.filter((article) => {
       if (activeSection !== ALL && article.section !== activeSection) return false;
@@ -4485,37 +4692,37 @@ function Academy(props) {
     });
   }, [articles, activeSection, query]);
   const isFiltered = query.trim() !== "" || activeSection !== ALL;
-  return (0, import_react17.createElement)(
+  return (0, import_react18.createElement)(
     "div",
     { className: "of-academy of-fade-in", ref: rootRef },
-    (0, import_react17.createElement)(
+    (0, import_react18.createElement)(
       "div",
       { className: "of-toolbar" },
-      (0, import_react17.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("academy.search") })
+      (0, import_react18.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("academy.search") })
     ),
-    sections.length > 0 ? (0, import_react17.createElement)(FilterChips, {
+    sections.length > 0 ? (0, import_react18.createElement)(FilterChips, {
       sections,
       active: activeSection,
       onSelect: setSection,
       label: t("academy.title")
     }) : null,
-    loading ? (0, import_react17.createElement)(
+    loading ? (0, import_react18.createElement)(
       "div",
       { className: "of-cards", "aria-busy": "true", "aria-label": t("a11y.loading") },
-      LOADING_CARDS.map((index) => (0, import_react17.createElement)(Skeleton, { key: index, height: 118, radius: 14 }))
-    ) : error ? (0, import_react17.createElement)(ErrorState, {
+      LOADING_CARDS.map((index) => (0, import_react18.createElement)(Skeleton, { key: index, height: 118, radius: 14 }))
+    ) : error ? (0, import_react18.createElement)(ErrorState, {
       title: t("error.title"),
       body: error,
       retryLabel: t("retry"),
       onRetry: reload
-    }) : filtered.length === 0 ? (0, import_react17.createElement)(EmptyState, {
+    }) : filtered.length === 0 ? (0, import_react18.createElement)(EmptyState, {
       title: isFiltered ? t("academy.searchEmpty") : t("academy.empty"),
-      icon: (0, import_react17.createElement)(Icon, { name: "search", size: 20 })
-    }) : (0, import_react17.createElement)(
+      icon: (0, import_react18.createElement)(Icon, { name: "search", size: 20 })
+    }) : (0, import_react18.createElement)(
       "div",
       { className: "of-cards" },
       filtered.map(
-        (article, index) => (0, import_react17.createElement)(AcademyCard, {
+        (article, index) => (0, import_react18.createElement)(AcademyCard, {
           key: article.id,
           t,
           article,
@@ -4528,13 +4735,13 @@ function Academy(props) {
 }
 
 // client/src/views/ArticleView.js
-var import_react21 = require("react");
+var import_react22 = require("react");
 
 // client/src/components/ArticleBody.js
-var import_react19 = require("react");
+var import_react20 = require("react");
 
 // client/src/md.js
-var import_react18 = require("react");
+var import_react19 = require("react");
 var HEADING_RE = /^(#{2,3})[ \t]+(.+?)[ \t]*#*[ \t]*$/;
 var UNORDERED_RE = /^([ \t]*)[-*+][ \t]+(.*)$/;
 var ORDERED_RE = /^([ \t]*)(\d{1,3})[.)][ \t]+(.*)$/;
@@ -4799,13 +5006,13 @@ function renderInline(nodes, onTerm, keyPrefix) {
     const key = `${keyPrefix}-${index}`;
     switch (node.type) {
       case "strong":
-        return (0, import_react18.createElement)("strong", { key }, ...renderInline(node.children, onTerm, key));
+        return (0, import_react19.createElement)("strong", { key }, ...renderInline(node.children, onTerm, key));
       case "em":
-        return (0, import_react18.createElement)("em", { key, className: "of-md-em" }, ...renderInline(node.children, onTerm, key));
+        return (0, import_react19.createElement)("em", { key, className: "of-md-em" }, ...renderInline(node.children, onTerm, key));
       case "code":
-        return (0, import_react18.createElement)("code", { key, className: "of-md-code" }, node.value);
+        return (0, import_react19.createElement)("code", { key, className: "of-md-code" }, node.value);
       case "term":
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           "button",
           {
             key,
@@ -4817,7 +5024,7 @@ function renderInline(nodes, onTerm, keyPrefix) {
           node.text
         );
       case "link":
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           "a",
           { key, className: "of-md-link", href: node.href, target: "_blank", rel: "noreferrer" },
           ...renderInline(node.children, onTerm, key)
@@ -4834,52 +5041,52 @@ function renderBlocks(blocks, { onTerm } = {}) {
     switch (block.type) {
       case "heading": {
         const level = block.level === 3 ? 3 : 2;
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           level === 3 ? "h3" : "h2",
           { key, className: level === 3 ? "of-md-h3" : "of-md-h2" },
           ...renderInline(block.children, onTerm, key)
         );
       }
       case "paragraph":
-        return (0, import_react18.createElement)("p", { key, className: "of-md-p" }, ...renderInline(block.children, onTerm, key));
+        return (0, import_react19.createElement)("p", { key, className: "of-md-p" }, ...renderInline(block.children, onTerm, key));
       case "hr":
-        return (0, import_react18.createElement)("hr", { key, className: "of-md-hr" });
+        return (0, import_react19.createElement)("hr", { key, className: "of-md-hr" });
       case "list": {
         const ordered = !!block.ordered;
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           ordered ? "ol" : "ul",
           { key, className: ordered ? "of-md-ol" : "of-md-ul" },
           ...block.items.map((item, itemIndex) => {
             const itemKey = `${key}-${itemIndex}`;
-            return (0, import_react18.createElement)("li", { key: itemKey, className: "of-md-li" }, ...renderInline(item, onTerm, itemKey));
+            return (0, import_react19.createElement)("li", { key: itemKey, className: "of-md-li" }, ...renderInline(item, onTerm, itemKey));
           })
         );
       }
       case "blockquote":
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           "blockquote",
           { key, className: "of-md-quote" },
           ...block.paragraphs.map((paragraph, paragraphIndex) => {
             const paragraphKey = `${key}-${paragraphIndex}`;
-            return (0, import_react18.createElement)("p", { key: paragraphKey, className: "of-md-p" }, ...renderInline(paragraph, onTerm, paragraphKey));
+            return (0, import_react19.createElement)("p", { key: paragraphKey, className: "of-md-p" }, ...renderInline(paragraph, onTerm, paragraphKey));
           })
         );
       case "table":
-        return (0, import_react18.createElement)(
+        return (0, import_react19.createElement)(
           "div",
           { key, className: "of-md-table-wrap" },
-          (0, import_react18.createElement)(
+          (0, import_react19.createElement)(
             "table",
             { className: "of-md-table" },
-            (0, import_react18.createElement)(
+            (0, import_react19.createElement)(
               "thead",
               null,
-              (0, import_react18.createElement)(
+              (0, import_react19.createElement)(
                 "tr",
                 null,
                 ...block.header.map((cell, cellIndex) => {
                   const cellKey = `${key}-h${cellIndex}`;
-                  return (0, import_react18.createElement)(
+                  return (0, import_react19.createElement)(
                     "th",
                     { key: cellKey, className: "of-md-th", scope: "col" },
                     ...renderInline(cell, onTerm, cellKey)
@@ -4887,16 +5094,16 @@ function renderBlocks(blocks, { onTerm } = {}) {
                 })
               )
             ),
-            (0, import_react18.createElement)(
+            (0, import_react19.createElement)(
               "tbody",
               null,
               ...block.rows.map(
-                (row, rowIndex) => (0, import_react18.createElement)(
+                (row, rowIndex) => (0, import_react19.createElement)(
                   "tr",
                   { key: `${key}-r${rowIndex}` },
                   ...row.map((cell, cellIndex) => {
                     const cellKey = `${key}-r${rowIndex}c${cellIndex}`;
-                    return (0, import_react18.createElement)("td", { key: cellKey, className: "of-md-td" }, ...renderInline(cell, onTerm, cellKey));
+                    return (0, import_react19.createElement)("td", { key: cellKey, className: "of-md-td" }, ...renderInline(cell, onTerm, cellKey));
                   })
                 )
               )
@@ -4904,7 +5111,7 @@ function renderBlocks(blocks, { onTerm } = {}) {
           )
         );
       default:
-        return (0, import_react18.createElement)("p", { key, className: "of-md-p" }, String(block && block.text != null ? block.text : ""));
+        return (0, import_react19.createElement)("p", { key, className: "of-md-p" }, String(block && block.text != null ? block.text : ""));
     }
   });
 }
@@ -4916,42 +5123,42 @@ function renderMarkdown(body, { onTerm } = {}) {
 function ArticleBody(props) {
   const body = props.body;
   const onTerm = props.onTerm;
-  const nodes = (0, import_react19.useMemo)(() => {
+  const nodes = (0, import_react20.useMemo)(() => {
     if (typeof body !== "string" || body.trim() === "") return null;
     try {
       const rendered = renderMarkdown(body, { onTerm });
       return Array.isArray(rendered) && rendered.length > 0 ? rendered : null;
     } catch (error) {
-      return [(0, import_react19.createElement)("p", { key: "of-md-fallback", className: "of-md-p" }, body)];
+      return [(0, import_react20.createElement)("p", { key: "of-md-fallback", className: "of-md-p" }, body)];
     }
   }, [body, onTerm]);
   if (!nodes) return null;
-  return (0, import_react19.createElement)("div", { className: "of-article-body" }, nodes);
+  return (0, import_react20.createElement)("div", { className: "of-article-body" }, nodes);
 }
 
 // client/src/components/GlossaryCard.js
-var import_react20 = require("react");
+var import_react21 = require("react");
 function Field(props) {
   if (!props.text) return null;
-  return (0, import_react20.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     null,
-    (0, import_react20.createElement)("div", { className: "of-gcard-label" }, props.label),
-    (0, import_react20.createElement)("div", { className: "of-gcard-text" }, props.text)
+    (0, import_react21.createElement)("div", { className: "of-gcard-label" }, props.label),
+    (0, import_react21.createElement)("div", { className: "of-gcard-text" }, props.text)
   );
 }
 function GlossaryRecord(props) {
   const t = props.t;
   const term = props.term || {};
-  return (0, import_react20.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     null,
-    (0, import_react20.createElement)("div", { className: "of-daily-term" }, term.term || term.id),
-    term.alias ? (0, import_react20.createElement)("div", { className: "of-gcard-alias" }, term.alias) : null,
-    term.one ? (0, import_react20.createElement)("p", { className: "of-daily-one" }, term.one) : null,
-    (0, import_react20.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
-    (0, import_react20.createElement)(Field, { label: t("glossary.number"), text: term.number }),
-    (0, import_react20.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
+    (0, import_react21.createElement)("div", { className: "of-daily-term" }, term.term || term.id),
+    term.alias ? (0, import_react21.createElement)("div", { className: "of-gcard-alias" }, term.alias) : null,
+    term.one ? (0, import_react21.createElement)("p", { className: "of-daily-one" }, term.one) : null,
+    (0, import_react21.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
+    (0, import_react21.createElement)(Field, { label: t("glossary.number"), text: term.number }),
+    (0, import_react21.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
   );
 }
 function GlossaryCard(props) {
@@ -4961,7 +5168,7 @@ function GlossaryCard(props) {
   const index = typeof props.index === "number" ? props.index : 0;
   const detailId = "of-gloss-" + String(term.id || index);
   const toggle = () => props.onToggle();
-  return (0, import_react20.createElement)(
+  return (0, import_react21.createElement)(
     "div",
     {
       className: "of-gcard of-stagger",
@@ -4979,22 +5186,22 @@ function GlossaryCard(props) {
         }
       }
     },
-    (0, import_react20.createElement)(
+    (0, import_react21.createElement)(
       "div",
       { className: "of-gcard-term" },
-      (0, import_react20.createElement)("span", null, term.term || term.id),
-      term.alias ? (0, import_react20.createElement)("span", { className: "of-gcard-alias" }, term.alias) : null
+      (0, import_react21.createElement)("span", null, term.term || term.id),
+      term.alias ? (0, import_react21.createElement)("span", { className: "of-gcard-alias" }, term.alias) : null
     ),
-    term.one ? (0, import_react20.createElement)("div", { className: "of-gcard-one" }, term.one) : null,
-    (0, import_react20.createElement)(
+    term.one ? (0, import_react21.createElement)("div", { className: "of-gcard-one" }, term.one) : null,
+    (0, import_react21.createElement)(
       "div",
       { className: "of-gcard-detail" },
-      (0, import_react20.createElement)(
+      (0, import_react21.createElement)(
         "div",
         { className: "of-gcard-detail-inner", id: detailId, "aria-hidden": open ? "false" : "true" },
-        (0, import_react20.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
-        (0, import_react20.createElement)(Field, { label: t("glossary.number"), text: term.number }),
-        (0, import_react20.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
+        (0, import_react21.createElement)(Field, { label: t("glossary.metaphor"), text: term.metaphor }),
+        (0, import_react21.createElement)(Field, { label: t("glossary.number"), text: term.number }),
+        (0, import_react21.createElement)(Field, { label: t("glossary.pit"), text: term.pit })
       )
     )
   );
@@ -5002,21 +5209,21 @@ function GlossaryCard(props) {
 
 // client/src/views/ArticleView.js
 function ArticleSkeleton(props) {
-  return (0, import_react21.createElement)(
+  return (0, import_react22.createElement)(
     "div",
     { "aria-busy": "true", "aria-label": props.t("a11y.loading") },
-    (0, import_react21.createElement)(Skeleton, { height: 26, width: "72%", radius: 8 }),
-    (0, import_react21.createElement)(Skeleton, { height: 13, width: "92%", style: { marginTop: 16 } }),
-    (0, import_react21.createElement)(Skeleton, { height: 13, width: "64%", style: { marginTop: 8 } }),
-    (0, import_react21.createElement)("div", { className: "of-section" }, (0, import_react21.createElement)(SkeletonLines, { lines: 7, gap: 11 }))
+    (0, import_react22.createElement)(Skeleton, { height: 26, width: "72%", radius: 8 }),
+    (0, import_react22.createElement)(Skeleton, { height: 13, width: "92%", style: { marginTop: 16 } }),
+    (0, import_react22.createElement)(Skeleton, { height: 13, width: "64%", style: { marginTop: 8 } }),
+    (0, import_react22.createElement)("div", { className: "of-section" }, (0, import_react22.createElement)(SkeletonLines, { lines: 7, gap: 11 }))
   );
 }
 function TermPeek(props) {
   const t = props.t;
   const termId = props.termId;
   const { loading, data, error, reload } = useResource((signal) => getGlossary(signal), []);
-  const nodeRef = (0, import_react21.useRef)(null);
-  (0, import_react21.useEffect)(() => {
+  const nodeRef = (0, import_react22.useRef)(null);
+  (0, import_react22.useEffect)(() => {
     const node = nodeRef.current;
     if (!node || typeof node.scrollIntoView !== "function") return;
     const reduce = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -5024,11 +5231,11 @@ function TermPeek(props) {
   }, [termId]);
   const terms = data && Array.isArray(data.terms) ? data.terms : [];
   const term = terms.find((item) => item.id === termId) || null;
-  return (0, import_react21.createElement)(
+  return (0, import_react22.createElement)(
     "div",
     { className: "of-section", ref: nodeRef, "aria-live": "polite" },
-    (0, import_react21.createElement)("div", { className: "of-section-head" }, (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("glossary.title"))),
-    loading ? (0, import_react21.createElement)("div", { className: "of-gloss-cards" }, (0, import_react21.createElement)(Skeleton, { height: 92, radius: 12 })) : error ? (0, import_react21.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : term ? (0, import_react21.createElement)("div", { className: "of-daily" }, (0, import_react21.createElement)(GlossaryRecord, { t, term })) : (0, import_react21.createElement)(EmptyState, { title: t("glossary.empty") })
+    (0, import_react22.createElement)("div", { className: "of-section-head" }, (0, import_react22.createElement)("h2", { className: "of-section-title" }, t("glossary.title"))),
+    loading ? (0, import_react22.createElement)("div", { className: "of-gloss-cards" }, (0, import_react22.createElement)(Skeleton, { height: 92, radius: 12 })) : error ? (0, import_react22.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : term ? (0, import_react22.createElement)("div", { className: "of-daily" }, (0, import_react22.createElement)(GlossaryRecord, { t, term })) : (0, import_react22.createElement)(EmptyState, { title: t("glossary.empty") })
   );
 }
 function ArticleView(props) {
@@ -5037,18 +5244,18 @@ function ArticleView(props) {
   const onBack = props.onBack;
   const onOpenArticle = props.onOpenArticle;
   const { data, error, reload } = useResource((signal) => getArticle(id, signal), [id]);
-  const [termId, setTermId] = (0, import_react21.useState)(null);
-  const rootRef = (0, import_react21.useRef)(null);
+  const [termId, setTermId] = (0, import_react22.useState)(null);
+  const rootRef = (0, import_react22.useRef)(null);
   const article = data && data.id === id ? data : null;
-  const onTerm = (0, import_react21.useCallback)((nextId) => {
+  const onTerm = (0, import_react22.useCallback)((nextId) => {
     setTermId((current) => current === nextId ? null : nextId);
   }, []);
-  (0, import_react21.useEffect)(() => {
+  (0, import_react22.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, [id]);
-  (0, import_react21.useEffect)(() => {
+  (0, import_react22.useEffect)(() => {
     setTermId(null);
   }, [id]);
   const phase = article ? "ready" : error ? "error" : "loading";
@@ -5057,59 +5264,59 @@ function ArticleView(props) {
   const asOf = article ? article.dataAsOfActual || article.dataAsOf : null;
   const points = article && Array.isArray(article.points) ? article.points : [];
   const related = article && Array.isArray(article.related) ? article.related : [];
-  return (0, import_react21.createElement)(
+  return (0, import_react22.createElement)(
     "div",
     { className: "of-article", ref: rootRef },
-    (0, import_react21.createElement)(
+    (0, import_react22.createElement)(
       "button",
       { type: "button", className: "of-article-back", onClick: onBack },
-      (0, import_react21.createElement)(Icon, { name: "back", size: 13 }),
-      (0, import_react21.createElement)("span", null, t("academy.back"))
+      (0, import_react22.createElement)(Icon, { name: "back", size: 13 }),
+      (0, import_react22.createElement)("span", null, t("academy.back"))
     ),
-    (0, import_react21.createElement)(
+    (0, import_react22.createElement)(
       "div",
       { key: id + ":" + phase, className: "of-fade-in" },
-      article ? (0, import_react21.createElement)(
+      article ? (0, import_react22.createElement)(
         "div",
         null,
-        (0, import_react21.createElement)("h1", { className: "of-article-title" }, article.title || id),
-        article.dek ? (0, import_react21.createElement)("p", { className: "of-article-dek" }, article.dek) : null,
-        (0, import_react21.createElement)(
+        (0, import_react22.createElement)("h1", { className: "of-article-title" }, article.title || id),
+        article.dek ? (0, import_react22.createElement)("p", { className: "of-article-dek" }, article.dek) : null,
+        (0, import_react22.createElement)(
           "div",
           { className: "of-article-meta" },
-          article.tag ? (0, import_react21.createElement)(Tag, null, article.tag) : null,
-          readMinutes > 0 ? (0, import_react21.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
-          difficulty > 0 ? (0, import_react21.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null,
-          asOf ? (0, import_react21.createElement)("span", { className: "of-meta" }, t("academy.dataAsOf", { date: asOf })) : null
+          article.tag ? (0, import_react22.createElement)(Tag, null, article.tag) : null,
+          readMinutes > 0 ? (0, import_react22.createElement)("span", { className: "of-meta" }, t("academy.readMinutes", { n: readMinutes })) : null,
+          difficulty > 0 ? (0, import_react22.createElement)(DifficultyDots, { value: difficulty, label: t("academy.difficulty", { n: difficulty }) }) : null,
+          asOf ? (0, import_react22.createElement)("span", { className: "of-meta" }, t("academy.dataAsOf", { date: asOf })) : null
         ),
-        points.length > 0 ? (0, import_react21.createElement)(
+        points.length > 0 ? (0, import_react22.createElement)(
           "div",
           { className: "of-section" },
-          (0, import_react21.createElement)(
+          (0, import_react22.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("academy.points"))
+            (0, import_react22.createElement)("h2", { className: "of-section-title" }, t("academy.points"))
           ),
-          (0, import_react21.createElement)(
+          (0, import_react22.createElement)(
             "div",
             { className: "of-points" },
-            points.map((point, index) => (0, import_react21.createElement)("div", { key: index, className: "of-point" }, point))
+            points.map((point, index) => (0, import_react22.createElement)("div", { key: index, className: "of-point" }, point))
           )
         ) : null,
-        (0, import_react21.createElement)(ArticleBody, { body: article.body, onTerm }),
-        termId ? (0, import_react21.createElement)(TermPeek, { key: "term-peek", t, termId }) : null,
-        related.length > 0 ? (0, import_react21.createElement)(
+        (0, import_react22.createElement)(ArticleBody, { body: article.body, onTerm }),
+        termId ? (0, import_react22.createElement)(TermPeek, { key: "term-peek", t, termId }) : null,
+        related.length > 0 ? (0, import_react22.createElement)(
           "div",
           { className: "of-related" },
-          (0, import_react21.createElement)(
+          (0, import_react22.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react21.createElement)("h2", { className: "of-section-title" }, t("academy.related"))
+            (0, import_react22.createElement)("h2", { className: "of-section-title" }, t("academy.related"))
           ),
           related.map((entry, index) => {
             const item = typeof entry === "string" ? { id: entry, title: entry } : entry || {};
             const isTerm = item.kind === "term";
-            return (0, import_react21.createElement)(
+            return (0, import_react22.createElement)(
               "button",
               {
                 key: item.id || index,
@@ -5124,13 +5331,13 @@ function ArticleView(props) {
             );
           })
         ) : null
-      ) : error ? (0, import_react21.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : (0, import_react21.createElement)(ArticleSkeleton, { t })
+      ) : error ? (0, import_react22.createElement)(ErrorState, { title: t("error.title"), body: error, retryLabel: t("retry"), onRetry: reload }) : (0, import_react22.createElement)(ArticleSkeleton, { t })
     )
   );
 }
 
 // client/src/views/Glossary.js
-var import_react22 = require("react");
+var import_react23 = require("react");
 var LOADING_TERMS = [0, 1, 2, 3, 4, 5, 6, 7];
 function categoryLabel(categories, id) {
   const match = categories.find((category) => category.id === id);
@@ -5140,57 +5347,57 @@ function DailyWord(props) {
   const t = props.t;
   const daily = props.daily;
   const category = categoryLabel(props.categories, daily.cat);
-  return (0, import_react22.createElement)(
+  return (0, import_react23.createElement)(
     "section",
     { className: "of-daily of-fade-in", "aria-label": t("glossary.daily") },
-    (0, import_react22.createElement)("div", { style: { flex: "1 1 auto", minWidth: 0 } }, (0, import_react22.createElement)(GlossaryRecord, { t, term: daily })),
-    (0, import_react22.createElement)(
+    (0, import_react23.createElement)("div", { style: { flex: "1 1 auto", minWidth: 0 } }, (0, import_react23.createElement)(GlossaryRecord, { t, term: daily })),
+    (0, import_react23.createElement)(
       "div",
       { className: "of-filters" },
-      (0, import_react22.createElement)(Chip, { tone: "brand" }, t("glossary.daily")),
-      category ? (0, import_react22.createElement)(Chip, null, category) : null
+      (0, import_react23.createElement)(Chip, { tone: "brand" }, t("glossary.daily")),
+      category ? (0, import_react23.createElement)(Chip, null, category) : null
     )
   );
 }
 function Glossary(props) {
   const t = props.t;
   const { loading, data, error, reload } = useResource((signal) => getGlossary(signal), []);
-  const [query, setQuery] = (0, import_react22.useState)("");
-  const [openId, setOpenId] = (0, import_react22.useState)(null);
-  const rootRef = (0, import_react22.useRef)(null);
+  const [query, setQuery] = (0, import_react23.useState)("");
+  const [openId, setOpenId] = (0, import_react23.useState)(null);
+  const rootRef = (0, import_react23.useRef)(null);
   const terms = data && Array.isArray(data.terms) ? data.terms : [];
   const categories = data && Array.isArray(data.categories) ? data.categories : [];
   const daily = data && data.daily ? data.daily : null;
   const needle = query.trim().toLowerCase();
-  (0, import_react22.useEffect)(() => {
+  (0, import_react23.useEffect)(() => {
     const node = rootRef.current;
     const page = node && typeof node.closest === "function" ? node.closest(".of-page") : null;
     if (page) page.scrollTop = 0;
   }, []);
-  const filtered = (0, import_react22.useMemo)(() => {
+  const filtered = (0, import_react23.useMemo)(() => {
     if (!needle) return terms;
     return terms.filter((term) => {
       const parts = [term.term, term.alias, term.one, term.cat, categoryLabel(categories, term.cat)];
       return parts.filter(Boolean).join(" ").toLowerCase().includes(needle);
     });
   }, [terms, categories, needle]);
-  const shown = (0, import_react22.useMemo)(() => {
+  const shown = (0, import_react23.useMemo)(() => {
     if (needle || !daily) return filtered;
     return filtered.filter((term) => term.id !== daily.id);
   }, [filtered, daily, needle]);
   const body = [];
   if (loading) {
-    body.push((0, import_react22.createElement)(Skeleton, { key: "daily-skeleton", height: 122, radius: 14 }));
+    body.push((0, import_react23.createElement)(Skeleton, { key: "daily-skeleton", height: 122, radius: 14 }));
     body.push(
-      (0, import_react22.createElement)(
+      (0, import_react23.createElement)(
         "div",
         { key: "term-skeleton", className: "of-gloss-cards", "aria-busy": "true", "aria-label": t("a11y.loading") },
-        LOADING_TERMS.map((index) => (0, import_react22.createElement)(Skeleton, { key: index, height: 76, radius: 12 }))
+        LOADING_TERMS.map((index) => (0, import_react23.createElement)(Skeleton, { key: index, height: 76, radius: 12 }))
       )
     );
   } else if (error) {
     body.push(
-      (0, import_react22.createElement)(ErrorState, {
+      (0, import_react23.createElement)(ErrorState, {
         key: "error",
         title: t("error.title"),
         body: error,
@@ -5199,22 +5406,22 @@ function Glossary(props) {
       })
     );
   } else {
-    if (!needle && daily) body.push((0, import_react22.createElement)(DailyWord, { key: "daily", t, daily, categories }));
+    if (!needle && daily) body.push((0, import_react23.createElement)(DailyWord, { key: "daily", t, daily, categories }));
     if (shown.length > 0) {
       body.push(
-        (0, import_react22.createElement)(
+        (0, import_react23.createElement)(
           "div",
           { key: "terms" },
-          (0, import_react22.createElement)(
+          (0, import_react23.createElement)(
             "div",
             { className: "of-section-head" },
-            (0, import_react22.createElement)("h2", { className: "of-section-title" }, t("glossary.terms"))
+            (0, import_react23.createElement)("h2", { className: "of-section-title" }, t("glossary.terms"))
           ),
-          (0, import_react22.createElement)(
+          (0, import_react23.createElement)(
             "div",
             { className: "of-gloss-cards" },
             shown.map(
-              (term, index) => (0, import_react22.createElement)(GlossaryCard, {
+              (term, index) => (0, import_react23.createElement)(GlossaryCard, {
                 key: term.id,
                 t,
                 term,
@@ -5228,21 +5435,21 @@ function Glossary(props) {
       );
     } else {
       body.push(
-        (0, import_react22.createElement)(EmptyState, {
+        (0, import_react23.createElement)(EmptyState, {
           key: "empty",
           title: needle ? t("glossary.empty") : t("empty"),
-          icon: (0, import_react22.createElement)(Icon, { name: "search", size: 20 })
+          icon: (0, import_react23.createElement)(Icon, { name: "search", size: 20 })
         })
       );
     }
   }
-  return (0, import_react22.createElement)(
+  return (0, import_react23.createElement)(
     "div",
     { className: "of-gloss of-fade-in", ref: rootRef },
-    (0, import_react22.createElement)(
+    (0, import_react23.createElement)(
       "div",
       { className: "of-toolbar" },
-      (0, import_react22.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("glossary.search") })
+      (0, import_react23.createElement)(SearchBox, { value: query, onChange: setQuery, placeholder: t("glossary.search") })
     ),
     ...body
   );
@@ -5257,10 +5464,10 @@ var TAB_KEY = "dsh-openfin:tab";
 function readTab() {
   try {
     const saved = window.localStorage.getItem(TAB_KEY);
-    if (saved === "market" || saved === "academy" || saved === "glossary") return saved;
+    if (saved === "terminal" || saved === "market" || saved === "academy" || saved === "glossary") return saved;
   } catch {
   }
-  return "market";
+  return "terminal";
 }
 function writeTab(tab) {
   try {
@@ -5269,10 +5476,10 @@ function writeTab(tab) {
   }
 }
 function useSnapshotFeed() {
-  const [state, setState] = (0, import_react23.useState)({ snapshot: null, loading: true, error: null });
-  const [generation, setGeneration] = (0, import_react23.useState)(0);
-  const refresh = (0, import_react23.useCallback)(() => setGeneration((value) => value + 1), []);
-  (0, import_react23.useEffect)(() => {
+  const [state, setState] = (0, import_react24.useState)({ snapshot: null, loading: true, error: null });
+  const [generation, setGeneration] = (0, import_react24.useState)(0);
+  const refresh = (0, import_react24.useCallback)(() => setGeneration((value) => value + 1), []);
+  (0, import_react24.useEffect)(() => {
     const controller = new AbortController();
     let alive = true;
     let timer = 0;
@@ -5326,20 +5533,20 @@ function matchesAccelerator(event, accelerator) {
   return event.key.toLowerCase() === key;
 }
 function HudLayer({ t, onOpenDashboard }) {
-  const [config, setConfig] = (0, import_react23.useState)(loadHudConfig);
-  const [settingsOpen, setSettingsOpen] = (0, import_react23.useState)(false);
-  const [status, setStatus] = (0, import_react23.useState)(null);
-  const [hidden, setHidden] = (0, import_react23.useState)(false);
-  const hiddenRef = (0, import_react23.useRef)(false);
-  const setPanic = (0, import_react23.useCallback)((next) => {
+  const [config, setConfig] = (0, import_react24.useState)(loadHudConfig);
+  const [settingsOpen, setSettingsOpen] = (0, import_react24.useState)(false);
+  const [status, setStatus] = (0, import_react24.useState)(null);
+  const [hidden, setHidden] = (0, import_react24.useState)(false);
+  const hiddenRef = (0, import_react24.useRef)(false);
+  const setPanic = (0, import_react24.useCallback)((next) => {
     hiddenRef.current = next;
     setHidden(next);
     postHud({ action: "panic", hidden: next }).catch(() => {
     });
   }, []);
-  (0, import_react23.useEffect)(() => subscribeHudConfig(setConfig), []);
-  (0, import_react23.useEffect)(() => onOpenHudSettings(() => setSettingsOpen(true)), []);
-  (0, import_react23.useEffect)(() => {
+  (0, import_react24.useEffect)(() => subscribeHudConfig(setConfig), []);
+  (0, import_react24.useEffect)(() => onOpenHudSettings(() => setSettingsOpen(true)), []);
+  (0, import_react24.useEffect)(() => {
     if (!config.panicEnabled) return void 0;
     const onKeyDown = (event) => {
       if (!matchesAccelerator(event, config.panicShortcut)) return;
@@ -5350,19 +5557,19 @@ function HudLayer({ t, onOpenDashboard }) {
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [config.panicEnabled, config.panicShortcut, setPanic]);
-  (0, import_react23.useEffect)(() => {
+  (0, import_react24.useEffect)(() => {
     if (!config.inline && hidden) setPanic(false);
   }, [config.inline, hidden, setPanic]);
-  const update = (0, import_react23.useCallback)((partial) => {
+  const update = (0, import_react24.useCallback)((partial) => {
     const next = saveHudConfig(partial);
     setConfig(next);
     if (partial && partial.desktop !== void 0) pushDesktop(partial.desktop);
     else syncHudConfig(next);
   }, []);
-  const refreshStatus = (0, import_react23.useCallback)(() => {
+  const refreshStatus = (0, import_react24.useCallback)(() => {
     getHud().then(setStatus, () => setStatus(null));
   }, []);
-  (0, import_react23.useEffect)(() => {
+  (0, import_react24.useEffect)(() => {
     if (!config.desktop && !settingsOpen) return void 0;
     refreshStatus();
     const timer = setInterval(() => {
@@ -5371,10 +5578,10 @@ function HudLayer({ t, onOpenDashboard }) {
     return () => clearInterval(timer);
   }, [config.desktop, settingsOpen, refreshStatus]);
   if (!config.inline && !settingsOpen) return null;
-  return (0, import_react23.createElement)(
+  return (0, import_react24.createElement)(
     "div",
     { className: "of-hud-layer" },
-    config.inline ? (0, import_react23.createElement)(FloatingHud, {
+    config.inline ? (0, import_react24.createElement)(FloatingHud, {
       t,
       config,
       onChange: update,
@@ -5383,7 +5590,7 @@ function HudLayer({ t, onOpenDashboard }) {
       hidden,
       onPanic: () => setPanic(true)
     }) : null,
-    settingsOpen ? (0, import_react23.createElement)(HudSettings, {
+    settingsOpen ? (0, import_react24.createElement)(HudSettings, {
       t,
       config,
       status,
@@ -5398,41 +5605,44 @@ function HudLayer({ t, onOpenDashboard }) {
   );
 }
 function OpenFinPage({ t }) {
-  const [tab, setTab] = (0, import_react23.useState)(readTab);
-  const [articleId, setArticleId] = (0, import_react23.useState)(null);
+  const [tab, setTab] = (0, import_react24.useState)(readTab);
+  const [articleId, setArticleId] = (0, import_react24.useState)(null);
+  const [terminalMounted, setTerminalMounted] = (0, import_react24.useState)(() => readTab() === "terminal");
   const feed = useSnapshotFeed();
   const direction = t("meta.direction") === "intl" ? "intl" : "cn";
-  const changeTab = (0, import_react23.useCallback)((next) => {
+  const changeTab = (0, import_react24.useCallback)((next) => {
     setArticleId(null);
     setTab(next);
     writeTab(next);
+    if (next === "terminal") setTerminalMounted(true);
   }, []);
-  const openArticle = (0, import_react23.useCallback)((id) => {
+  const openArticle = (0, import_react24.useCallback)((id) => {
     setArticleId(id);
     setTab("academy");
   }, []);
   const updated = feed.snapshot && feed.snapshot.updatedAt;
-  return (0, import_react23.createElement)(
+  return (0, import_react24.createElement)(
     "div",
-    { className: "of-page", "data-direction": direction },
-    (0, import_react23.createElement)(
+    { className: "of-page", "data-direction": direction, "data-view": tab },
+    (0, import_react24.createElement)(
       "div",
       { className: "of-inner" },
-      (0, import_react23.createElement)(
+      (0, import_react24.createElement)(
         "header",
         { className: "of-head" },
-        (0, import_react23.createElement)("div", { className: "of-mark" }, (0, import_react23.createElement)(Mark, { size: 23 })),
-        (0, import_react23.createElement)(
+        (0, import_react24.createElement)("div", { className: "of-mark" }, (0, import_react24.createElement)(Mark, { size: 23 })),
+        (0, import_react24.createElement)(
           "div",
           { className: "of-titles" },
-          (0, import_react23.createElement)("h1", { className: "of-title" }, t("title")),
-          (0, import_react23.createElement)("div", { className: "of-sub" }, t("subtitle"))
+          (0, import_react24.createElement)("h1", { className: "of-title" }, t("title")),
+          (0, import_react24.createElement)("div", { className: "of-sub" }, t("subtitle"))
         ),
-        (0, import_react23.createElement)(
+        (0, import_react24.createElement)(
           "div",
           { className: "of-head-actions" },
-          (0, import_react23.createElement)(Tabs, {
+          (0, import_react24.createElement)(Tabs, {
             items: [
+              { id: "terminal", label: t("tab.terminal") },
               { id: "market", label: t("tab.market") },
               { id: "academy", label: t("tab.academy") },
               { id: "glossary", label: t("tab.glossary") }
@@ -5441,7 +5651,7 @@ function OpenFinPage({ t }) {
             onChange: changeTab,
             ariaLabel: t("title")
           }),
-          (0, import_react23.createElement)(
+          (0, import_react24.createElement)(
             "button",
             {
               type: "button",
@@ -5450,55 +5660,63 @@ function OpenFinPage({ t }) {
               "aria-label": t("hud.settings"),
               onClick: () => openHudSettings()
             },
-            (0, import_react23.createElement)(Icon, { name: "float", size: 15 })
+            (0, import_react24.createElement)(Icon, { name: "float", size: 15 })
           ),
-          tab === "market" ? (0, import_react23.createElement)(RefreshButton, {
+          tab === "market" ? (0, import_react24.createElement)(RefreshButton, {
             label: t("refresh"),
             busy: feed.loading,
             onClick: feed.refresh
           }) : null
         )
       ),
-      (0, import_react23.createElement)(
+      (0, import_react24.createElement)(
         "main",
         { id: "of-panel-" + tab, role: "tabpanel" },
-        tab === "market" ? (0, import_react23.createElement)(Dashboard, {
+        terminalMounted ? (0, import_react24.createElement)(
+          "div",
+          {
+            className: "of-terminal-holder",
+            "data-active": tab === "terminal" ? "true" : "false"
+          },
+          (0, import_react24.createElement)(Terminal, { t })
+        ) : null,
+        tab === "terminal" ? null : tab === "market" ? (0, import_react24.createElement)(Dashboard, {
           t,
           snapshot: feed.snapshot,
           loading: feed.loading,
           error: feed.error,
           onRetry: feed.refresh
-        }) : tab === "academy" ? articleId ? (0, import_react23.createElement)(ArticleView, {
+        }) : tab === "academy" ? articleId ? (0, import_react24.createElement)(ArticleView, {
           t,
           id: articleId,
           onBack: () => setArticleId(null),
           onOpenArticle: openArticle
-        }) : (0, import_react23.createElement)(Academy, { t, onOpenArticle: openArticle }) : (0, import_react23.createElement)(Glossary, { t })
+        }) : (0, import_react24.createElement)(Academy, { t, onOpenArticle: openArticle }) : (0, import_react24.createElement)(Glossary, { t })
       ),
-      (0, import_react23.createElement)(
+      tab === "terminal" ? null : (0, import_react24.createElement)(
         "footer",
         { className: "of-foot" },
-        (0, import_react23.createElement)("span", { className: "of-live-dot", "data-stale": feed.snapshot && feed.snapshot.stale ? "true" : "false" }),
-        (0, import_react23.createElement)(
+        (0, import_react24.createElement)("span", { className: "of-live-dot", "data-stale": feed.snapshot && feed.snapshot.stale ? "true" : "false" }),
+        (0, import_react24.createElement)(
           "span",
           { className: "of-foot-meta" },
           t("market.updated") + " " + (updated ? new Date(updated).toLocaleTimeString() : "\u2014")
         ),
-        feed.snapshot && feed.snapshot.stale ? (0, import_react23.createElement)("span", { className: "of-badge" }, t("stale")) : null,
-        (0, import_react23.createElement)("span", { style: { flex: 1 } }),
-        (0, import_react23.createElement)(
+        feed.snapshot && feed.snapshot.stale ? (0, import_react24.createElement)("span", { className: "of-badge" }, t("stale")) : null,
+        (0, import_react24.createElement)("span", { style: { flex: 1 } }),
+        (0, import_react24.createElement)(
           "a",
           { href: "https://github.com/5777-wq/openfinlens", target: "_blank", rel: "noreferrer noopener" },
           "OpenFinLens"
         ),
-        (0, import_react23.createElement)("span", null, "\xB7"),
-        (0, import_react23.createElement)(
+        (0, import_react24.createElement)("span", null, "\xB7"),
+        (0, import_react24.createElement)(
           "a",
           { href: "https://github.com/5777-wq/openfin-academy", target: "_blank", rel: "noreferrer noopener" },
           "OpenFin Academy"
         ),
-        (0, import_react23.createElement)("span", null, "\xB7"),
-        (0, import_react23.createElement)("span", null, t("market.disclaimer"))
+        (0, import_react24.createElement)("span", null, "\xB7"),
+        (0, import_react24.createElement)("span", null, t("market.disclaimer"))
       )
     )
   );
@@ -5535,7 +5753,7 @@ function apply(ctx) {
         locale: NS,
         inject: () => ({ t })
       },
-      (owner) => (0, import_react23.createElement)(Mark, { size: owner && owner.size || 16 })
+      (owner) => (0, import_react24.createElement)(Mark, { size: owner && owner.size || 16 })
     )
   );
   ctx.slots.inject(
@@ -5547,7 +5765,7 @@ function apply(ctx) {
         locale: NS,
         inject: () => ({ t })
       },
-      (ownerProps) => (0, import_react23.createElement)(OpenFinPage, { t: ownerProps && ownerProps.t || t })
+      (ownerProps) => (0, import_react24.createElement)(OpenFinPage, { t: ownerProps && ownerProps.t || t })
     )
   );
   const layout = ctx.get ? ctx.get("layout") : void 0;
@@ -5562,7 +5780,7 @@ function apply(ctx) {
         locale: NS,
         inject: () => ({ t })
       },
-      (ownerProps) => (0, import_react23.createElement)(HudLayer, {
+      (ownerProps) => (0, import_react24.createElement)(HudLayer, {
         t: ownerProps && ownerProps.t || t,
         onOpenDashboard: () => {
           if (layout && typeof layout.selectPanel === "function") layout.selectPanel(PANEL_ID);

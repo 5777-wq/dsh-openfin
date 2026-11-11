@@ -492,3 +492,77 @@ GET  /dsh-openfin/api/hud/quotes?ids=sh000001,em:1.600519
   and the settings sheet offers the switch, the shortcut preset and a "hide now" action.
 - Hiding is a display state: config, position and window bounds are untouched, and a
   fresh DSH start shows the HUD again.
+
+---
+
+# Complete terminal (v0.4)
+
+The plugin reproduces the **entire OpenFinLens app** instead of reimplementing a
+subset. The upstream static build is vendored under `lens/` and served by the
+Host; the DSH page opens it in a same-origin frame from a dedicated tab.
+
+## Why vendoring instead of a native rewrite
+
+OpenFinLens is ~22k lines across 40 modules (Canvas treemaps, world map with
+d3-geo, lightweight-charts K-lines, prediction-market charts, fund/portfolio
+calculators, command palette, deep links). A partial native rewrite is exactly
+the "crippled version" this feature is meant to avoid, and it would drift from
+upstream. The vendored app keeps feature parity 1:1 and upgrades by re-running
+the sync script. Native DSH surfaces (market quick view, academy, glossary,
+floating HUD) remain for in-app convenience.
+
+## Vendoring (`scripts/sync-lens.mjs`)
+
+- Source: `../openfin/openfinlens` by default, `--lens <dir>` to override; must
+  be a git checkout (commit recorded).
+- Copies only runtime files (`index.html`, `manifest.webmanifest`,
+  `css/bundle.css`, `js/bundle.js`, `js/bundle-lazy.js`, `lib/*`, the globe
+  TopoJSON, icons, `data/actors/*`, `data/events/*`) — no docs, tests,
+  screenshots, Android app or `api/v1` snapshots.
+- Injects exactly one line after `<meta charset="UTF-8">`:
+  `<script src="dsh-embed.js"></script>`.
+- Writes `lens/SOURCES.json` (`repo`, `commit`, `committedAt`, `license`,
+  file list) and is deterministic: the same upstream commit produces identical
+  bytes. Clean re-run removes stale copied files but keeps the authored
+  `lens/dsh-embed.js`.
+- `npm run sync:lens`; `scripts/check.mjs` fails when `lens/` or its provenance
+  is missing.
+
+## Embed adapter (`lens/dsh-embed.js`)
+
+Runs before the app's scripts when `?embed=1`:
+
+1. applies `?theme=daylight|nexus` by merging into the app's own
+   `localStorage.gfd_settings` and setting `<html data-theme>`;
+2. accepts `postMessage({ type: 'dsh-theme', theme })` for later DSH theme
+   flips (updates the dataset + settings, dispatches `resize` so canvas charts
+   repaint);
+3. posts `{ type: 'dsh-lens-ready' }` to the parent on `load`, which clears the
+   DSH loading veil.
+
+Everything else (routing, data sources, keyboard shortcuts, localStorage) is
+the app's own behaviour. The frame shares the DSH origin, so the app's
+`gfd_*`/`ofl:*` keys never collide with the plugin's `dsh-openfin:*` keys.
+
+## Host (`lib/lens.js`)
+
+- One prefix route `{ kind: 'prefix', path: '/dsh-openfin/lens', handler }`.
+- GET/HEAD only; no directory listing; `..`, encoded traversal, backslash and
+  NUL paths are 404; every resolved file must stay inside the vendored root,
+  symlinks included.
+- MIME by extension, `no-cache` for documents (upgrades take effect on reload),
+  `public, max-age=300` + ETag/304 for assets, `x-content-type-options: nosniff`.
+
+## Client (`client/src/views/Terminal.js`)
+
+- Tab order: **终端 / 行情 / 学院 / 词典**, default `terminal`; the choice is
+  remembered in the existing `dsh-openfin:tab` key.
+- Full-bleed layout: the page becomes a flex column, the terminal fills the
+  remaining viewport, the native footer is hidden on this tab.
+- Once opened, the terminal stays mounted (hidden) across tab switches so its
+  tab/scroll/chart state survives.
+- Host theme is read from `--dsw-alias-bg-base` luminance (community skins
+  included), passed as `?theme=` on first load and as `dsh-theme` messages
+  afterwards.
+- A small bar above the frame offers reload and "open in a new tab"; a veil
+  shows until `dsh-lens-ready`, with a slow-loading hint after 12 s.

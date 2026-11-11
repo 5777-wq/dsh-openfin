@@ -12,16 +12,20 @@ the same author. Their license texts are reproduced verbatim in `LICENSES/`.
   records under `data/`. The build step (`scripts/sync-academy.mjs`) normalizes
   these files; the wording is unmodified.
 
-## OpenFinLens — product design and data-source research
+## OpenFinLens — the complete terminal (vendored app)
 
 - Repository: <https://github.com/5777-wq/openfinlens>
 - Copyright (c) 2026 GLOBAL FIN contributors
 - License: MIT (`LICENSES/OpenFinLens.txt`)
-- What is bundled: no source files. OpenFinLens documents and prototypes the
-  public market endpoints this plugin's Host half reads, and the plugin's
-  product concept (market dashboard plus plain-language academy) comes from the
-  same family of projects. Endpoint paths and field meanings were re-derived and
-  reimplemented here; no OpenFinLens code is copied.
+- What is bundled: the **runtime files of the complete OpenFinLens web app**
+  under `lens/` (HTML, CSS, JS bundles, vendored chart/map libraries, icons,
+  static event/actor data), served by the plugin at `/dsh-openfin/lens/` and
+  embedded in the DSH page so the terminal keeps 1:1 feature parity. The
+  upstream commit and file list are recorded in `lens/SOURCES.json`; the only
+  in-tree change is the injected `dsh-embed.js` adapter (theme handshake and
+  readiness message). Re-vendor with `npm run sync:lens`.
+- The plugin's native market page re-derived endpoint paths and field meanings
+  from the same project; no other upstream files are copied.
 
 ## Market data
 

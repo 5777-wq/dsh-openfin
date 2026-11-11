@@ -13,6 +13,7 @@ English | [中文](README.md)
 
 OpenFin puts two things on one DSH page:
 
+- **Complete terminal (default tab)** — the **original OpenFinLens app** (MIT, vendored in `lens/` and shipped with the plugin), 1:1 rather than a subset: full-market heatmaps for 5,574 A-shares, Hong Kong, US and crypto (market cap / turnover / equal area, wheel zoom anchored at the cursor, legend as filter), the global event map and prediction markets, stock K-lines with RSI/MACD/KDJ/BOLL, fund profiles, risk quizzes and comparison, portfolio tracking, macro curves, industry chains, dragon-tiger lists, 13F and southbound flows, the ⌘K command palette, `#tab=` deep links, and the primary→fallback→cache degradation chain. It follows the host light/dark theme and keeps its state across tab switches.
 - **Markets** — 11 global instruments (Shanghai, Shenzhen, ChiNext, Hang Seng, Nasdaq, S&P 500, Dow, COMEX gold, dollar index, BTC, ETH), a market-cap treemap of 96 A-share industry sectors, gainers/losers/turnover lists, and an Eastmoney news feed. Click any sector to expand its constituents underneath the heatmap.
 - **Academy** — 25 plain-language finance articles (7 crisis replays, 13 asset explainers, concepts and cycles) with glossary cross-links, plus a 293-term finance glossary with a term of the day.
 - **Floating HUD ("slacking mode")** — a small draggable quote card, inside the page or **always-on-top on the desktop**: pick the eleven built-in instruments or search any A-share/HK/US symbol (e.g. Kweichow Moutai), set opacity, idle fade, card title and size. Collapsed, it is a mascot chip showing the first instrument's change. A **boss key** hides everything instantly and brings it back.
@@ -35,6 +36,20 @@ Open **OpenFin → the floating-window button (top right)**:
 - **Desktop window** — a transparent **always-on-top** window outside the app, still visible when DSH is behind other windows; native window opacity, remembered position, close button to quit. It needs an Electron runtime on the machine (other DSH desktop plugins usually leave one in `$DSH_HOME/electron`; alternatively point `DSH_OPENFIN_ELECTRON` at one, or have `electron` on `PATH`).
 - **Instruments** — choose from the eleven built-in quotes, or search any stock, fund or index by name/code (typing “茅台” finds Kweichow Moutai, “五粮液” another) and add it to the HUD; up to six in total, rendered in your selection order. Optional sparklines, a custom card title, and a one-click position reset.
 - **Boss key** — default `Ctrl+Shift+H` (presets: `Alt+X`, `Ctrl+Alt+H`, `Ctrl+Shift+Space`, or off). One press hides the in-page card and the desktop window instantly; another press brings them back. The desktop window registers it **system-wide**, so it works while DSH is not focused; if the combination is already taken, the page still works and the desktop window follows within ~2 s through the Host fallback.
+
+## Complete terminal
+
+The **Terminal** tab is the original OpenFinLens app itself — the full ~22k-line native-JS product, not a rewritten subset:
+
+- multi-market heatmaps: A-shares / Hong Kong / US / crypto, with market-cap, turnover and equal-area modes; wheel zoom, drag pan, legend colour buckets as filters
+- events: global event map, prediction markets (probability trends, tier rings), dragon-tiger capital flows, 13F holdings, southbound flows
+- assets: stock K-lines with technical indicators, multi-symbol comparison, fund profiles / risk quiz / holdings
+- insights: US–China yield curves, cross-asset matrix, industry chains and concept boards, World Bank annual heatmap
+- ⌘K / Ctrl+K command palette, `#tab=` deep links, primary→fallback→local-cache degradation
+
+The plugin vendors the whole runtime into `lens/` (MIT; version and commit in `lens/SOURCES.json`), serves it from the Host, and embeds it full-bleed in the DSH page while syncing the host light/dark theme. Upgrading is one `npm run sync:lens`. The Markets/Academy/Glossary tabs and the floating HUD remain native DSH surfaces.
+
+![Complete terminal](docs/screenshots/terminal.jpg)
 
 | In-page card | Desktop always-on-top |
 |---|---|
@@ -98,8 +113,9 @@ After installing, click **OpenFin** in the sidebar. Refresh the page; if the row
 ```sh
 npm install
 npm run build        # emits the single-file ModuleLoader artifact at client/client.js
-npm run check        # manifest, patch, locales, icon, artifact, generated data
+npm run check        # manifest, patch, locales, icon, artifact, generated data, terminal
 node --test "tests/**/*.test.mjs"
+npm run sync:lens    # re-vendor the complete terminal from ../openfin/openfinlens
 ```
 
 Regenerate the bundled content from the sibling repositories:
@@ -116,6 +132,7 @@ lib/                      quote fetching, caching, snapshot assembly, academy da
 runtime/electron-helper/  the desktop always-on-top window (standalone Electron process, no dependencies)
 client/src/               page sources (React, bundled into one file)
 client/client.js          committed build artifact (no build needed at install time)
+lens/                     the complete OpenFinLens terminal (original MIT app, generated by sync:lens)
 data/                     article index, 25 article bodies, 293 glossary terms (generated)
 locale/                   zh/en dictionaries (also read by the plugin manager)
 docs/SPEC.md              interface and module contracts
@@ -127,6 +144,7 @@ docs/SPEC.md              interface and module contracts
 - The desktop window is unavailable without an Electron runtime (the reason is shown in settings); the in-page card is unaffected.
 - The desktop window is always-on-top and does not steal focus or block other apps' clicks; lower the opacity or close it if you want it out of the way.
 - Custom instruments depend on eastmoney's public search/quote endpoints; a suspended or missing symbol leaves that row blank while the others keep rendering.
+- The **Terminal** tab is the original OpenFinLens app embedded same-origin, by design, so the feature set stays 1:1. Its storage keys (`gfd_*`, `ofl:*`) do not collide with the plugin's (`dsh-openfin:*`); the host light/dark theme is passed in, but canvas charts already open inside the terminal may need re-entering that view to repaint after a theme flip.
 - Article bodies are Chinese originals; the English UI translates interface copy only.
 - Tested on DSH 0.2.2-rc.1 desktop and `dsh web` only.
 

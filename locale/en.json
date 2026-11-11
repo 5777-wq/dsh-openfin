@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "OpenFin market and academy",
-    "description": "A-share and global quotes, an industry heatmap, market news, a plain-language finance academy and glossary, plus a draggable, translucent market HUD with searchable custom instruments and a boss key, as native DeepSeek Harness surfaces.",
+    "description": "OpenFin inside DeepSeek Harness: the complete OpenFinLens terminal (multi-market heatmaps, event map, prediction markets, K-lines, funds, portfolio, macro, industry chains and every other upstream feature), plus a native market page, a plain-language finance academy and glossary, and a floating HUD with custom instruments and a boss key.",
     "direction": "intl"
   },
   "nav": "OpenFin",
@@ -112,5 +112,13 @@
   "hud.panicHint": "Press it once to hide the floating card instantly; the same combo brings it back.",
   "hud.panicNow": "Hide now",
   "hud.panicShortcut": "Shortcut",
-  "hud.panicOff": "Off"
+  "hud.panicOff": "Off",
+  "tab.terminal": "Terminal",
+  "terminal.title": "OpenFinLens terminal",
+  "terminal.hint": "The full app: multi-market treemap, event map, prediction markets, K-lines, funds and portfolio…",
+  "terminal.reload": "Reload the terminal",
+  "terminal.openExternal": "Open in a new tab",
+  "terminal.loading": "Loading the full terminal…",
+  "terminal.slow": "Still loading — the terminal bundle is large. You can retry with “reload”.",
+  "terminal.frameTitle": "OpenFinLens terminal"
 }

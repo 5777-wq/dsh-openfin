@@ -9,6 +9,7 @@ import { FloatingHud } from './components/FloatingHud.js'
 import { HudSettings } from './components/HudSettings.js'
 import { Tabs, RefreshButton } from './components/Tabs.js'
 import { Dashboard } from './views/Dashboard.js'
+import { Terminal } from './views/Terminal.js'
 import { Academy } from './views/Academy.js'
 import { ArticleView } from './views/ArticleView.js'
 import { Glossary } from './views/Glossary.js'
@@ -24,11 +25,11 @@ const TAB_KEY = 'dsh-openfin:tab'
 function readTab() {
   try {
     const saved = window.localStorage.getItem(TAB_KEY)
-    if (saved === 'market' || saved === 'academy' || saved === 'glossary') return saved
+    if (saved === 'terminal' || saved === 'market' || saved === 'academy' || saved === 'glossary') return saved
   } catch {
     /* storage may be disabled; the default tab is fine */
   }
-  return 'market'
+  return 'terminal'
 }
 
 function writeTab(tab) {
@@ -209,6 +210,10 @@ function HudLayer({ t, onOpenDashboard }) {
 function OpenFinPage({ t }) {
   const [tab, setTab] = useState(readTab)
   const [articleId, setArticleId] = useState(null)
+  // The terminal is a same-origin iframe with the whole OpenFinLens app: once
+  // the user opens it, keep it mounted (hidden) so switching tabs does not
+  // reload the app and lose its tab/scroll/chart state.
+  const [terminalMounted, setTerminalMounted] = useState(() => readTab() === 'terminal')
   const feed = useSnapshotFeed()
   const direction = t('meta.direction') === 'intl' ? 'intl' : 'cn'
 
@@ -216,6 +221,7 @@ function OpenFinPage({ t }) {
     setArticleId(null)
     setTab(next)
     writeTab(next)
+    if (next === 'terminal') setTerminalMounted(true)
   }, [])
 
   const openArticle = useCallback((id) => {
@@ -227,7 +233,7 @@ function OpenFinPage({ t }) {
 
   return h(
     'div',
-    { className: 'of-page', 'data-direction': direction },
+    { className: 'of-page', 'data-direction': direction, 'data-view': tab },
     h(
       'div',
       { className: 'of-inner' },
@@ -246,6 +252,7 @@ function OpenFinPage({ t }) {
           { className: 'of-head-actions' },
           h(Tabs, {
             items: [
+              { id: 'terminal', label: t('tab.terminal') },
               { id: 'market', label: t('tab.market') },
               { id: 'academy', label: t('tab.academy') },
               { id: 'glossary', label: t('tab.glossary') },
@@ -277,7 +284,19 @@ function OpenFinPage({ t }) {
       h(
         'main',
         { id: 'of-panel-' + tab, role: 'tabpanel' },
-        tab === 'market'
+        terminalMounted
+          ? h(
+              'div',
+              {
+                className: 'of-terminal-holder',
+                'data-active': tab === 'terminal' ? 'true' : 'false',
+              },
+              h(Terminal, { t }),
+            )
+          : null,
+        tab === 'terminal'
+          ? null
+          : tab === 'market'
           ? h(Dashboard, {
               t,
               snapshot: feed.snapshot,
@@ -296,7 +315,9 @@ function OpenFinPage({ t }) {
               : h(Academy, { t, onOpenArticle: openArticle })
             : h(Glossary, { t }),
       ),
-      h(
+      tab === 'terminal'
+        ? null
+        : h(
         'footer',
         { className: 'of-foot' },
         h('span', { className: 'of-live-dot', 'data-stale': feed.snapshot && feed.snapshot.stale ? 'true' : 'false' }),

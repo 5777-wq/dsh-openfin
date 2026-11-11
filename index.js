@@ -1,11 +1,13 @@
 /**
  * dsh-openfin — Host half.
  *
- * Registers exactly one prefix route on the harness Web server:
- *   { kind: 'prefix', path: '/dsh-openfin', resource }
- * The path must NOT carry a trailing slash: the Web server matches
+ * Registers three route prefixes on the harness Web server:
+ *   { kind: 'prefix', path: '/dsh-openfin',       resource }  data + academy
+ *   { kind: 'prefix', path: '/dsh-openfin/lens',  handler }   complete terminal
+ *   { kind: 'prefix', path: '/dsh-openfin/api/hud', handler } floating HUD
+ * Prefixes must NOT carry a trailing slash: the Web server matches
  * `pathname === prefix || pathname.startsWith(prefix + '/')`, so a trailing
- * slash would never match `/dsh-openfin/api/...` requests.
+ * slash would never match the subpaths.
  *
  * Everything reachable from here imports `node:*` builtins only. The plugin is
  * installed as a linked local directory in some profiles, so `@deepseek-ai/*`
@@ -20,6 +22,10 @@
  * `lib/hud.js`; it starts and stops a separate Electron helper process and is
  * the only part of this plugin that spawns anything.
  */
+import { resolve } from 'node:path'
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { createCache } from './lib/cache.js'
 import { createQuotes } from './lib/quotes.js'
 import { createBoards } from './lib/boards.js'
@@ -30,6 +36,7 @@ import { buildSnapshot } from './lib/snapshot.js'
 import { createRouter, ROUTE_PREFIX } from './lib/routes.js'
 import { createHud } from './lib/hud.js'
 import { createInstruments } from './lib/instruments.js'
+import { createLens, LENS_PREFIX } from './lib/lens.js'
 
 export const name = 'dsh-openfin'
 
@@ -78,9 +85,22 @@ export function apply(ctx) {
     'dsh-openfin: routes',
   )
 
+  ctx.effect(
+    () =>
+      ctx.webServer.register({
+        kind: 'prefix',
+        path: LENS_PREFIX,
+        handler: (request, response) => lens.handleNode(request, response),
+      }),
+    'dsh-openfin: lens terminal',
+  )
+
   // Floating HUD: the desktop helper is opt-in, but a profile that already has
   // it enabled restores the window on boot.
   const instruments = createInstruments({ cache, loadBuiltinQuotes: quotes.load })
+  // The complete OpenFinLens terminal, vendored under `lens/` and served as
+  // static files; the page embeds it with ?embed=1.
+  const lens = createLens({ root: resolve(dirname(fileURLToPath(import.meta.url)), 'lens') })
   const hud = createHud({
     instruments,
     origin: () => {
