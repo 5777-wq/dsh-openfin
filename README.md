@@ -125,6 +125,7 @@ npm run build        # 生成 client/client.js（单文件 ModuleLoader 产物�
 npm run check        # 校验 manifest/补丁/locale/图标/产物/数据/终端
 node --test "tests/**/*.test.mjs"
 npm run sync:lens    # 从 ../openfin/openfinlens 重新同步完整终端（lens/）
+node scripts/probe.mjs  # 可选：用真实上游跑一遍 Host 半场，打印冷/热耗时（需要网络）
 ```
 
 内容来自姊妹仓库，重新生成：
