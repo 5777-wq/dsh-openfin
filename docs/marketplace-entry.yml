@@ -1,0 +1,18 @@
+# Entry for the awesome-dsh-plugin list (the index behind dsh-market).
+#
+# To submit: copy this file into the list repository as
+#   data/plugins/5777-wq__dsh-openfin.yml
+# and open a pull request. One file is the whole submission; the two READMEs
+# there are generated from `data/plugins/*.yml`.
+#
+# Keep it in sync with this repo: the maintainers read it as a claim about the
+# code and check it against the source.
+url: https://github.com/5777-wq/dsh-openfin
+name: 5777-wq/dsh-openfin
+category: ui
+description:
+  en: 'An OpenFin page in the DeepSeek Harness sidebar: eleven quote cards (Shanghai, Shenzhen, ChiNext, Hang Seng, Nasdaq, S&P 500, Dow, COMEX gold, dollar index, BTC, ETH), a 96-board A-share industry heatmap whose cells open a constituent drawer, gainers/losers/most-active lists, an eastmoney news feed, a 25-article plain-language finance academy with a 293-term glossary, and the complete OpenFinLens terminal (MIT, vendored under lens/) as an embedded tab. An optional floating HUD shows chosen symbols in-page or in an always-on-top Electron window; quotes come from public eastmoney, Binance, OKX and CoinGecko endpoints and need no API key.'
+  zh: '在 DeepSeek Harness 侧边栏加入一个 OpenFin 页面：11 张行情卡（上证、深证、创业板、恒生、纳指、标普、道指、COMEX 黄金、美元指数、BTC、ETH）、96 个 A 股行业板块热力图（点开看成分股）、涨幅/跌幅/成交额异动榜、东方财富快讯、25 篇白话金融文章与 293 条金融词典，以及内嵌的完整 OpenFinLens 终端（MIT，整包放在 lens/）。可选悬浮窗在页面内或独立置顶的 Electron 窗口里显示自选品种；行情取自东方财富、Binance、OKX、CoinGecko 公开接口，不需要 API key。'
+# GitHub Release 托管、文件名不带版本号——带版本号会在下次发版后 404。
+tarball: https://github.com/5777-wq/dsh-openfin/releases/latest/download/dsh-openfin.tgz
+icon: https://raw.githubusercontent.com/5777-wq/dsh-openfin/main/docs/screenshots/icon-180.png
