@@ -40,17 +40,29 @@ function writeTab(tab) {
   }
 }
 
-/** Snapshot polling shared by the header refresh button and the page body. */
-function useSnapshotFeed() {
+/**
+ * Snapshot polling shared by the header refresh button and the page body.
+ *
+ * `enabled` is false on the terminal tab: the embedded OpenFinLens app has its
+ * own data sources, so polling `/api/snapshot` behind it only costs the Host
+ * upstream calls nobody reads. The last snapshot is kept while disabled, so
+ * switching back paints immediately.
+ *
+ * @param {boolean} enabled
+ */
+function useSnapshotFeed(enabled) {
   const [state, setState] = useState({ snapshot: null, loading: true, error: null })
   const [generation, setGeneration] = useState(0)
 
   const refresh = useCallback(() => setGeneration((value) => value + 1), [])
 
   useEffect(() => {
+    if (!enabled) return undefined
+    const doc = typeof document === 'undefined' ? null : document
     const controller = new AbortController()
     let alive = true
     let timer = 0
+    let failures = 0
 
     const schedule = (delay) => {
       clearTimeout(timer)
@@ -58,34 +70,50 @@ function useSnapshotFeed() {
     }
 
     const run = async () => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        schedule(8000)
-        return
-      }
+      clearTimeout(timer)
+      timer = 0
+      // A hidden page does not need live quotes. The visibility listener below
+      // fetches once when the page comes back, instead of polling in the dark.
+      if (doc !== null && doc.hidden) return
       try {
         const snapshot = await getSnapshot(controller.signal)
         if (!alive) return
+        failures = 0
         setState({ snapshot, loading: false, error: null })
         schedule(snapshot && snapshot.refreshMs)
       } catch (error) {
         if (!alive || (error && error.name === 'AbortError')) return
+        failures += 1
         setState((previous) => ({
           snapshot: previous.snapshot,
           loading: false,
           error: (error && error.message) || String(error),
         }))
-        schedule(30000)
+        // Back off: an upstream outage should not be retried every 30 s forever.
+        schedule(Math.min(30_000 * 2 ** (failures - 1), 5 * 60_000))
       }
     }
 
+    const onVisibility = () => {
+      if (doc === null) return
+      if (doc.hidden) {
+        clearTimeout(timer)
+        timer = 0
+        return
+      }
+      if (timer === 0) void run()
+    }
+
+    doc?.addEventListener('visibilitychange', onVisibility)
     setState((previous) => ({ snapshot: previous.snapshot, loading: true, error: null }))
-    run()
+    if (doc === null || !doc.hidden) void run()
     return () => {
       alive = false
       controller.abort()
       clearTimeout(timer)
+      doc?.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [generation])
+  }, [enabled, generation])
 
   return { ...state, refresh }
 }
@@ -169,6 +197,8 @@ function HudLayer({ t, onOpenDashboard }) {
     if (!config.desktop && !settingsOpen) return undefined
     refreshStatus()
     const timer = setInterval(() => {
+      // No point waking the Host for a status nobody can see.
+      if (typeof document !== 'undefined' && document.hidden) return
       if (config.desktop) refreshStatus()
     }, 15000)
     return () => clearInterval(timer)
@@ -214,7 +244,9 @@ function OpenFinPage({ t }) {
   // the user opens it, keep it mounted (hidden) so switching tabs does not
   // reload the app and lose its tab/scroll/chart state.
   const [terminalMounted, setTerminalMounted] = useState(() => readTab() === 'terminal')
-  const feed = useSnapshotFeed()
+  // Nothing on the terminal tab reads the snapshot: the embedded app has its
+  // own feeds, so the poll stays off until a tab that shows quotes is opened.
+  const feed = useSnapshotFeed(tab !== 'terminal')
   const direction = t('meta.direction') === 'intl' ? 'intl' : 'cn'
 
   const changeTab = useCallback((next) => {
@@ -291,7 +323,7 @@ function OpenFinPage({ t }) {
                 className: 'of-terminal-holder',
                 'data-active': tab === 'terminal' ? 'true' : 'false',
               },
-              h(Terminal, { t }),
+              h(Terminal, { t, active: tab === 'terminal' }),
             )
           : null,
         tab === 'terminal'

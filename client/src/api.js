@@ -37,19 +37,45 @@ export async function getJson(path, options = {}) {
 /** Live dashboard snapshot (indices, heatmap boards, movers, news). */
 export const getSnapshot = (signal) => getJson('/snapshot', { signal })
 
+/**
+ * Committed content (`/api/academy`, `/api/glossary`, one article) only changes
+ * with a plugin release, so it is fetched once per page lifetime. Without this
+ * a tab switch re-downloads and re-parses the 242 KB glossary, and the article
+ * reader re-reads the same body every visit.
+ *
+ * A failed load is forgotten so the next visit retries; a resolved one is kept.
+ * The caller's abort signal is deliberately not forwarded: the shared request
+ * outlives one view, and its result is what makes the next visit instant.
+ *
+ * @param {string} path
+ * @returns {Promise<any>}
+ */
+const immutable = new Map()
+
+function getJsonOnce(path) {
+  const running = immutable.get(path)
+  if (running !== undefined) return running
+  const promise = getJson(path, { cache: 'default' }).catch((error) => {
+    immutable.delete(path)
+    throw error
+  })
+  immutable.set(path, promise)
+  return promise
+}
+
 /** Constituents of one eastmoney industry board. */
 export const getSector = (code, signal) =>
   getJson('/sector?code=' + encodeURIComponent(code), { signal })
 
 /** Academy article index and section chips. */
-export const getAcademy = (signal) => getJson('/academy', { signal, cache: 'default' })
+export const getAcademy = () => getJsonOnce('/academy')
 
 /** One academy article with its markdown body. */
-export const getArticle = (id, signal) =>
-  getJson('/academy/article?id=' + encodeURIComponent(id), { signal, cache: 'default' })
+export const getArticle = (id) =>
+  getJsonOnce('/academy/article?id=' + encodeURIComponent(id))
 
 /** Glossary terms plus the term of the day. */
-export const getGlossary = (signal) => getJson('/glossary', { signal, cache: 'default' })
+export const getGlossary = () => getJsonOnce('/glossary')
 
 /**
  * POST one JSON body to a HUD endpoint.

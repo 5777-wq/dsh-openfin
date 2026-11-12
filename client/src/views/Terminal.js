@@ -60,7 +60,7 @@ function frameSrc(theme) {
  * keeps feature parity with OpenFinLens instead of reimplementing it partially.
  * The embed adapter receives the host theme and reports readiness.
  */
-export function Terminal({ t }) {
+export function Terminal({ t, active = true }) {
   const [src, setSrc] = useState(() => frameSrc(hostTerminalTheme()))
   const [ready, setReady] = useState(false)
   const [slow, setSlow] = useState(false)
@@ -100,8 +100,11 @@ export function Terminal({ t }) {
   }, [])
 
   // Theme handshake: initial theme is in the URL; later DSH theme flips are a
-  // message, so the embedded app keeps its tab/scroll state.
+  // message, so the embedded app keeps its tab/scroll state. The observer only
+  // runs while the terminal is the visible tab: a hidden iframe does not need
+  // a postMessage for every host style mutation.
   useEffect(() => {
+    if (!active) return undefined
     const root = document.documentElement
     const body = document.body
     const send = () => {
@@ -123,11 +126,13 @@ export function Terminal({ t }) {
     } catch {
       query = null
     }
+    // Pick up a theme change that happened while the tab was hidden.
+    send()
     return () => {
       observer.disconnect()
       query?.removeEventListener?.('change', send)
     }
-  }, [])
+  }, [active])
 
   const openExternal = useCallback((event) => {
     event.preventDefault()

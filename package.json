@@ -1,6 +1,6 @@
 {
   "name": "dsh-openfin",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "OpenFin — the complete OpenFinLens terminal, a native market dashboard, a plain-language finance academy, and a floating always-on-top HUD, inside DeepSeek Harness.",
   "type": "module",
   "license": "MIT",

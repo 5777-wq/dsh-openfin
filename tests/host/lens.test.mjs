@@ -85,6 +85,11 @@ describe('resolveLensPath', () => {
     }
   })
 
+  it('answers 404 (not 400) for NUL bytes, like every other rejected path', () => {
+    const root = makeRoot()
+    assert.equal(resolveLensPath(LENS_PREFIX + '/bad%00name', root).status, 404)
+  })
+
   it('returns 404 for a missing file', () => {
     const root = makeRoot()
     const resolved = resolveLensPath(LENS_PREFIX + '/nope.js', root)

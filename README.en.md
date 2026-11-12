@@ -97,6 +97,15 @@ After installing, click **OpenFin** in the sidebar. Refresh the page; if the row
 - A snapshot is cached for 30 s (the page polls using the `refreshMs` the server returns). If one upstream fails, the rest is served with a "partial data" badge instead of failing the page.
 - Articles and glossary ship with the plugin, derived from the MIT-licensed sibling projects [openfin-academy](https://github.com/5777-wq/openfin-academy) and [openfinlens](https://github.com/5777-wq/openfinlens). Attribution in [NOTICE.md](NOTICE.md).
 
+## Performance
+
+- **Work happens once**: the 293 glossary terms are built once (only the term of the day rotates, by local date), articles are reparsed only when their file changes, and the browser keeps the academy index, glossary and each article for the page lifetime — switching tabs no longer re-downloads and re-parses 242 KB.
+- **The sector drawer is cached for 30 s**: reopening a board issues no upstream request, and one open is bounded to 5 s.
+- **The floating HUD shares the dashboard's quotes cache**: built-in symbols no longer fetch on their own, and custom symbols load in parallel with them.
+- **One upstream call has a 5.5 s total budget, retries included**: the old worst case (4 s timeout plus a 4 s retry) exceeded the 6 s snapshot part and could never be delivered. The crypto fallback chain has its own cache and a 2 s wait, so it cannot hold the index cards.
+- **The client artifact is minified**: 222 KB → 143 KB (gzip 47 KB → 38 KB), parsed on every DSH page load.
+- **Polling stops while the page is hidden** and resumes immediately on return; the terminal tab no longer polls the market snapshot it never shows.
+
 ## Interactions
 
 | Where | What |

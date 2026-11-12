@@ -41,6 +41,10 @@ const result = await build({
   target: ['chrome120', 'safari17', 'firefox120'],
   external: ['react'],
   legalComments: 'none',
+  // The artifact ships inside the plugin and is parsed on every DSH page load;
+  // the unminified build was 222 KB against 146 KB minified.
+  minify: true,
+  charset: 'utf8',
   logLevel: 'warning',
 })
 

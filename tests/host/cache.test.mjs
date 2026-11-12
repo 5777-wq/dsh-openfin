@@ -96,3 +96,21 @@ test('default cache exports the module-level memo/peek aliases', async () => {
   assert.equal(typeof defaultCache.memo, 'function')
   assert.equal(defaultCache.size(), 0)
 })
+
+test('the cache sweeps once it grows past maxEntries', async () => {
+  let now = 0
+  const cache = createCache({ now: () => now, maxEntries: 2 })
+  cache.set('a', 1, 100)
+  cache.set('b', 2, 100)
+  cache.set('c', 3, 100)
+  // Everything is fresh, so the oldest entries are dropped to stay bounded.
+  assert.equal(cache.size(), 2)
+  assert.equal(cache.peek('a'), undefined)
+  assert.equal(cache.peek('c')?.value, 3)
+
+  now = 1_000
+  cache.set('d', 4, 100)
+  assert.equal(cache.size(), 1)
+  assert.equal(cache.peek('b'), undefined)
+  assert.equal(cache.peek('d')?.value, 4)
+})

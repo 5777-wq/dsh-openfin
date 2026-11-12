@@ -20,7 +20,8 @@ export function AcademyCard(props) {
     {
       type: 'button',
       className: 'of-acard of-stagger',
-      style: { '--i': String(index) },
+      // Cap the stagger so a filtered list never waits on a long delay chain.
+      style: { '--i': String(Math.min(index, 6)) },
       onClick: () => props.onOpen(article.id),
     },
     h('span', { className: 'of-acard-title' }, article.title || article.id),

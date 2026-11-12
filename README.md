@@ -3,7 +3,6 @@
 [English](README.en.md) | 中文
 
 [![ci](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml/badge.svg)](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/dsh-openfin?label=npm)](https://www.npmjs.com/package/dsh-openfin)
 [![license](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
 > 装进 DeepSeek Harness 的金融看板与白话学院：A股/港股/美股/商品/加密行情、行业热力图、异动榜、财经快讯，加上 25 篇白话金融文章与 293 条金融词典，全部作为 **DSH 里的一个原生页面**（不是 iframe，不是外链）。
@@ -97,6 +96,15 @@ dsh plugin --profile web add https://github.com/5777-wq/dsh-openfin/releases/lat
 - 所有数据请求都是匿名 `GET`；插件不上报、不写盘、不读取你的任何文件与会话。
 - 行情快照缓存 30 秒（页面按返回的 `refreshMs` 轮询）；单个上游失败时返回其余部分并标注「部分数据延迟」，不会整页报错。
 - 文章与词典随插件发布，来自 MIT 协议的姊妹项目：[openfin-academy](https://github.com/5777-wq/openfin-academy)、[openfinlens](https://github.com/5777-wq/openfinlens)。署名见 [NOTICE.md](NOTICE.md)。
+
+## 性能
+
+- **只算一次**：词典 293 条构建一次（内容不随请求变，只有「今日一词」按本地日期滚动），文章解析结果按 mtime/size 复用，浏览器端把学院/词典/文章按页面生命周期缓存——切页签不再重新下载并解析 242 KB。
+- **板块抽屉缓存 30 秒**：同一个板块反复打开不再发上游请求，单次最多等 5 秒。
+- **悬浮窗与行情页共用一份行情缓存**：内置品种不再单独请求，自选品种与内置品种并行拉取。
+- **单次上游请求有 5.5 秒总预算（含重试）**：不会再出现「4 秒超时 + 再试 4 秒」叠成 8 秒、而快照只等 6 秒的局面。加密行情降级链单独缓存且最多等 2 秒，不会拖住指数卡片。
+- **客户端产物压缩发布**：单文件 222 KB → 143 KB（gzip 47 KB → 38 KB），每次打开 DSH 页面都要解析它。
+- **页面隐藏时停止轮询**，回到前台立刻补一次；终端页签不再拉行情快照（那里不需要）。
 
 ## 交互
 

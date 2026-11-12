@@ -560,6 +560,9 @@ export const CSS = String.raw`
   padding: 12px 14px; border-radius: 12px; text-align: left;
   background: var(--of-surface); border: 0.5px solid var(--of-border);
   font: inherit; color: inherit; cursor: pointer;
+  /* 293 cards: off-screen rows skip layout and paint until they are scrolled
+     into view. The intrinsic size keeps the scrollbar stable. */
+  content-visibility: auto; contain-intrinsic-size: auto 92px;
   transition: border-color 0.18s var(--of-ease), background-color 0.18s var(--of-ease),
               transform 0.18s var(--of-ease), box-shadow 0.22s var(--of-ease);
 }

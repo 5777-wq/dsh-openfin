@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.5.0 — 2026-11-12
+
+Performance and logic pass over both halves, found by auditing every request
+path rather than by guessing.
+
+### Changed
+
+- **The client bundle is minified**: `client/client.js` 222 KB → 143 KB
+  (gzip 47 KB → 38 KB). It is parsed on every DSH page load, so this is paid on
+  every refresh, not just the first.
+- **The glossary paints immediately.** Its reveal animation is a stagger, not a
+  queue, but the delay was derived from the card index: with 293 terms the last
+  card only became visible 7.6 s after the first. The index is now capped, and
+  off-screen cards use `content-visibility` so they skip layout and paint.
+- **Committed content is cached.** Articles are parsed once (revalidated by
+  mtime/size), the glossary payload is built once per local date and
+  pre-serialized for the route, and the client keeps `/api/academy`,
+  `/api/glossary` and each article for the page lifetime instead of re-reading
+  them on every tab switch.
+- **The sector drawer is cached and bounded**: one 30 s entry per board code
+  plus a 5 s budget, so reopening a board costs no upstream calls and a hung
+  constituent request cannot stall the drawer.
+- **The floating HUD reuses the dashboard's quotes entry.** Built-in symbols
+  used to load the quotes part outside the shared cache (one extra index +
+  crypto request per HUD poll, and the desktop helper polls every 15 s); they
+  now join `part:quotes`, and built-in and custom symbols load in parallel.
+- **Sparklines no longer stall a poll**: a cached series is served as-is while
+  an expired one refreshes in the background, so the 30 s refresh stops waiting
+  on nine trend requests.
+- **Retries have to fit the budget**: `fetchJson` gained a 5.5 s deadline, so a
+  4 s timeout is no longer followed by an 8.15 s second attempt that could
+  never reach a 6 s snapshot part.
+- **The crypto fallback chain can no longer hold the index cards hostage.** It
+  has its own cache entry and a 2 s wait, so a dead Binance/OKX/CoinGecko path
+  costs at most 2 s instead of up to 24 s.
+- The board list asks upstream for 150 rows instead of 500 (the heatmap keeps
+  96).
+- The HUD settings sheet renders the status it is given instead of fetching it
+  again (3 → 1 request on open), and the opacity sliders stage locally and
+  commit on release instead of writing config on every pointer move.
+
+### Fixed
+
+- Snapshot polling now stops on the terminal tab (nothing there reads it),
+  pauses while the page is hidden via `visibilitychange` instead of re-arming
+  an 8 s timer, and backs off 30 s → 5 min on repeated failures.
+- The terminal's theme observer runs only while its tab is visible.
+- A NUL byte in a static path answers 404 (the SPEC's contract) instead of 400.
+- The desktop helper can report an unexpected exit again after an intentional
+  stop; the in-process cache sweeps expired entries instead of growing forever,
+  and a part served from a still-fresh entry is no longer flagged stale.
+- `npm run check` no longer skips the academy checks when `data/` is missing.
+  It now validates section counts, article → article/term cross-references, and
+  the 260 KiB budget on the payload the route actually serves.
+- Tests: 171 (+10), including an end-to-end wiring test that proves the HUD,
+  the dashboard and the sector route share one cache.
+
 ## 0.4.0 — 2026-11-11
 
 ### Added

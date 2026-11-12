@@ -6,11 +6,13 @@
  * theme). Everything edits the shared `HudConfig` through `onChange`; the page
  * shell owns persistence and the debounced Host sync.
  *
- * Desktop status is live: `getHud` is polled after a toggle so the sheet can
- * report available / running / reason without a reload.
+ * Desktop status is live: the page shell (the `status` prop) polls `getHud`
+ * after a toggle so the sheet reports available / running / reason without a
+ * reload. The sheet itself never fetches, so opening it costs one request
+ * instead of one per component that wants the status.
  */
 import { createElement as h, useCallback, useEffect, useRef, useState } from 'react'
-import { getHud, postHud, searchInstruments } from '../api.js'
+import { postHud, searchInstruments } from '../api.js'
 import { PANIC_SHORTCUTS, SYMBOLS, instrumentName, isCustomSymbol, panicShortcutLabel } from '../hud-config.js'
 import { Icon, Mark } from './Icon.js'
 
@@ -37,7 +39,6 @@ function SettingSwitch({ checked, label, disabled, onChange, autoFocus }) {
 }
 
 export function HudSettings({ t, config, onChange, status, onRefreshStatus, onClose, onPanicNow }) {
-  const [localStatus, setLocalStatus] = useState(null)
   const [recentering, setRecentering] = useState(false)
   const [desktopPending, setDesktopPending] = useState(false)
   const [titleDraft, setTitleDraft] = useState(config.title || '')
@@ -50,16 +51,9 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
   const direction = t('meta.direction') === 'intl' ? 'intl' : 'cn'
 
   const refreshStatus = useCallback(() => {
-    getHud().then(
-      (next) => setLocalStatus(next !== null && typeof next === 'object' ? next : null),
-      () => setLocalStatus(null),
-    )
+    // The shell owns the single `GET /api/hud`; this just asks it to refresh.
     if (typeof onRefreshStatus === 'function') onRefreshStatus()
   }, [onRefreshStatus])
-
-  useEffect(() => {
-    refreshStatus()
-  }, [refreshStatus])
 
   // Re-check the helper a couple of times after a desktop toggle: spawning is
   // asynchronous on the Host side.
@@ -265,7 +259,7 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
     toggleSymbol(id)
   }
 
-  const hud = status !== null && status !== undefined ? status : localStatus
+  const hud = status !== null && status !== undefined ? status : null
   const available = hud ? hud.available !== false : null
   const running = hud ? hud.running === true : false
   const reason = hud && hud.reason ? String(hud.reason) : ''
@@ -288,6 +282,25 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
   idleChoices.sort((left, right) => left - right)
   const opacity = typeof config.opacity === 'number' ? config.opacity : 85
   const idleOpacity = typeof config.idleOpacity === 'number' ? config.idleOpacity : 35
+
+  /**
+   * Sliders are staged locally and committed on release. Writing the shared
+   * config on every pointer move saved to localStorage, cloned the config twice
+   * and re-rendered this sheet plus the HUD about 60 times a second, which is
+   * what made dragging feel sticky.
+   */
+  const [draft, setDraft] = useState(() => ({ opacity, idleOpacity }))
+  useEffect(() => {
+    setDraft({ opacity, idleOpacity })
+  }, [opacity, idleOpacity])
+  const stage = (name) => (event) => setDraft((current) => ({ ...current, [name]: Number(event.target.value) }))
+  const commit = (name) => (event) => onChange?.({ [name]: Number(event.target.value) })
+  const sliderHandlers = (name) => ({
+    onChange: stage(name),
+    onPointerUp: commit(name),
+    onKeyUp: commit(name),
+    onBlur: commit(name),
+  })
   const size = config.size === 's' || config.size === 'l' ? config.size : 'm'
   const spark = config.showSpark !== false
 
@@ -562,11 +575,11 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
                 min: 20,
                 max: 100,
                 step: 1,
-                value: opacity,
+                value: draft.opacity,
                 'aria-label': t('hud.opacity'),
-                onChange: (event) => onChange?.({ opacity: Number(event.target.value) }),
+                ...sliderHandlers('opacity'),
               }),
-              h('span', { className: 'of-hset-value' }, opacity + '%'),
+              h('span', { className: 'of-hset-value' }, draft.opacity + '%'),
             ),
           ),
           h(
@@ -582,12 +595,12 @@ export function HudSettings({ t, config, onChange, status, onRefreshStatus, onCl
                 min: 20,
                 max: 100,
                 step: 1,
-                value: idleOpacity,
+                value: draft.idleOpacity,
                 disabled: idleAfter === 0,
                 'aria-label': t('hud.idleOpacity'),
-                onChange: (event) => onChange?.({ idleOpacity: Number(event.target.value) }),
+                ...sliderHandlers('idleOpacity'),
               }),
-              h('span', { className: 'of-hset-value' }, idleOpacity + '%'),
+              h('span', { className: 'of-hset-value' }, draft.idleOpacity + '%'),
             ),
           ),
           h(

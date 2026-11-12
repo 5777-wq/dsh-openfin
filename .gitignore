@@ -9,3 +9,7 @@ coverage/
 
 # helper scratch
 runtime/**/*.tmp
+.tmp/
+
+# local tooling state
+.mimosa/

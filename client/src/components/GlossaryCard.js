@@ -46,7 +46,9 @@ export function GlossaryCard(props) {
     'div',
     {
       className: 'of-gcard of-stagger',
-      style: { '--i': String(index) },
+      // The reveal is a stagger, not a queue: capping the index keeps a 293
+      // card grid from painting its last row 7.6 s after the first.
+      style: { '--i': String(Math.min(index, 10)) },
       'data-open': open ? 'true' : 'false',
       role: 'button',
       tabIndex: 0,

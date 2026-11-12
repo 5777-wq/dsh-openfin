@@ -12,6 +12,7 @@ import {
   normalizeSectorStocks,
 } from '../../lib/boards.js'
 import { fixture, mockFetchJson, routedFetchJson } from './helpers.mjs'
+import { createCache } from '../../lib/cache.js'
 
 const boardsFixture = await fixture('eastmoney/boards-industry.json')
 const sectorBk1295 = await fixture('eastmoney/sector-BK1295.json')
@@ -164,4 +165,27 @@ test('loadSector propagates a constituent failure so the route can answer 502', 
     throw new Error('clist down')
   })
   await assert.rejects(createBoards({ fetchJson }).loadSector('BK1295'), /clist down/)
+})
+
+test('loadSector is cached per code when a cache is injected', async () => {
+  const fetchJson = routedFetchJson([
+    [boardStocksUrl('BK1295'), sectorBk1295],
+    [boardMetaUrl('BK1295'), boardMeta],
+  ])
+  const boards = createBoards({ fetchJson, cache: createCache() })
+
+  const first = await boards.loadSector('BK1295')
+  const callsAfterFirst = fetchJson.calls.length
+  const second = await boards.loadSector('BK1295')
+
+  assert.deepEqual(second, first)
+  assert.equal(fetchJson.calls.length, callsAfterFirst, 'a reopen inside the TTL must not hit upstream')
+})
+
+test('loadSector gives up at its budget instead of hanging the drawer', async () => {
+  const boards = createBoards({
+    fetchJson: () => new Promise(() => {}),
+    sectorBudgetMs: 40,
+  })
+  await assert.rejects(boards.loadSector('BK1295'), (error) => error.code === 'timeout')
 })

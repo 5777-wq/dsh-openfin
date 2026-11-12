@@ -132,3 +132,25 @@ test('fetchJson surfaces a caller abort as code "aborted"', async () => {
   // An already-aborted request is not retried.
   assert.equal(requests, 0)
 })
+
+test('a retry that cannot fit the deadline is skipped', async () => {
+  let requests = 0
+  await withServer(
+    (req, res) => {
+      requests += 1
+      const timer = setTimeout(() => res.end('{"late":true}'), 300)
+      res.on('close', () => clearTimeout(timer))
+    },
+    async (base) => {
+      const started = Date.now()
+      await assert.rejects(
+        fetchJson(`${base}/x`, { timeoutMs: 80, deadlineMs: 120, retryDelayMs: 0 }),
+        (error) => error.code === 'timeout',
+      )
+      // First attempt already spent the budget: a second one would only stall
+      // the caller past its own part budget.
+      assert.ok(Date.now() - started < 250)
+    },
+  )
+  assert.equal(requests, 1)
+})

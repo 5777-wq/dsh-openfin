@@ -171,3 +171,21 @@ test('json helper sets status, content type and cache headers', async () => {
   assert.equal(response.headers.get('cache-control'), 'no-store')
   assert.deepEqual(await response.json(), { ok: true })
 })
+
+test('GET /api/glossary returns the academy pre-serialized payload unchanged', async () => {
+  const text = '{"daily":null,"terms":[{"id":"t"}],"categories":[]}'
+  const { route } = makeRouter({
+    academy: {
+      getIndex: async () => INDEX,
+      getArticle: async () => null,
+      getGlossary: async () => {
+        throw new Error('the route must prefer getGlossaryJson')
+      },
+      getGlossaryJson: async () => text,
+    },
+  })
+  const response = await get(route, `${ROUTE_PREFIX}/api/glossary`)
+  assert.equal(response.status, 200)
+  assert.equal(await response.text(), text)
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=300')
+})

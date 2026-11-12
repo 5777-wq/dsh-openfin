@@ -5,12 +5,24 @@
 
 const PLACEHOLDER = '—'
 
+/**
+ * One Intl.NumberFormat per digit count. Building one per call costs ~20 µs,
+ * and a dashboard render calls this a few hundred times per refresh.
+ */
+const priceFormats = new Map()
+
+function priceFormat(digits) {
+  let format = priceFormats.get(digits)
+  if (format === undefined) {
+    format = new Intl.NumberFormat('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })
+    priceFormats.set(digits, format)
+  }
+  return format
+}
+
 export function fmtPrice(value, digits = 2) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return PLACEHOLDER
-  return value.toLocaleString('en-US', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  })
+  return priceFormat(digits).format(value)
 }
 
 export function fmtPct(value, digits = 2) {

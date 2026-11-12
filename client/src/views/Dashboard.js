@@ -51,7 +51,7 @@ export function Dashboard({ t, snapshot, loading, error, onRetry }) {
         },
       )
     },
-    [sector],
+    [],
   )
 
   useEffect(() => () => {

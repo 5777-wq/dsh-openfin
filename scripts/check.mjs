@@ -2,10 +2,11 @@
 // Repository self-check for dsh-openfin: manifest, patch, locales, icon, the
 // committed client artifact and the generated academy data. No network, no
 // writes — safe for CI and for `npm run check` before publishing.
-import { readFile, stat, readdir } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { buildGlossaryPayload, MAX_GLOSSARY_BYTES } from '../lib/academy.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const failures = []
@@ -131,7 +132,12 @@ if (existsSync(resolve(root, 'lib'))) {
 }
 
 // ------------------------------------------------------------ academy data
-if (existsSync(resolve(root, 'data/academy/index.json'))) {
+// The data directory is committed and shipped inside the package, so a missing
+// file is a failure. (It used to be guarded by existsSync, which meant deleting
+// `data/` made this check pass.)
+if (!existsSync(resolve(root, 'data/academy/index.json'))) {
+  fail('data/academy/index.json is missing')
+} else {
   const index = await readJson('data/academy/index.json')
   const articles = Array.isArray(index.articles) ? index.articles : []
   if (articles.length < 10) fail(`data/academy/index.json has only ${articles.length} articles`)
@@ -145,11 +151,46 @@ if (existsSync(resolve(root, 'data/academy/index.json'))) {
     }
   }
   if (!Array.isArray(index.sections) || index.sections.length === 0) fail('data/academy/index.json has no sections')
+
+  // Section counts must describe the committed articles, not a stale snapshot.
+  const bySection = new Map()
+  for (const article of articles) {
+    const section = typeof article.section === 'string' ? article.section : ''
+    bySection.set(section, (bySection.get(section) ?? 0) + 1)
+  }
+  for (const section of Array.isArray(index.sections) ? index.sections : []) {
+    const expected = section.id === 'all' ? ids.size : (bySection.get(section.id) ?? 0)
+    if (section.count !== expected) fail(`section ${section.id} says ${section.count} articles, data has ${expected}`)
+  }
+
   const glossary = await readJson('data/glossary.json')
   if (!Array.isArray(glossary.terms) || glossary.terms.length < 50) fail('data/glossary.json has too few terms')
   if (!Array.isArray(glossary.categories) || glossary.categories.length === 0) fail('data/glossary.json has no categories')
-  const size = (await stat(resolve(root, 'data/glossary.json'))).size
-  if (size > 260 * 1024) fail(`data/glossary.json is ${size} bytes (limit 260 KiB)`)
+  const termIds = new Set(
+    (Array.isArray(glossary.terms) ? glossary.terms : []).map((term) => term?.id).filter((id) => typeof id === 'string'),
+  )
+
+  // Cross-references: a related link that resolves to nothing renders as dead
+  // text in the reader, so it is checked here rather than discovered by a user.
+  for (const article of articles) {
+    let body
+    try {
+      body = await readJson(`data/academy/articles/${article.id}.json`)
+    } catch {
+      continue
+    }
+    for (const related of Array.isArray(body.related) ? body.related : []) {
+      if (related?.kind === 'article' && !ids.has(related.id)) fail(`article ${article.id} links missing article ${related.id}`)
+      if (related?.kind === 'term' && !termIds.has(related.id)) fail(`article ${article.id} links missing term ${related.id}`)
+    }
+  }
+
+  // The budget applies to the payload the Host sends, not to the raw file,
+  // which still carries upstream-only fields that are stripped on the way out.
+  const payload = buildGlossaryPayload(glossary)
+  const bytes = Buffer.byteLength(JSON.stringify(payload), 'utf8')
+  if (bytes > MAX_GLOSSARY_BYTES) fail(`glossary payload is ${bytes} bytes (limit ${MAX_GLOSSARY_BYTES})`)
+  if (!payload.daily) fail('glossary payload has no term of the day')
 }
 
 // ------------------------------------------------------- vendored terminal

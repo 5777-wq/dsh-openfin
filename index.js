@@ -14,7 +14,8 @@
  * packages would not resolve from this module graph; the Web server service is
  * reached through `ctx` instead.
  *
- * Data flow: `lib/routes.js` answers the five public endpoints; market data is
+ * Data flow: `lib/routes.js` answers the public endpoints (snapshot, sector,
+ * academy index, article, glossary, plus the `/ping` probe); market data is
  * fetched by the loader modules and assembled by `lib/snapshot.js`; academy
  * data is read from the committed `data/` directory by `lib/academy.js`.
  *
@@ -32,7 +33,7 @@ import { createBoards } from './lib/boards.js'
 import { createMovers } from './lib/movers.js'
 import { createNews } from './lib/news.js'
 import { createAcademy } from './lib/academy.js'
-import { buildSnapshot } from './lib/snapshot.js'
+import { buildSnapshot, DEFAULT_REFRESH_MS } from './lib/snapshot.js'
 import { createRouter, ROUTE_PREFIX } from './lib/routes.js'
 import { createHud } from './lib/hud.js'
 import { createInstruments } from './lib/instruments.js'
@@ -46,14 +47,22 @@ export const inject = ['webServer']
  * @param {{ effect: Function, webServer: { register: Function } }} ctx
  */
 export function apply(ctx) {
-  // One cache instance shared by the snapshot parts and the sector route, so
-  // opening a sector reuses the board list the dashboard just loaded.
+  // One cache instance shared by the snapshot parts, the sector route and the
+  // floating HUD: opening a sector, or the HUD asking for a built-in symbol the
+  // dashboard just loaded, reuses the same entry instead of the same upstream.
   const cache = createCache()
   const quotes = createQuotes({ cache })
-  const boards = createBoards()
+  const boards = createBoards({ cache })
   const movers = createMovers()
   const news = createNews()
   const academy = createAcademy()
+
+  /**
+   * The quotes part under the key `buildSnapshot` uses, so the HUD's built-in
+   * symbols join the dashboard load instead of issuing their own.
+   * @returns {Promise<Array<object>>}
+   */
+  const loadBuiltinQuotes = () => cache.memo('part:quotes', DEFAULT_REFRESH_MS, quotes.load)
 
   const snapshot = () =>
     buildSnapshot({
@@ -97,7 +106,7 @@ export function apply(ctx) {
 
   // Floating HUD: the desktop helper is opt-in, but a profile that already has
   // it enabled restores the window on boot.
-  const instruments = createInstruments({ cache, loadBuiltinQuotes: quotes.load })
+  const instruments = createInstruments({ cache, loadBuiltinQuotes })
   // The complete OpenFinLens terminal, vendored under `lens/` and served as
   // static files; the page embeds it with ?embed=1.
   const lens = createLens({ root: resolve(dirname(fileURLToPath(import.meta.url)), 'lens') })

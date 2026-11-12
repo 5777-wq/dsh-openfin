@@ -270,6 +270,9 @@ export function FloatingHud({ t, config, onChange, onConfigure, onOpenDashboard,
     const schedule = () => {
       clearTimeout(timer)
       timer = setTimeout(async () => {
+        // A hidden page schedules nothing: `onVisibility` resumes the poll when
+        // the page comes back, so the card is never stale-but-polling.
+        if (typeof document !== 'undefined' && document.hidden) return
         await load()
         if (alive) schedule()
       }, POLL_MS)

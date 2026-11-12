@@ -182,3 +182,39 @@ test('an invalid glossary file raises AcademyUnavailableError, not a partial pay
     await rm(dir, { recursive: true, force: true })
   }
 })
+
+test('getArticle reuses the parsed article and re-reads it after a change', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'dsh-openfin-article-'))
+  try {
+    await mkdir(join(dir, 'academy', 'articles'), { recursive: true })
+    await writeFile(
+      join(dir, 'academy', 'index.json'),
+      JSON.stringify({ articles: [{ id: 'a1' }], sections: [{ id: 'all', label: 'all', count: 1 }] }),
+    )
+    await writeFile(join(dir, 'glossary.json'), JSON.stringify({ terms: [], categories: [] }))
+    await writeFile(join(dir, 'academy', 'articles', 'a1.json'), JSON.stringify({ id: 'a1', body: 'v1' }))
+
+    const academy = createAcademy({ dataDir: dir, now: () => DAY })
+    const first = await academy.getArticle('a1')
+    assert.equal(await academy.getArticle('a1'), first, 'a second open must not reparse the file')
+
+    // A size change is a deterministic change signal (mtime is coarse on Windows).
+    await writeFile(join(dir, 'academy', 'articles', 'a1.json'), JSON.stringify({ id: 'a1', body: 'v2-longer' }))
+    const second = await academy.getArticle('a1')
+    assert.equal(second.body, 'v2-longer')
+    assert.notEqual(second, first)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('getGlossaryJson returns the bytes of the same payload, once', async () => {
+  const academy = createAcademy({ dataDir: DATA_DIR, now: () => DAY })
+  const payload = await academy.getGlossary()
+  const text = await academy.getGlossaryJson()
+
+  assert.equal(text, JSON.stringify(payload))
+  // The memoized record is reused, not rebuilt per request.
+  assert.equal(await academy.getGlossaryJson(), text)
+  assert.equal(await academy.getGlossary(), payload)
+})

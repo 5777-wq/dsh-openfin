@@ -205,3 +205,20 @@ test('the quotes part fails only when the index list itself fails', async () => 
   ])
   await assert.rejects(createQuotes({ fetchJson, cache: createCache(), sparkWaitMs: 100 }).load(), /ulist down/)
 })
+
+test('a crypto chain that never answers does not hold the index cards', async () => {
+  const never = new Promise(() => {})
+  const fetchJson = (url) => {
+    if (url.includes('ulist.np/get')) return Promise.resolve(ulist)
+    if (url.includes('trends2/get')) return Promise.resolve(trend)
+    // Every crypto source hangs, as a blackholed exchange edge does.
+    return never
+  }
+  const started = Date.now()
+  const list = await createQuotes({ fetchJson, cache: createCache(), sparkWaitMs: 100, cryptoWaitMs: 40 }).load()
+  const elapsed = Date.now() - started
+
+  assert.equal(list.filter((quote) => quote.kind === 'index').length, 9)
+  assert.equal(list.some((quote) => quote.kind === 'crypto'), false)
+  assert.ok(elapsed < 1_000, `index cards waited ${elapsed}ms for crypto`)
+})
