@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
     <linearGradient id="ring" x1="10" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0F8C93"/>
-      <stop offset="1" stop-color="#0B5E66"/>
+      <stop offset="0" stop-color="#E0B96A"/>
+      <stop offset="1" stop-color="#9A722C"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="#0E1B21"/>
+  <rect width="64" height="64" rx="15" fill="#23333A"/>
   <circle cx="32" cy="33" r="18.5" fill="none" stroke="url(#ring)" stroke-width="3.2"/>
-  <path d="M14.5 39.5 24 29.5l7 6.8 9.5-11.2 8 8.4" fill="none" stroke="#F4F1E8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="48.5" cy="33" r="3.1" fill="#C79A3A"/>
+  <path d="M14.5 39.5 24 29.5l7 6.8 9.5-11.2 8 8.4" fill="none" stroke="#F2EADA" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="48.5" cy="33" r="3.1" fill="#F2EADA"/>
 </svg>

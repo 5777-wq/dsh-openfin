@@ -11,8 +11,8 @@
  */
 export const CSS = String.raw`
 .of-page {
-  --of-brand: #0f8c93;
-  --of-brand-deep: #0a5c64;
+  --of-brand: #96692b;
+  --of-brand-deep: #6a4a15;
   --of-gold: #c79a3a;
   --of-ease: cubic-bezier(0.22, 0.8, 0.24, 1);
   --of-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -105,10 +105,10 @@ export const CSS = String.raw`
   width: 40px; height: 40px;
   border-radius: 12px;
   display: grid; place-items: center;
-  background: linear-gradient(148deg, #14989f 0%, #0b6a72 58%, #0a535b 100%);
+  background: linear-gradient(148deg, #35474c 0%, #24343a 58%, #1b282d 100%);
   box-shadow: 0 8px 20px -12px color-mix(in srgb, var(--of-brand-deep) 90%, transparent),
               inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  color: #f6f4ec;
+  color: #e3c184;
 }
 .of-titles { flex: 1; min-width: 0; }
 .of-title { margin: 0; font-size: 22px; line-height: 1.2; font-weight: 650; letter-spacing: -0.015em; }

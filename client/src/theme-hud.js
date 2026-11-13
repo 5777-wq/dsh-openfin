@@ -14,8 +14,8 @@
 export const HUD_CSS = String.raw`
 /* ------------------------------------------------------------- layer */
 .of-hud-layer {
-  --of-brand: #0f8c93;
-  --of-brand-deep: #0a5c64;
+  --of-brand: #96692b;
+  --of-brand-deep: #6a4a15;
   --of-gold: #c79a3a;
   --of-ease: cubic-bezier(0.22, 0.8, 0.24, 1);
   --of-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -120,13 +120,13 @@ export const HUD_CSS = String.raw`
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #f4f9f8;
+  color: #f7f1e3;
   background:
-    radial-gradient(120% 120% at 32% 22%, rgba(56, 190, 190, 0.5) 0%, transparent 62%),
-    linear-gradient(152deg, #14989f 0%, #0c6f77 56%, #094b53 100%);
+    radial-gradient(120% 120% at 32% 22%, rgba(214, 168, 90, 0.42) 0%, transparent 62%),
+    linear-gradient(152deg, #3b4d52 0%, #26363c 56%, #1a272c 100%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
-    0 14px 30px -18px rgba(3, 18, 22, 0.9),
+    0 14px 30px -18px rgba(16, 12, 4, 0.9),
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
     inset 0 -8px 16px -12px rgba(0, 0, 0, 0.6);
 }
@@ -208,8 +208,8 @@ export const HUD_CSS = String.raw`
   display: grid;
   place-items: center;
   flex: none;
-  color: #f4f9f8;
-  background: linear-gradient(152deg, #14989f 0%, #0a5c64 100%);
+  color: #f7f1e3;
+  background: linear-gradient(152deg, #b98c3e 0%, #7d5a22 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .of-hud-title {
