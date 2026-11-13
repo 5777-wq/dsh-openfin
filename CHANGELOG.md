@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- The prediction-market list (`#pmList`) carries the `.news-list` class for the
+  shared list styling, so it inherited the news timeline's 1px rail
+  (`.news-list::before`, `left:26px`). On the prediction list there are no
+  timeline items to connect, so the rail drew a stray hairline across the
+  cards, the "收起" button and the next section heading. `lens/dsh-embed.js`
+  now hides it for that list only; the news timeline keeps its rail.
+
+### Changed
+
+- The brand mark is ink and brass instead of teal. The teal ring read as a
+  generic AI-product gradient; the icon, the in-page header mark, the floating
+  HUD's ball and the accent colour (links, chips, focus, term refs) are now a
+  graphite/brass/cream palette. The storefront tile is regenerated from the new
+  `icon.svg`.
+
 ## 0.5.0 — 2026-11-12
 
 Performance and logic pass over both halves, found by auditing every request

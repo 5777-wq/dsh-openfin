@@ -23,6 +23,29 @@
   root.setAttribute('data-dsh-embed', '1')
   root.setAttribute('data-dsh-embed-origin', window.location.origin)
 
+  /**
+   * Embed-only corrections for upstream layout quirks. Each entry names the
+   * defect, so a re-sync can be re-checked against it rather than trusted.
+   *
+   * - `#pmList` (the prediction-market list) carries the `.news-list` class for
+   *   the shared list styling, which also brings `.news-list::before` — the
+   *   news timeline's 1px rail at `left:26px`. The prediction list has no
+   *   timeline items to connect, so that rail draws a stray hairline through
+   *   the cards, the "收起" button and the next section's header.
+   */
+  function applyEmbedFixes() {
+    try {
+      var style = document.createElement('style')
+      style.setAttribute('data-dsh-embed-fixes', '')
+      style.textContent = '#pmList.news-list::before{content:none!important}'
+      ;(document.head || root).appendChild(style)
+    } catch (error) {
+      /* a missing head must not stop the app from booting */
+    }
+  }
+
+  applyEmbedFixes()
+
   /** The app persists settings as JSON under `gfd_settings` (see its Store). */
   function storeTheme(theme) {
     try {
