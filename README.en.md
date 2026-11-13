@@ -3,6 +3,7 @@
 English | [中文](README.md)
 
 [![ci](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml/badge.svg)](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/dsh-openfin?label=npm)](https://www.npmjs.com/package/dsh-openfin)
 [![license](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
 > A finance dashboard and a plain-language finance library, installed into DeepSeek Harness as **one native page** — not an iframe, not an external link.
@@ -64,6 +65,12 @@ Settings are remembered and shared between both surfaces; quotes refresh every 3
 ## Install
 
 > Listed in the [DSH plugin market](https://awesome-dsh-plugin.com/p/5777-wq/dsh-openfin/) (awesome-dsh-plugin, UI Enhancements). With [dsh-market](https://github.com/dsh-market/dsh-market) installed, **Settings → Plugins → Market** and a search for `OpenFin` installs it in one click.
+
+**npm** (published — the shortest path):
+
+```sh
+dsh plugin --profile web add dsh-openfin
+```
 
 **Desktop:** open **Plugins → + Install** and paste
 

@@ -3,6 +3,7 @@
 [English](README.en.md) | 中文
 
 [![ci](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml/badge.svg)](https://github.com/5777-wq/dsh-openfin/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/dsh-openfin?label=npm)](https://www.npmjs.com/package/dsh-openfin)
 [![license](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
 > 装进 DeepSeek Harness 的金融看板与白话学院：A股/港股/美股/商品/加密行情、行业热力图、异动榜、财经快讯，加上 25 篇白话金融文章与 293 条金融词典，全部作为 **DSH 里的一个原生页面**（不是 iframe，不是外链）。
@@ -64,6 +65,12 @@ OpenFin 把两块东西放进同一个 DSH 页面：
 ## 安装
 
 > 已收录在 [DSH 插件市场](https://awesome-dsh-plugin.com/p/5777-wq/dsh-openfin/)（awesome-dsh-plugin，分类 UI Enhancements）。装了 [dsh-market](https://github.com/dsh-market/dsh-market) 的话，**设置 → 插件 → 市场** 里搜 `OpenFin` 就能一键装。
+
+**npm**（已发布，最省事）：
+
+```sh
+dsh plugin --profile web add dsh-openfin
+```
 
 **桌面端**：打开 **插件** 页 → 右上 **+ 安装** → 粘贴
 
