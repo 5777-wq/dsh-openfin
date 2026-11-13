@@ -63,6 +63,8 @@ OpenFin 把两块东西放进同一个 DSH 页面：
 
 ## 安装
 
+> 已收录在 [DSH 插件市场](https://awesome-dsh-plugin.com/p/5777-wq/dsh-openfin/)（awesome-dsh-plugin，分类 UI Enhancements）。装了 [dsh-market](https://github.com/dsh-market/dsh-market) 的话，**设置 → 插件 → 市场** 里搜 `OpenFin` 就能一键装。
+
 **桌面端**：打开 **插件** 页 → 右上 **+ 安装** → 粘贴
 
 ```text

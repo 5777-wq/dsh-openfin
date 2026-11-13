@@ -63,6 +63,8 @@ Settings are remembered and shared between both surfaces; quotes refresh every 3
 
 ## Install
 
+> Listed in the [DSH plugin market](https://awesome-dsh-plugin.com/p/5777-wq/dsh-openfin/) (awesome-dsh-plugin, UI Enhancements). With [dsh-market](https://github.com/dsh-market/dsh-market) installed, **Settings → Plugins → Market** and a search for `OpenFin` installs it in one click.
+
 **Desktop:** open **Plugins → + Install** and paste
 
 ```text
